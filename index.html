@@ -1,0 +1,3545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>GIVAP FREND</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<style>
+/* =========================================================
+   01. RESET GENERAL / CANVAS
+========================================================= */
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #080808;
+    font-family: Arial, sans-serif;
+    touch-action: none;
+    overscroll-behavior: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#game {
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100dvh;
+    object-fit: cover;
+    background: #87CEEB;
+}
+
+@supports not (height: 100dvh) {
+    #game {
+        height: 100vh;
+    }
+}
+
+/* =========================================================
+   02. MENÚ DE PERSONAJES
+========================================================= */
+
+
+#characterMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+
+    padding:
+        calc(18px + env(safe-area-inset-top))
+        14px
+        calc(18px + env(safe-area-inset-bottom));
+
+    box-sizing: border-box;
+
+
+    background:
+        radial-gradient(circle at top, rgba(0,255,255,0.18), transparent 36%),
+        linear-gradient(180deg, #18244a 0%, #050509 100%);
+}
+
+#characterMenu h1 {
+    font-size: clamp(25px, 7vw, 42px);
+    margin: 8px 0 18px;
+    text-align: center;
+    text-shadow: 0 0 12px #00ffff, 0 0 28px rgba(0,255,255,0.55);
+}
+
+.character-options {
+    width: 100%;
+    max-width: 760px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.character-card {
+    min-height: 210px;
+    border: 3px solid rgba(255,255,255,0.22);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at top, rgba(255,255,255,0.14), transparent 45%),
+        rgba(255,255,255,0.075);
+    text-align: center;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: 0.16s ease;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.42);
+    box-sizing: border-box;
+}
+
+.character-card.selected {
+    border-color: #00ff99;
+    box-shadow: 0 0 26px rgba(0,255,153,0.8), 0 12px 24px rgba(0,0,0,0.42);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.character-card canvas {
+    width: 72px;
+    height: 90px;
+    background: transparent;
+}
+
+.character-card h3 {
+    margin: 6px 0 4px;
+    font-size: clamp(14px, 3.8vw, 18px);
+}
+
+.character-card p {
+    margin: 0;
+    font-size: clamp(11px, 3.2vw, 13px);
+    color: #cfcfcf;
+}
+
+#startBtn {
+    margin-top: 18px;
+    padding: 14px 48px;
+    min-height: 54px;
+    font-size: clamp(18px, 5vw, 24px);
+    border: none;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 35% 20%, rgba(255,255,255,0.45), transparent 32%),
+        linear-gradient(145deg, #00ff99, #00a86b);
+    color: #07130d;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(0,255,153,0.75), 0 10px 24px rgba(0,0,0,0.5);
+}
+
+#startBtn:active {
+    transform: scale(0.94) translateY(3px);
+}
+
+/* =========================================================
+   03. RESPONSIVE MENÚ
+========================================================= */
+
+@media (max-width: 520px) {
+    #characterMenu {
+        padding-top: calc(12px + env(safe-area-inset-top));
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    #characterMenu h1 {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .character-options {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+        gap: 10px;
+    }
+
+    .character-card {
+        min-height: 112px;
+        display: grid;
+        grid-template-columns: 82px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 8px;
+        align-items: center;
+        text-align: left;
+        padding: 8px 10px;
+    }
+
+    .character-card canvas {
+        grid-row: 1 / span 2;
+        width: 68px;
+        height: 86px;
+        margin: 0 auto;
+    }
+
+    .character-card h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+    }
+
+    .character-card p {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    #startBtn {
+    margin-top: 18px;
+    padding: 14px 48px;
+    min-height: 54px;
+    font-size: clamp(18px, 5vw, 24px);
+    border: none;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 35% 20%, rgba(255,255,255,0.45), transparent 32%),
+        linear-gradient(145deg, #00ff99, #00a86b);
+    color: #07130d;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow:
+        0 0 24px rgba(0,255,153,0.75),
+        0 10px 24px rgba(0,0,0,0.5);
+
+    pointer-events: auto;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 200;
+}
+}
+
+/* =========================================================
+   04. CONTROLES MÓVILES
+========================================================= */
+
+.mobile-hud {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
+    z-index: 60;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.pause-btn {
+    pointer-events: auto;
+    width: 46px;
+    height: 46px;
+    border: 2px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    font-size: 19px;
+    font-weight: bold;
+    color: white;
+    background: rgba(0,0,0,0.20);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    backdrop-filter: blur(3px);
+    opacity: 0.62;
+    touch-action: none;
+}
+
+.controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(7px + env(safe-area-inset-bottom));
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 clamp(6px, 2.2vw, 16px);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 50;
+    visibility: hidden;
+}
+
+body.game-running .controls,
+body.game-running .mobile-hud {
+    visibility: visible !important;
+}
+
+.left-controls,
+.right-controls {
+    display: flex;
+    gap: clamp(7px, 2vw, 12px);
+    pointer-events: auto;
+}
+
+.game-btn {
+    border: 2px solid rgba(255,255,255,0.20);
+    border-radius: 50%;
+    font-weight: 900;
+    color: rgba(255,255,255,0.88);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.16), transparent 36%),
+        rgba(0,0,0,0.20);
+    box-shadow: 0 5px 13px rgba(0,0,0,0.25);
+    backdrop-filter: blur(3px);
+    touch-action: none;
+    opacity: 0.58;
+    transition: 0.06s ease;
+}
+
+.move-btn {
+    width: clamp(70px, 25vw, 85px);
+    height: clamp(70px, 25vw, 85px);
+    font-size: clamp(25px, 6vw, 33px);
+}
+
+.jump-btn {
+    width: clamp(82px, 25vw, 98px);
+    height: clamp(82px, 25vw, 98px);
+    font-size: clamp(31px, 7.5vw, 40px);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 36%),
+        rgba(0,160,100,0.25);
+}
+
+.game-btn.pressed,
+.pause-btn.pressed {
+    transform: scale(0.90) translateY(3px);
+    opacity: 0.95;
+    background: rgba(255,255,255,0.22);
+}
+
+.jump-btn.pressed {
+    background: rgba(0,255,153,0.38);
+    box-shadow: 0 0 24px rgba(0,255,153,0.65), 0 3px 8px rgba(0,0,0,0.4);
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game" width="900" height="400"></canvas>
+
+<div id="characterMenu">
+    <h1>Elige tu personaje</h1>
+
+    <div class="character-options">
+        <div class="character-card selected" onclick="selectCharacter('hero')" id="card-hero">
+            <canvas width="80" height="100" id="preview-hero"></canvas>
+            <h3>Rojo Clásico</h3>
+            <p>MORIO</p>
+        </div>
+
+        <div class="character-card" onclick="selectCharacter('ninja')" id="card-ninja">
+            <canvas width="80" height="100" id="preview-ninja"></canvas>
+            <h3>Ninja Sombra</h3>
+            <p>Ágil y oscuro</p>
+        </div>
+
+        <div class="character-card" onclick="selectCharacter('robot')" id="card-robot">
+            <canvas width="80" height="100" id="preview-robot"></canvas>
+            <h3>Robot MK‑7</h3>
+            <p>Industrial</p>
+        </div>
+    </div>
+
+    <button id="startBtn" onclick="startGame()">JUGAR</button>
+</div>
+
+<div class="mobile-hud">
+    <button id="btnPause" class="pause-btn">⏸</button>
+</div>
+
+<div class="controls">
+    <div class="left-controls">
+        <button id="btnLeft" class="game-btn move-btn">⬅</button>
+        <button id="btnRight" class="game-btn move-btn">➡</button>
+    </div>
+
+    <div class="right-controls">
+        <button id="btnJump" class="game-btn jump-btn">⬆</button>
+    </div>
+</div>
+
+<script>
+/* =========================================================
+   01. CANVAS Y CONFIGURACIÓN BASE
+========================================================= */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+/* Evita scroll/zoom durante el juego, pero permite hacer scroll en el menú */
+document.addEventListener("touchmove", e => {
+    const menu = document.getElementById("characterMenu");
+
+    if (menu && menu.style.display !== "none") {
+        return; // deja hacer scroll en selección de personaje
+    }
+
+    e.preventDefault();
+}, { passive: false });
+
+/* Bloquea zoom por doble toque rápido en móvil */
+let lastTouchEnd = 0;
+
+document.addEventListener("touchend", e => {
+    const now = Date.now();
+
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+
+    lastTouchEnd = now;
+}, { passive: false });
+
+/* Evita menú contextual o selección rara por pulsación larga */
+document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+});
+
+/* =========================================================
+   02. ESTADO GLOBAL DEL JUEGO
+========================================================= */
+
+let gameStarted = false;
+let paused = false;
+let selectedCharacter = "hero";
+
+//SHAKE
+let freezeFrames = 0;
+let shakePower = 0;
+let shakeTimer = 0;
+
+let currentLevel = 1;
+let maxLevel = 4;
+let levelTheme = "grass";
+let levelEnd = 6200;
+let groundY = 340;
+let camX = 0;
+let targetCamX = 0;
+let ambientParticles = [];
+let levelDecorations = [];
+
+let transition = 0;
+let score = 0;
+let lives = 10;
+let deaths = 0;
+
+let win = false;
+let gameOver = false;
+let changingLevel = false;
+let playerDead = false;
+let respawnTimer = 0;
+
+let message = "";
+let messageTimer = 0;
+let flashTimer = 0;
+
+
+let checkpointIndex = -1;
+let checkpoint = { x: 100, y: 290 };
+
+let jumpBuffer = 0;
+let coyoteTime = 0;
+
+let player = {
+    x: 100,
+    y: 290,
+    prevX: 100,
+    prevY: 290,
+    w: 34,
+    h: 50,
+    dx: 0,
+    dy: 0,
+    speed: 4,
+    jumpPower: -11,
+    gravity: 0.55,
+    grounded: false,
+    frame: 0,
+    facing: 1,
+    invulnerable: 0
+};
+
+let keys = {
+    left: false,
+    right: false,
+    jump: false
+};
+
+/* =========================================================
+   03. LISTAS DE OBJETOS DEL NIVEL
+========================================================= */
+
+let blocks = [];
+let fakeFloors = [];
+let fallingBlocks = [];
+let movingPlatforms = [];
+let vanishingPlatforms = [];
+let brittlePlatforms = [];
+let spikes = [];
+let crushers = [];
+let invisibleWalls = [];
+let coins = [];
+let enemies = [];
+let enemyProjectiles = [];
+let checkpoints = [];
+let triggers = [];
+let lavaPits = [];
+let signs = [];
+let lasers = [];
+let gravityZones = [];
+let windZones = [];
+let iceZones = [];
+let sawBlades = [];
+let particles = [];
+
+let iceBoss = null;
+
+/* =========================================================
+   04. AUDIO / MÚSICA RETRO
+========================================================= */
+
+let audioCtx = null;
+let musicTimer = null;
+let musicGain = null;
+let bassGain = null;
+let musicEnabled = false;
+let musicStep = 0;
+
+const melodies = {
+    grass:   [392,440,523,440,392,330,392,440,523,587,523,440],
+    cave:    [220,262,330,262,196,220,262,330,392,330,262,220],
+    factory: [165,196,247,196,165,147,165,196,247,294,247,196],
+    ice:     [330,392,494,587,494,392,330,294,330,392,440,392]
+};
+
+function startMusic() {
+    if (musicEnabled) return;
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    musicGain = audioCtx.createGain();
+    bassGain = audioCtx.createGain();
+
+    musicGain.gain.value = 0.045;
+    bassGain.gain.value = 0.032;
+
+    musicGain.connect(audioCtx.destination);
+    bassGain.connect(audioCtx.destination);
+
+    musicEnabled = true;
+    scheduleMusic();
+}
+
+function playTone(freq, dur, type = "square", gainNode = musicGain, detune = 0) {
+    if (!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+
+    osc.type = type;
+    osc.frequency.value = freq;
+    osc.detune.value = detune;
+
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+
+    osc.connect(g);
+    g.connect(gainNode);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur + 0.02);
+}
+
+function scheduleMusic() {
+    if (musicTimer) clearInterval(musicTimer);
+
+    musicTimer = setInterval(() => {
+        if (!musicEnabled || paused || !gameStarted || gameOver) return;
+
+        const arr = melodies[levelTheme] || melodies.grass;
+        const note = arr[musicStep % arr.length];
+        const bass = note / 2;
+
+        playTone(
+            note,
+            0.22,
+            levelTheme === "factory" ? "sawtooth" : "square",
+            musicGain,
+            levelTheme === "cave" ? -8 : 0
+        );
+
+        if (musicStep % 2 === 0) {
+            playTone(bass, 0.35, "triangle", bassGain);
+        }
+
+        if (musicStep % 4 === 0) {
+            playTone(note * 1.5, 0.12, "triangle", musicGain);
+        }
+
+        musicStep++;
+    }, 260);
+}
+
+/* =========================================================
+   05. MENÚ DE PERSONAJE
+========================================================= */
+
+function selectCharacter(type) {
+    selectedCharacter = type;
+
+    document.querySelectorAll(".character-card").forEach(card => {
+        card.classList.remove("selected");
+    });
+
+    document.getElementById("card-" + type).classList.add("selected");
+}
+
+function startGame() {
+    document.getElementById("characterMenu").style.display = "none";
+    document.body.classList.add("game-running");
+    gameStarted = true;
+    startMusic();
+    showMessage("PRADERA TROLL\nNo todo es lo que parece...", 140);
+}
+
+function drawCharacterPreview(id, type) {
+    const previewCanvas = document.getElementById(id);
+    const pctx = previewCanvas.getContext("2d");
+
+    pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    pctx.save();
+    pctx.translate(23, 18);
+    drawMiniCharacter(pctx, type, 0, 0, false, 0);
+    pctx.restore();
+}
+
+function drawAllPreviews() {
+    drawCharacterPreview("preview-hero", "hero");
+    drawCharacterPreview("preview-ninja", "ninja");
+    drawCharacterPreview("preview-robot", "robot");
+}
+
+/* =========================================================
+   06. INPUT / CONTROLES
+========================================================= */
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") keys.left = true;
+    if (e.key === "ArrowRight") keys.right = true;
+    if (e.key === " ") keys.jump = true;
+});
+
+document.addEventListener("keyup", e => {
+    if (e.key === "ArrowLeft") keys.left = false;
+    if (e.key === "ArrowRight") keys.right = false;
+    if (e.key === " ") keys.jump = false;
+});
+
+function vibrate(ms = 18) {
+    if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+function pressMobileButton(button, key) {
+    keys[key] = true;
+    button.classList.add("pressed");
+    vibrate(12);
+}
+
+function releaseMobileButton(button, key) {
+    keys[key] = false;
+    button.classList.remove("pressed");
+}
+
+function bindButton(id, key) {
+    const button = document.getElementById(id);
+
+    button.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        button.setPointerCapture(e.pointerId);
+        pressMobileButton(button, key);
+    });
+
+    button.addEventListener("pointerup", e => {
+        e.preventDefault();
+        releaseMobileButton(button, key);
+    });
+
+    button.addEventListener("pointercancel", e => {
+        e.preventDefault();
+        releaseMobileButton(button, key);
+    });
+
+    button.addEventListener("lostpointercapture", () => {
+        releaseMobileButton(button, key);
+    });
+
+    button.addEventListener("contextmenu", e => e.preventDefault());
+}
+
+function bindPauseButton() {
+    const button = document.getElementById("btnPause");
+
+    button.addEventListener("pointerdown", e => {
+        e.preventDefault();
+
+        if (!gameStarted || gameOver || win) return;
+
+        paused = !paused;
+        button.textContent = paused ? "▶" : "⏸";
+        button.classList.add("pressed");
+        vibrate(22);
+
+        setTimeout(() => button.classList.remove("pressed"), 120);
+    });
+
+    button.addEventListener("contextmenu", e => e.preventDefault());
+}
+
+bindButton("btnLeft", "left");
+bindButton("btnRight", "right");
+bindButton("btnJump", "jump");
+bindPauseButton();
+
+/* =========================================================
+   07. UTILIDADES GENERALES
+========================================================= */
+
+function getTileType(i, arr){
+  let left = arr[i-1];
+  let right = arr[i+1];
+
+  if(!left && !right) return "solo";
+  if(!left) return "inicio";
+  if(!right) return "fin";
+  return "centro";
+}
+
+function rectsCollide(a, b) {
+    return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+    );
+}
+
+function showMessage(text, time = 100) {
+    message = text;
+    messageTimer = time;
+}
+
+function resetKeys() {
+    keys.left = false;
+    keys.right = false;
+    keys.jump = false;
+}
+
+/* =========================================================
+   08. PARTÍCULAS Y EFECTOS
+========================================================= */
+
+function addBlood(x, y, count = 34) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: -Math.random() * 7 - 1,
+            life: 50 + Math.random() * 25,
+            max: 70,
+            size: 2 + Math.random() * 4,
+            color: Math.random() > 0.35 ? "#d00000" : "#ff3030",
+            gravity: 0.28
+        });
+    }
+}
+
+function addExplosion(x, y, color = "#ffcc00", count = 34) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 9,
+            vy: (Math.random() - 0.5) * 9,
+            life: 42 + Math.random() * 22,
+            max: 65,
+            size: 2 + Math.random() * 5,
+            color,
+            gravity: 0.06
+        });
+    }
+}
+
+function addDust(x, y, count = 12) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 3,
+            vy: -Math.random() * 2,
+            life: 25 + Math.random() * 15,
+            max: 40,
+            size: 2 + Math.random() * 4,
+            color: "rgba(230,230,230,0.75)",
+            gravity: 0.05
+        });
+    }
+}
+
+function updateParticles() {
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.98;
+        p.life--;
+    });
+
+    particles = particles.filter(p => p.life > 0);
+}
+
+/* =========================================================
+   09. FACTORÍAS DE OBJETOS
+========================================================= */
+
+function addGround(x, w, h = 60) {
+    blocks.push({ x, y: groundY, w, h, type: "solid" });
+}
+
+function addPlatform(x, y, w, h = 22) {
+    blocks.push({ x, y, w, h, type: "solid" });
+}
+
+function addLava(x, w, h = 60) {
+    lavaPits.push({ x, y: groundY, w, h });
+}
+
+function addFakeFloor(x, w, h = 60) {
+    fakeFloors.push({
+        x,
+        y: groundY,
+        w,
+        h,
+        active: true,
+        triggered: false,
+        alpha: 1,
+        type: "fake"
+    });
+}
+
+function addFallingBlock(x, y, w, delay = 180) {
+    fallingBlocks.push({
+        x,
+        y,
+        w,
+        h: 22,
+        vy: 0,
+        falling: false,
+        used: false,
+        delay,
+        type: "falling"
+    });
+}
+
+function addMovingPlatform(x, y, w, startX, endX, speed = 2) {
+    movingPlatforms.push({
+        x,
+        y,
+        w,
+        h: 20,
+        startX,
+        endX,
+        dir: 1,
+        speed,
+        moveX: 0,
+        type: "moving"
+    });
+}
+
+function addVanishingPlatform(x, y, w) {
+    vanishingPlatforms.push({
+        x,
+        y,
+        w,
+        h: 20,
+        active: true,
+        alpha: 1,
+        touched: false,
+        type: "vanish"
+    });
+}
+
+function addBrittlePlatform(x, y, w) {
+    brittlePlatforms.push({
+        x,
+        y,
+        w,
+        h: 20,
+        active: true,
+        cracking: false,
+        crackTimer: 0,
+        alpha: 1,
+        type: "brittle"
+    });
+}
+
+function addSpike(x, hidden = false, variant = "normal") {
+    spikes.push({
+        x,
+        y: hidden ? groundY : groundY - 28,
+        w: 36,
+        h: 28,
+        active: !hidden,
+        hidden,
+        rising: false,
+        targetY: groundY - 28,
+        variant
+    });
+}
+
+function addEnemy(x, minX, maxX, type = "blob", dir = 1) {
+    const size = type === "robot" ? 36 : type === "bat" ? 34 : 32;
+
+    enemies.push({
+        x,
+        y: groundY - size,
+        w: size,
+        h: size,
+        dir,
+        minX,
+        maxX,
+        alive: true,
+        type
+    });
+}
+
+function addShooterEnemy(x, y, minX, maxX, dir = -1, fireRate = 120) {
+    enemies.push({
+        x,
+        y,
+        w: 36,
+        h: 36,
+        dir,
+        minX,
+        maxX,
+        alive: true,
+        type: "shooter",
+        fireCooldown: fireRate,
+        fireRate
+    });
+}
+
+function addEnemyProjectile(x, y, vx, vy = 0, type = "ice") {
+    enemyProjectiles.push({
+        x,
+        y,
+        w: type === "boss" ? 18 : 12,
+        h: type === "boss" ? 12 : 8,
+        vx,
+        vy,
+        life: 260,
+        type
+    });
+}
+
+function addCheckpoint(x) {
+    checkpoints.push({
+        x,
+        y: groundY - 50,
+        w: 20,
+        h: 50,
+        active: false
+    });
+}
+
+function addSign(x, y, text) {
+    signs.push({ x, y, text });
+}
+
+function addTrigger(x, action) {
+    triggers.push({
+        x,
+        y: 0,
+        w: 40,
+        h: 400,
+        done: false,
+        action
+    });
+}
+
+function addSaw(x, y, minX, maxX, speed = 3, size = 42, dir = 1) {
+    sawBlades.push({
+        x,
+        y,
+        w: size,
+        h: size,
+        minX,
+        maxX,
+        dir,
+        speed,
+        angle: 0
+    });
+}
+
+function addLaser(x, y, h, timer = 0) {
+    lasers.push({
+        x,
+        y,
+        w: 12,
+        h,
+        active: true,
+        timer
+    });
+}
+
+function addCrusher(x, y, w, h, active = false) {
+    crushers.push({
+        x,
+        y,
+        w,
+        h,
+        vy: 0,
+        active,
+        dropping: active
+    });
+}
+
+function addInvisibleWall(x, y = 160, h = 180) {
+    invisibleWalls.push({
+        x,
+        y,
+        w: 18,
+        h,
+        active: false
+    });
+}
+
+function addIceZone(x, w) {
+    iceZones.push({
+        x,
+        y: groundY - 8,
+        w,
+        h: 12
+    });
+}
+
+function addWindZone(x, y, w, h, force, label = "VIENTO") {
+    windZones.push({
+        x,
+        y,
+        w,
+        h,
+        force,
+        label
+    });
+}
+
+function createCoins(start, end, step, y) {
+    for (let i = start; i < end; i += step) {
+        coins.push({
+            x: i,
+            y,
+            r: 9,
+            taken: false,
+            anim: Math.random() * 10,
+            trap: false
+        });
+    }
+}
+
+function addTrapCoin(x, y, spikeX) {
+    coins.push({
+        x,
+        y,
+        r: 10,
+        taken: false,
+        anim: 0,
+        trap: true,
+        spikeX
+    });
+}
+
+function revealSpikeAt(x) {
+    const spike = spikes.find(sp => Math.abs(sp.x - x) < 10);
+    if (!spike) return;
+
+    spike.active = true;
+    spike.rising = true;
+    spike.y = groundY;
+    spike.targetY = groundY - 28;
+}
+
+function createIceBoss() {
+    iceBoss = {
+        x: 8050,
+        y: groundY - 112,
+        w: 92,
+        h: 112,
+        hp: 14,
+        maxHp: 14,
+        active: false,
+        defeated: false,
+        hurtTimer: 0,
+        fireCooldown: 90,
+        jumpCooldown: 180,
+        stompCooldown: 120,
+        shieldTimer: 0
+    };
+}
+
+/* =========================================================
+   10. SISTEMA DE NIVELES
+========================================================= */
+
+function buildLevel() {
+    clearLevelObjects();
+
+    if (currentLevel === 1) buildLevelOne();
+    if (currentLevel === 2) buildLevelTwo();
+    if (currentLevel === 3) buildLevelThree();
+    if (currentLevel === 4) buildLevelFour();
+
+    restoreReachedCheckpoints();
+    seedLevelDecorations();
+    seedAmbientParticles();
+}
+
+function clearLevelObjects() {
+    blocks = [];
+    fakeFloors = [];
+    fallingBlocks = [];
+    movingPlatforms = [];
+    vanishingPlatforms = [];
+    brittlePlatforms = [];
+    spikes = [];
+    crushers = [];
+    invisibleWalls = [];
+    coins = [];
+    enemies = [];
+    enemyProjectiles = [];
+    checkpoints = [];
+    triggers = [];
+    lavaPits = [];
+    signs = [];
+    lasers = [];
+    gravityZones = [];
+    windZones = [];
+    iceZones = [];
+    sawBlades = [];
+    iceBoss = null;
+    ambientParticles = [];
+    levelDecorations = [];
+}
+
+function restoreReachedCheckpoints() {
+    for (let i = 0; i <= checkpointIndex; i++) {
+        if (checkpoints[i]) checkpoints[i].active = true;
+    }
+}
+
+function setLevel(theme, end, ground) {
+    levelTheme = theme;
+    levelEnd = end;
+    groundY = ground;
+}
+
+/* =========================================================
+   11. NIVEL 1 - PRADERA TROLL
+========================================================= */
+
+function buildLevelOne() {
+    setLevel("grass", 6200, 340);
+
+    [
+        [0, 850], [980, 500], [1650, 600], [2450, 500],
+        [3200, 650], [4100, 650], [5000, 1150]
+    ].forEach(([x, w]) => addGround(x, w));
+
+    [
+        [850, 130], [1480, 170], [2250, 200],
+        [2950, 250], [3850, 250], [4750, 250]
+    ].forEach(([x, w]) => addLava(x, w));
+
+    addPlatform(520, 265, 100);
+    addPlatform(1180, 250, 110);
+    addPlatform(1850, 250, 120);
+    addPlatform(3420, 250, 120);
+    addPlatform(5300, 240, 120);
+
+    addFakeFloor(690, 160);
+    addFakeFloor(1480, 170);
+    addFakeFloor(2950, 250);
+    addFakeFloor(4750, 250);
+
+    addFallingBlock(900, 255, 95, 250);
+    addFallingBlock(2100, 240, 100, 180);
+    addFallingBlock(2750, 220, 120, 130);
+    addFallingBlock(4450, 240, 110, 200);
+
+    addMovingPlatform(1320, 235, 100, 1320, 1560, 1.9);
+    addMovingPlatform(2350, 245, 100, 2350, 2600, 2.2);
+    addMovingPlatform(3920, 245, 110, 3920, 4200, 2.3);
+
+    addVanishingPlatform(3150, 210, 110);
+    addVanishingPlatform(3650, 210, 110);
+    addVanishingPlatform(4900, 230, 120);
+
+    [430, 1120, 1740, 3330, 5120].forEach(x => addSpike(x, false, "grass"));
+    [610, 1260, 1990, 2860, 3580, 4610, 5450].forEach(x => addSpike(x, true, "grass"));
+
+    addCrusher(1600, 80, 70, 30, false);
+    addCrusher(4260, 70, 80, 35, false);
+
+    addInvisibleWall(2580);
+    addInvisibleWall(5200);
+
+
+    addEnemy(360, 300, 520, "blob", 1);
+    addEnemy(1200, 1050, 1400, "blob", -1);
+    addEnemy(1980, 1780, 2150, "blob", 1);
+    addEnemy(3480, 3300, 3760, "blob", -1);
+    addEnemy(5200, 5050, 5600, "blob", 1);
+
+    addSaw(2600, 302, 2550, 2750, 2, 38);
+
+    createCoins(250, 6000, 190, 210);
+
+    addTrapCoin(600, 205, 610);
+    addTrapCoin(1260, 205, 1260);
+    addTrapCoin(2860, 180, 2860);
+    addTrapCoin(5450, 190, 5450);
+
+    addCheckpoint(1700);
+    addCheckpoint(3400);
+    addCheckpoint(5050);
+
+    
+    addSign(500, 350, "SIGUE RECTO...\nSI CONFÍAS");
+
+    addSign(1400, 285, "Este salto es fácil");
+    addSign(2520, 145, "Nada invisible aquí");
+    addSign(3140, 180, "Confía");
+    addSign(5400, 285, "Último tramo seguro");
+
+    addTrigger(560, () => {
+        revealSpikeAt(610);
+        showMessage("¡Pinchos sorpresa!", 80);
+    });
+
+    addTrigger(1540, () => {
+        crushers[0].active = true;
+        crushers[0].dropping = true;
+        showMessage("Mira arriba.", 75);
+    });
+
+    addTrigger(2480, () => {
+        invisibleWalls[0].active = true;
+        revealSpikeAt(2860);
+        showMessage("Pared invisible activada", 80);
+    });
+
+    addTrigger(3520, () => {
+        revealSpikeAt(3580);
+        if (vanishingPlatforms[1]) vanishingPlatforms[1].touched = true;
+        showMessage("Ahora desaparece", 80);
+    });
+
+    addTrigger(4200, () => {
+        crushers[1].active = true;
+        crushers[1].dropping = true;
+        showMessage("No corras... o sí", 75);
+    });
+
+    addTrigger(5350, () => {
+        invisibleWalls[1].active = true;
+        revealSpikeAt(5450);
+        showMessage("La meta también miente", 90);
+    });
+}
+
+/* =========================================================
+   12. NIVEL 2 - CAVERNA NEÓN
+========================================================= */
+
+function buildLevelTwo() {
+    setLevel("cave", 6800, 345);
+
+    [
+        [0, 750], [880, 650], [1700, 550], [2400, 650],
+        [3250, 650], [4100, 550], [4850, 700], [5700, 1050]
+    ].forEach(([x, w]) => addGround(x, w, 55));
+
+    [
+        [750, 130], [1530, 170], [2250, 150], [3050, 200],
+        [3900, 200], [4650, 200], [5550, 150]
+    ].forEach(([x, w]) => addLava(x, w, 55));
+
+    addMovingPlatform(760, 255, 110, 760, 1030, 2.8);
+    addMovingPlatform(1600, 235, 100, 1600, 1880, 2.6);
+    addMovingPlatform(3100, 230, 110, 3100, 3370, 3);
+    addMovingPlatform(4620, 220, 100, 4620, 4920, 3.2);
+
+    addFallingBlock(1250, 240, 110, 120);
+    addFallingBlock(2600, 230, 120, 120);
+    addFallingBlock(5200, 230, 130, 100);
+
+    addVanishingPlatform(2050, 210, 120);
+    addVanishingPlatform(3700, 200, 120);
+    addVanishingPlatform(5900, 230, 120);
+
+    addFakeFloor(880, 140, 55);
+    addFakeFloor(3350, 180, 55);
+    addFakeFloor(6000, 200, 55);
+
+    [1050, 1820, 3500, 5050].forEach(x => addSpike(x, false, "crystal"));
+    [920, 2750, 3980, 6100].forEach(x => addSpike(x, true, "crystal"));
+
+    addEnemy(1200, 1050, 1450, "bat", 1);
+    addEnemy(2650, 2500, 2950, "bat", -1);
+    addEnemy(4300, 4150, 4550, "bat", 1);
+    addEnemy(5950, 5750, 6300, "bat", -1);
+
+    addLaser(1450, 120, 220, 0);
+    addLaser(2900, 90, 250, 60);
+    addLaser(4450, 110, 235, 120);
+    addLaser(6250, 90, 255, 180);
+
+    gravityZones.push({ x: 2150, y: 0, w: 200, h: 400, active: true });
+    gravityZones.push({ x: 5300, y: 0, w: 220, h: 400, active: true });
+
+    addSaw(3400, 305, 3300, 3650, 3, 42);
+    addSaw(5750, 305, 5700, 6200, 3.2, 42, -1);
+
+    createCoins(300, 6500, 180, 200);
+
+    addTrapCoin(900, 200, 920);
+    addTrapCoin(2750, 190, 2750);
+    addTrapCoin(6100, 180, 6100);
+
+    addCheckpoint(1900);
+    addCheckpoint(3900);
+    addCheckpoint(5600);
+
+    addSign(720, 190, "Las luces parpadean por algo");
+    addSign(2100, 185, "Aquí pesas menos");
+    addSign(3650, 175, "Plataforma estable, seguro");
+    addSign(6000, 285, "Última cueva tranquila");
+
+    addTrigger(860, () => {
+        revealSpikeAt(920);
+        showMessage("Cristales emergentes", 80);
+    });
+
+    addTrigger(2100, () => {
+        showMessage("Gravedad rara", 90);
+    });
+
+    addTrigger(3650, () => {
+        if (vanishingPlatforms[1]) vanishingPlatforms[1].touched = true;
+        showMessage("Nunca confíes", 80);
+    });
+
+    addTrigger(6000, () => {
+        revealSpikeAt(6100);
+        showMessage("La cueva muerde", 80);
+    });
+}
+
+/* =========================================================
+   13. NIVEL 3 - FÁBRICA INFERNAL
+========================================================= */
+
+function buildLevelThree() {
+    setLevel("factory", 7600, 345);
+
+    [
+        [0, 700], [850, 600], [1650, 550], [2400, 650],
+        [3250, 550], [4000, 600], [4800, 600], [5600, 600], [6400, 1150]
+    ].forEach(([x, w]) => addGround(x, w, 55));
+
+    [
+        [700, 150], [1450, 200], [2200, 200], [3050, 200],
+        [3800, 200], [4600, 200], [5400, 200], [6200, 200]
+    ].forEach(([x, w]) => addLava(x, w, 55));
+
+    addMovingPlatform(700, 245, 100, 700, 1000, 3.3);
+    addMovingPlatform(1500, 235, 100, 1500, 1800, 3.4);
+    addMovingPlatform(3050, 225, 100, 3050, 3350, 3.7);
+    addMovingPlatform(4650, 225, 100, 4650, 5000, 3.8);
+    addMovingPlatform(6250, 220, 120, 6250, 6600, 4);
+
+    addFallingBlock(1100, 240, 100, 80);
+    addFallingBlock(2600, 225, 120, 80);
+    addFallingBlock(4300, 225, 120, 70);
+    addFallingBlock(5900, 215, 130, 60);
+
+    addVanishingPlatform(1950, 205, 120);
+    addVanishingPlatform(3600, 205, 120);
+    addVanishingPlatform(5200, 205, 120);
+    addVanishingPlatform(6900, 205, 120);
+
+    [500, 1750, 3400, 5000, 6600].forEach(x => addSpike(x, false, "metal"));
+    [1150, 2750, 4400, 6000, 7100].forEach(x => addSpike(x, true, "metal"));
+
+    addCrusher(1250, 60, 90, 38, true);
+    addCrusher(2850, 60, 90, 38, true);
+    addCrusher(4450, 60, 90, 38, true);
+    addCrusher(6050, 60, 90, 38, true);
+
+    addLaser(2100, 80, 265, 0);
+    addLaser(3750, 80, 265, 80);
+    addLaser(5350, 80, 265, 160);
+    addLaser(7000, 80, 265, 240);
+
+    addInvisibleWall(2350);
+    addInvisibleWall(5550);
+    addInvisibleWall(7200);
+
+    addEnemy(900, 870, 1300, "robot", 1);
+    addEnemy(2500, 2450, 2950, "robot", -1);
+    addEnemy(4100, 4050, 4550, "robot", 1);
+    addEnemy(5700, 5650, 6150, "robot", -1);
+    addEnemy(6900, 6600, 7350, "robot", 1);
+
+    addSaw(1850, 305, 1700, 2150, 3.8, 46);
+    addSaw(3550, 305, 3300, 3750, 4, 46, -1);
+    addSaw(5200, 305, 5000, 5350, 4.2, 46);
+
+    createCoins(250, 7300, 170, 190);
+
+    addTrapCoin(1150, 190, 1150);
+    addTrapCoin(2750, 180, 2750);
+    addTrapCoin(4400, 180, 4400);
+    addTrapCoin(6000, 170, 6000);
+    addTrapCoin(7100, 170, 7100);
+
+    addCheckpoint(1800);
+    addCheckpoint(3600);
+    addCheckpoint(5400);
+
+    addSign(900, 285, "La fábrica no perdona");
+    addSign(2300, 145, "Hay paredes que no se ven");
+    addSign(4300, 180, "La máquina aprende");
+    addSign(6800, 180, "Final verdadero... quizá");
+
+    addTrigger(1100, () => {
+        revealSpikeAt(1150);
+        showMessage("Sistema anti-jugador", 80);
+    });
+
+    addTrigger(2300, () => {
+        invisibleWalls[0].active = true;
+        showMessage("Bloqueo invisible", 75);
+    });
+
+    addTrigger(4300, () => {
+        revealSpikeAt(4400);
+        showMessage("Trampa industrial", 80);
+    });
+
+    addTrigger(5550, () => {
+        invisibleWalls[1].active = true;
+        revealSpikeAt(6000);
+        showMessage("No mires atrás", 80);
+    });
+
+    addTrigger(7050, () => {
+        invisibleWalls[2].active = true;
+        revealSpikeAt(7100);
+        showMessage("Última humillación", 90);
+    });
+}
+
+/* =========================================================
+   14. NIVEL 4 - TEMPLO HELADO
+   Mecánicas nuevas:
+   - Hielo resbaladizo
+   - Viento lateral
+   - Plataformas quebradizas
+   - Enemigos que disparan
+   - Mini jefe final
+========================================================= */
+
+function buildLevelFour() {
+    setLevel("ice", 9000, 345);
+
+    /* 1. SUELO PRINCIPAL */
+    [
+        [0, 720],
+        [900, 620],
+        [1700, 580],
+        [2500, 620],
+        [3350, 640],
+        [4200, 520],
+        [4950, 680],
+        [5900, 680],
+        [6850, 2050]
+    ].forEach(([x, w]) => addGround(x, w, 55));
+
+    /* 2. VACÍOS / AGUA HELADA */
+    [
+        [720, 180],
+        [1520, 180],
+        [2280, 220],
+        [3120, 230],
+        [3990, 210],
+        [4720, 230],
+        [5630, 270],
+        [6580, 270]
+    ].forEach(([x, w]) => addLava(x, w, 55));
+
+    /* 3. HIELO RESBALADIZO */
+    addIceZone(60, 620);
+    addIceZone(980, 480);
+    addIceZone(1760, 430);
+    addIceZone(3440, 470);
+    addIceZone(5000, 560);
+    addIceZone(6950, 1200);
+
+    /* 4. PLATAFORMAS NORMALES */
+    addPlatform(420, 255, 110);
+    addPlatform(1180, 245, 110);
+    addPlatform(1900, 235, 120);
+    addPlatform(2850, 230, 120);
+    addPlatform(4420, 225, 120);
+    addPlatform(6150, 230, 140);
+    addPlatform(7350, 220, 140);
+
+    /* 5. PLATAFORMAS MÓVILES */
+    addMovingPlatform(760, 250, 110, 760, 980, 2.4);
+    addMovingPlatform(1580, 235, 110, 1580, 1840, 2.7);
+    addMovingPlatform(3180, 225, 120, 3180, 3480, 3.0);
+    addMovingPlatform(5650, 220, 120, 5650, 6000, 3.2);
+    addMovingPlatform(6600, 215, 120, 6600, 7000, 3.4);
+
+    /* 6. PLATAFORMAS QUEBRADIZAS */
+    addBrittlePlatform(1380, 210, 110);
+    addBrittlePlatform(2360, 205, 120);
+    addBrittlePlatform(3750, 205, 120);
+    addBrittlePlatform(5250, 205, 120);
+    addBrittlePlatform(7100, 205, 130);
+    addBrittlePlatform(7680, 205, 130);
+
+    /* 7. PLATAFORMAS QUE DESAPARECEN */
+    addVanishingPlatform(2050, 190, 120);
+    addVanishingPlatform(4550, 190, 120);
+    addVanishingPlatform(6350, 190, 120);
+
+    /* 8. BLOQUES QUE CAEN */
+    addFallingBlock(1050, 220, 110, 100);
+    addFallingBlock(2700, 215, 120, 90);
+    addFallingBlock(4900, 215, 120, 80);
+    addFallingBlock(7450, 205, 120, 70);
+
+    /* 9. VIENTO LATERAL */
+    addWindZone(2300, 40, 420, 300, 1.15, "VIENTO →");
+    addWindZone(4050, 40, 440, 300, -1.2, "← VIENTO");
+    addWindZone(6100, 40, 480, 300, 1.35, "VIENTO →");
+
+    /* 10. PINCHOS DE HIELO */
+    [520, 1120, 1850, 3520, 5060, 7040].forEach(x => addSpike(x, false, "ice"));
+    [980, 2160, 2960, 4300, 5480, 7280, 7900].forEach(x => addSpike(x, true, "ice"));
+
+    /* 11. SIERRAS */
+    addSaw(1800, 306, 1720, 2150, 2.8, 42);
+    addSaw(3650, 306, 3400, 3900, 3.2, 42, -1);
+    addSaw(7050, 306, 6900, 7600, 3.6, 46);
+
+    /* 12. ENEMIGOS */
+    addEnemy(1100, 980, 1450, "blob", -1);
+    addEnemy(3500, 3400, 3900, "bat", 1);
+    addEnemy(5200, 5000, 5550, "bat", -1);
+
+    /* 13. ENEMIGOS QUE DISPARAN */
+    addShooterEnemy(2050, groundY - 36, 1950, 2200, -1, 100);
+    addShooterEnemy(4550, groundY - 36, 4300, 4650, -1, 90);
+    addShooterEnemy(6200, groundY - 36, 6000, 6450, -1, 85);
+    addShooterEnemy(7600, groundY - 36, 7350, 8000, -1, 75);
+
+    /* 14. MONEDAS */
+    createCoins(250, 8400, 175, 185);
+
+    /* 15. MONEDAS TRAMPA */
+    addTrapCoin(980, 185, 980);
+    addTrapCoin(2160, 175, 2160);
+    addTrapCoin(4300, 170, 4300);
+    addTrapCoin(5480, 170, 5480);
+    addTrapCoin(7900, 165, 7900);
+
+    /* 16. CHECKPOINTS */
+    addCheckpoint(1900);
+    addCheckpoint(4200);
+    addCheckpoint(6500);
+
+    /* 17. CARTELES */
+    addSign(320, 285, "El suelo resbala");
+    addSign(2250, 80, "El viento decide por ti");
+    addSign(3700, 180, "El hielo no aguanta mucho");
+    addSign(5950, 80, "Corre con el viento");
+    addSign(7500, 180, "El templo dispara");
+    addSign(8050, 180, "Guardián del hielo");
+
+    /* 18. MINI JEFE */
+    createIceBoss();
+
+    /* 19. TRIGGERS */
+    addTrigger(900, () => {
+        revealSpikeAt(980);
+        showMessage("El hielo también pincha", 80);
+    });
+
+    addTrigger(2100, () => {
+        revealSpikeAt(2160);
+        showMessage("Mira tus pies", 80);
+    });
+
+    addTrigger(2920, () => {
+        revealSpikeAt(2960);
+        showMessage("Demasiado fácil, ¿no?", 80);
+    });
+
+    addTrigger(4250, () => {
+        revealSpikeAt(4300);
+        showMessage("El templo despierta", 80);
+    });
+
+    addTrigger(5400, () => {
+        revealSpikeAt(5480);
+        showMessage("No frenes ahora", 80);
+    });
+
+    addTrigger(7250, () => {
+        revealSpikeAt(7280);
+        showMessage("Última ventisca", 90);
+    });
+
+    addTrigger(7850, () => {
+        revealSpikeAt(7900);
+        if (iceBoss) iceBoss.active = true;
+        showMessage("¡Mini jefe: Guardián del Hielo!", 120);
+    });
+}
+
+/* =========================================================
+   15. MUERTE / RESPAWN / CAMBIO DE NIVEL
+========================================================= */
+
+function resetAfterDeath() {
+    buildLevel();
+
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+    player.prevX = player.x;
+    player.prevY = player.y;
+    player.dx = 0;
+    player.dy = 0;
+    player.grounded = false;
+    player.invulnerable = 100;
+
+    playerDead = false;
+    respawnTimer = 0;
+
+    resetKeys();
+}
+
+function killPlayer(reason = "Has muerto", kind = "generic") {
+    if (player.invulnerable > 0 || gameOver || win || changingLevel || playerDead) return;
+
+    lives--;
+    deaths++;
+    playerDead = true;
+    respawnTimer = 45;
+
+    const cx = player.x + player.w / 2;
+    const cy = player.y + player.h / 2;
+
+    if (kind === "spike") addBlood(cx, cy, 42);
+    else if (kind === "lava") addExplosion(cx, cy, "#ff5a00", 45);
+    else if (kind === "laser") addExplosion(cx, cy, "#00ffff", 38);
+    else if (kind === "crush") addExplosion(cx, cy, "#bbbbbb", 45);
+    else addExplosion(cx, cy, "#ffcc00", 32);
+
+    
+freezeFrames = 4;
+shakePower = 8;
+shakeTimer = 20;
+
+
+    showMessage(reason, 90);
+    vibrate(55);
+
+    if (lives <= 0) {
+        gameOver = true;
+
+        setTimeout(() => {
+            alert("GAME OVER. Muertes: " + deaths + " | Nivel alcanzado: " + currentLevel);
+            location.reload();
+        }, 500);
+    }
+}
+
+function nextLevel() {
+    changingLevel = true;
+
+    if (currentLevel >= maxLevel) {
+        win = true;
+
+        setTimeout(() => {
+            alert("🏆 JUEGO COMPLETADO | Muertes: " + deaths + " | Score: " + score);
+            location.reload();
+        }, 300);
+
+        return;
+    }
+
+    currentLevel++;
+    checkpointIndex = -1;
+    checkpoint = { x: 100, y: 290 };
+
+    player.x = 100;
+    player.y = 290;
+    player.prevX = 100;
+    player.prevY = 290;
+    player.dx = 0;
+    player.dy = 0;
+    player.invulnerable = 120;
+
+    resetKeys();
+    buildLevel();
+
+    showMessage("Nivel " + currentLevel + " desbloqueado", 140);
+
+    setTimeout(() => {
+        changingLevel = false;
+    }, 700);
+}
+
+/* =========================================================
+   16. UPDATE PRINCIPAL / FÍSICAS / COLISIONES
+========================================================= */
+
+function getActiveSolids() {
+    let solids = [...blocks];
+
+    fakeFloors.forEach(f => {
+        if (f.active) solids.push(f);
+    });
+
+    fallingBlocks.forEach(f => {
+        if (f.y < canvas.height + 100) solids.push(f);
+    });
+
+    movingPlatforms.forEach(m => solids.push(m));
+
+    vanishingPlatforms.forEach(v => {
+        if (v.active) solids.push(v);
+    });
+
+    brittlePlatforms.forEach(b => {
+        if (b.active) solids.push(b);
+    });
+
+    return solids;
+}
+
+function updateIceBoss() {
+    if (!iceBoss || iceBoss.defeated || !iceBoss.active) return;
+
+    if (iceBoss.hurtTimer > 0) iceBoss.hurtTimer--;
+
+    iceBoss.fireCooldown--;
+    iceBoss.jumpCooldown--;
+    iceBoss.stompCooldown--;
+    
+if (iceBoss.hp <= iceBoss.maxHp/2) {
+    addExplosion(iceBoss.x + 40, iceBoss.y + 50, "#ffffff", 4);
+}
+
+    if (iceBoss.fireCooldown <= 0) {
+        const direction = player.x < iceBoss.x ? -1 : 1;
+
+        addEnemyProjectile(
+            iceBoss.x + iceBoss.w / 2,
+            iceBoss.y + 35,
+            direction * 4.8,
+            -0.4,
+            "boss"
+        );
+
+        addEnemyProjectile(
+            iceBoss.x + iceBoss.w / 2,
+            iceBoss.y + 58,
+            direction * 4.2,
+            0.5,
+            "boss"
+        );
+
+        addExplosion(iceBoss.x + iceBoss.w / 2, iceBoss.y + 50, "#bfffff", 12);
+        iceBoss.fireCooldown = iceBoss.hp <= 7 ? 55 : 85;
+    }
+
+    if (iceBoss.stompCooldown <= 0) {
+        addSpike(iceBoss.x - 80, false, "ice");
+        addSpike(iceBoss.x + iceBoss.w + 45, false, "ice");
+        showMessage("¡El guardián rompe el hielo!", 60);
+        iceBoss.stompCooldown = 190;
+    }
+
+    if (iceBoss.jumpCooldown <= 0) {
+        iceBoss.y -= 20;
+        setTimeout(() => {
+            if (iceBoss && !iceBoss.defeated) {
+                iceBoss.y = groundY - iceBoss.h;
+                shakeTimer = 18;
+                shakePower = 6;
+                addExplosion(iceBoss.x + iceBoss.w / 2, groundY - 10, "#bfffff", 22);
+            }
+        }, 220);
+
+        iceBoss.jumpCooldown = 260;
+    }
+
+    if (rectsCollide(player, iceBoss)) {
+        const wasAbove = player.prevY + player.h <= iceBoss.y + 12;
+
+        if (player.dy > 0 && wasAbove) {
+            iceBoss.hp--;
+            iceBoss.hurtTimer = 20;
+            player.dy = -9;
+            addExplosion(player.x + player.w / 2, player.y + player.h, "#ffffff", 18);
+            showMessage("¡Golpe al jefe! HP: " + iceBoss.hp, 50);
+
+            if (iceBoss.hp <= 0) {
+                iceBoss.defeated = true;
+                iceBoss.active = false;
+                score += 50;
+                shakeTimer = 35;
+                shakePower = 10;
+                addExplosion(iceBoss.x + iceBoss.w / 2, iceBoss.y + iceBoss.h / 2, "#bfffff", 80);
+                showMessage("¡Guardián derrotado!", 120);
+            }
+        } else {
+            killPlayer("Aplastado por el guardián", "crush");
+        }
+    }
+
+    if (currentLevel === 4 && !iceBoss.defeated && player.x > 8250) {
+        player.x = 8250;
+        showMessage("Derrota al guardián", 40);
+    }
+}
+
+function update() {
+    updateParticles();
+    updateAmbientParticles();
+
+    if (!gameStarted) return;
+    if (paused) return;
+    if (gameOver || win) return;
+
+    if (playerDead) {
+        respawnTimer--;
+
+        if (respawnTimer <= 0 && lives > 0) resetAfterDeath();
+
+        if (messageTimer > 0) messageTimer--;
+     
+        
+if(shakeTimer > 0){
+    shakeTimer--;
+}else{
+    shakePower = 0;
+}
+
+        return;
+    }
+
+    if (player.invulnerable > 0) player.invulnerable--;
+
+    /* Movimiento de plataformas */
+    movingPlatforms.forEach(p => {
+        const oldX = p.x;
+
+        p.x += p.dir * p.speed;
+
+        if (p.x < p.startX || p.x > p.endX) {
+            p.dir *= -1;
+            p.x += p.dir * p.speed;
+        }
+
+        p.moveX = p.x - oldX;
+    });
+
+    /* Trituradoras */
+    crushers.forEach(c => {
+        if (!c.active) return;
+
+        if (c.dropping) {
+            c.vy += 0.8;
+            c.y += c.vy;
+
+            if (c.y > groundY - c.h) {
+                c.y = groundY - c.h;
+                c.vy = -12;
+                c.dropping = false;
+            }
+        } else {
+            c.vy += 0.35;
+            c.y += c.vy;
+
+            if (c.y < 60) {
+                c.y = 60;
+                c.vy = 0;
+                c.dropping = true;
+            }
+        }
+    });
+
+    /* Pinchos emergentes */
+    spikes.forEach(s => {
+        if (s.rising) {
+            s.y -= 4;
+
+            if (s.y <= s.targetY) {
+                s.y = s.targetY;
+                s.rising = false;
+            }
+        }
+    });
+
+    /* Bloques que caen */
+    fallingBlocks.forEach(b => {
+        if (b.falling) {
+            b.vy += 0.35;
+            b.y += b.vy;
+        }
+    });
+
+    /* Láseres */
+    lasers.forEach(l => {
+        l.timer++;
+        l.active = Math.sin(l.timer / 40) > -0.25;
+    });
+
+    /* Sierras */
+    sawBlades.forEach(s => {
+        s.x += s.dir * s.speed;
+
+        if (s.x < s.minX || s.x > s.maxX) s.dir *= -1;
+
+        s.angle += 0.25;
+    });
+
+    /* Input jugador + hielo */
+    let onIce = false;
+
+    iceZones.forEach(zone => {
+        const feet = {
+            x: player.x,
+            y: player.y + player.h,
+            w: player.w,
+            h: 4
+        };
+
+        if (rectsCollide(feet, zone)) onIce = true;
+    });
+
+    if (onIce) {
+        if (keys.left) {
+            player.dx -= 0.22;
+            player.facing = -1;
+        }
+
+        if (keys.right) {
+            player.dx += 0.22;
+            player.facing = 1;
+        }
+
+        player.dx *= 0.975;
+
+        if (player.dx > player.speed * 1.35) player.dx = player.speed * 1.35;
+        if (player.dx < -player.speed * 1.35) player.dx = -player.speed * 1.35;
+    } else {
+        player.dx = 0;
+
+        if (keys.left) {
+            player.dx = -player.speed;
+            player.facing = -1;
+        }
+
+        if (keys.right) {
+            player.dx = player.speed;
+            player.facing = 1;
+        }
+    }
+
+    let gravityMultiplier = 1;
+
+    gravityZones.forEach(g => {
+        if (g.active && rectsCollide(player, g)) gravityMultiplier = 0.45;
+    });
+
+    /* Viento lateral */
+    windZones.forEach(wind => {
+        if (rectsCollide(player, wind)) {
+            player.x += wind.force;
+        }
+    });
+
+    /* Jump buffer + coyote time */
+    if (keys.jump) jumpBuffer = 8;
+    else jumpBuffer--;
+
+    if (player.grounded) coyoteTime = 8;
+    else coyoteTime--;
+
+    if (jumpBuffer > 0 && coyoteTime > 0) {
+        player.dy = player.jumpPower;
+        player.grounded = false;
+        jumpBuffer = 0;
+        coyoteTime = 0;
+        addDust(player.x + player.w / 2, player.y + player.h, 8);
+    }
+
+    player.prevX = player.x;
+    player.prevY = player.y;
+
+    player.dy += player.gravity * gravityMultiplier;
+
+    /* Movimiento horizontal */
+    player.x += player.dx;
+
+    if (player.x < 0) player.x = 0;
+    if (player.x > levelEnd - player.w) player.x = levelEnd - player.w;
+
+    invisibleWalls.forEach(w => {
+        if (!w.active) return;
+
+        if (rectsCollide(player, w)) {
+            if (player.dx > 0) player.x = w.x - player.w;
+            if (player.dx < 0) player.x = w.x + w.w;
+            showMessage("¿Qué ha sido eso?", 45);
+        }
+    });
+
+    /* Movimiento vertical */
+    player.y += player.dy;
+    player.grounded = false;
+
+    getActiveSolids().forEach(s => {
+        if (!rectsCollide(player, s)) return;
+
+        const wasAbove = player.prevY + player.h <= s.y;
+        const wasBelow = player.prevY >= s.y + s.h;
+
+        if (player.dy >= 0 && wasAbove) {
+            player.y = s.y - player.h;
+            player.dy = 0;
+            player.grounded = true;
+
+            if (s.type === "moving") player.x += s.moveX || 0;
+
+            if (s.type === "fake" && !s.triggered) {
+                s.triggered = true;
+                showMessage("El suelo no era suelo", 80);
+                setTimeout(() => s.active = false, currentLevel === 3 ? 180 : 330);
+            }
+
+            if (s.type === "falling" && !s.used) {
+                s.used = true;
+                showMessage("Corre, corre...", 55);
+                setTimeout(() => s.falling = true, s.delay);
+            }
+
+            if (s.type === "vanish" && !s.touched) {
+                s.touched = true;
+                showMessage("No te quedes ahí", 60);
+            }
+
+            if (s.type === "brittle" && !s.cracking) {
+                s.cracking = true;
+                s.crackTimer = 45;
+                showMessage("El hielo se rompe...", 55);
+            }
+        } else if (player.dy < 0 && wasBelow) {
+            player.y = s.y + s.h;
+            player.dy = 0;
+        }
+    });
+
+    /* Desvanecimiento de plataformas */
+    fakeFloors.forEach(f => {
+        if (f.triggered) {
+            f.alpha -= currentLevel === 3 ? 0.045 : 0.025;
+            if (f.alpha < 0.1) f.alpha = 0.1;
+        }
+    });
+
+    vanishingPlatforms.forEach(v => {
+        if (v.touched && v.active) {
+            v.alpha -= currentLevel === 3 ? 0.055 : 0.035;
+            if (v.alpha <= 0) v.active = false;
+        }
+    });
+
+    brittlePlatforms.forEach(b => {
+        if (!b.active) return;
+
+        if (b.cracking) {
+            b.crackTimer--;
+            b.alpha -= 0.018;
+
+            if (b.crackTimer <= 0) {
+                b.active = false;
+                addExplosion(b.x + b.w / 2, b.y + 10, "#bfffff", 18);
+            }
+        }
+    });
+
+    /* Triggers */
+    triggers.forEach(t => {
+        if (!t.done && rectsCollide(player, t)) {
+            t.done = true;
+            t.action();
+        }
+    });
+
+    /* Daño / muerte */
+    lavaPits.forEach(p => {
+        if (rectsCollide(player, p)) {
+            killPlayer(
+                currentLevel === 2 ? "Ácido neón" :
+                currentLevel === 3 ? "Fundido por la fábrica" :
+                currentLevel === 4 ? "Agua helada" :
+                "A la lava",
+                "lava"
+            );
+        }
+    });
+
+    if (player.y > canvas.height + 80) {
+        killPlayer("Caíste al vacío", "generic");
+    }
+
+    spikes.forEach(s => {
+        if (s.active && rectsCollide(player, s)) {
+            killPlayer(
+                currentLevel === 2 ? "Cristales letales" :
+                currentLevel === 3 ? "Pinchos industriales" :
+                currentLevel === 4 ? "Estalactitas heladas" :
+                "Pinchos sorpresa",
+                "spike"
+            );
+        }
+    });
+
+    crushers.forEach(c => {
+        if (c.active && rectsCollide(player, c)) {
+            killPlayer("Aplastado", "crush");
+        }
+    });
+
+    lasers.forEach(l => {
+        if (l.active && rectsCollide(player, l)) {
+            killPlayer("Láser", "laser");
+        }
+    });
+
+    sawBlades.forEach(s => {
+        if (rectsCollide(player, s)) {
+            killPlayer("Sierra giratoria", "spike");
+        }
+    });
+
+    /* Monedas */
+    coins.forEach(c => {
+        c.anim += 0.1;
+
+        if (c.taken) return;
+
+        const dx = (player.x + player.w / 2) - c.x;
+        const dy = (player.y + player.h / 2) - c.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 28) {
+            c.taken = true;
+            score++;
+            addExplosion(c.x, c.y, c.trap ? "#ff3333" : "#ffdf00", 10);
+
+            if (c.trap) {
+                revealSpikeAt(c.spikeX);
+                showMessage("Moneda trampa", 80);
+            }
+        }
+    });
+
+    /* Enemigos */
+    enemies.forEach(e => {
+        if (!e.alive) return;
+
+        e.x += e.dir * (currentLevel === 3 ? 2.1 : currentLevel === 2 ? 1.9 : 1.7);
+
+        if (e.x < e.minX || e.x > e.maxX) e.dir *= -1;
+
+        if (e.type === "bat") e.y += Math.sin(Date.now() / 150 + e.x) * 0.5;
+
+        if (e.type === "shooter") {
+            e.fireCooldown--;
+
+            if (e.fireCooldown <= 0) {
+                const direction = player.x < e.x ? -1 : 1;
+                addEnemyProjectile(e.x + e.w / 2, e.y + 16, direction * 4.2, 0, "ice");
+                addExplosion(e.x + e.w / 2, e.y + 16, "#bfffff", 8);
+                e.fireCooldown = e.fireRate;
+            }
+        }
+
+        if (rectsCollide(player, e)) {
+            const wasAbove = player.prevY + player.h <= e.y + 8;
+
+            if (player.dy > 0 && wasAbove) {
+                e.alive = false;
+                player.dy = -7;
+                score += 3;
+                addExplosion(e.x + e.w / 2, e.y + e.h / 2, "#aa66ff", 20);
+            } else {
+                killPlayer("Enemigo al contacto", "generic");
+            }
+        }
+    });
+
+    /* Proyectiles enemigos */
+    enemyProjectiles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+
+        if (rectsCollide(player, p)) {
+            killPlayer(p.type === "boss" ? "Fragmento del guardián" : "Proyectil helado", "laser");
+        }
+    });
+
+    enemyProjectiles = enemyProjectiles.filter(p => {
+        return p.life > 0 && p.x > camX - 300 && p.x < camX + canvas.width + 500;
+    });
+
+    /* Mini jefe */
+    updateIceBoss();
+
+    /* Checkpoints */
+    checkpoints.forEach((cp, index) => {
+        if (!cp.active && rectsCollide(player, cp)) {
+            cp.active = true;
+            checkpointIndex = index;
+            checkpoint.x = cp.x;
+            checkpoint.y = cp.y - player.h;
+            showMessage("Checkpoint conseguido", 80);
+            addExplosion(cp.x, cp.y, "#00ff99", 25);
+        }
+    });
+
+    /* Fin de nivel */
+    if (!changingLevel && player.x > levelEnd - 130) {
+        if (currentLevel === 4 && iceBoss && !iceBoss.defeated) {
+            showMessage("Derrota al guardián", 60);
+        } else {
+            showMessage("Nivel superado", 80);
+            nextLevel();
+        }
+    }
+
+    /* Cámara suave con anticipación */
+    let target = player.x - 260 + player.facing * 40;
+let diff = target - camX;
+
+if (Math.abs(diff) > 30) {
+    camX += diff * 0.04;
+} else {
+    camX += diff * 0.015;
+}
+
+camX = Math.max(0, Math.min(camX, levelEnd - canvas.width));
+
+
+    if (player.dx !== 0) player.frame += 0.2;
+
+    if (messageTimer > 0) messageTimer--;
+    if (flashTimer > 0) flashTimer--;
+    if (shakeTimer > 0) shakeTimer--;
+}
+
+/* =========================================================
+   17. DIBUJO / RENDER
+========================================================= */
+
+function drawBackground() {
+    const t = Date.now() * 0.001;
+
+    if (levelTheme === "grass") {
+        const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        sky.addColorStop(0, "#6ecbff");
+        sky.addColorStop(0.58, "#b8f1ff");
+        sky.addColorStop(1, "#eaffdd");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Sol suave
+        drawGlowScreen(760 - camX * 0.04, 72, 95, "rgba(255,245,160,0.32)");
+        ctx.fillStyle = "rgba(255,246,165,0.75)";
+        ctx.beginPath();
+        ctx.arc(760 - camX * 0.04, 72, 32, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Montañas lejanas
+        ctx.fillStyle = "rgba(85,150,120,0.34)";
+        for (let i = -1; i < 7; i++) {
+            let x = i * 310 - (camX * 0.10 % 310);
+            ctx.beginPath();
+            ctx.moveTo(x, 340);
+            ctx.lineTo(x + 155, 185);
+            ctx.lineTo(x + 320, 340);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Colinas medias
+        ctx.fillStyle = "#67bd56";
+        for (let i = -1; i < 8; i++) {
+            let x = i * 420 - (camX * 0.18 % 420);
+            ctx.beginPath();
+            ctx.arc(x + 160, 365, 125, Math.PI, 0);
+            ctx.fill();
+        }
+
+        // Nubes parallax
+        ctx.fillStyle = "rgba(255,255,255,0.88)";
+        for (let i = 0; i < 9; i++) {
+            let x = (i * 520 - camX * 0.28 + Math.sin(t + i) * 8) % 1500;
+            if (x < -220) x += 1500;
+            let y = 70 + (i % 3) * 38;
+            ctx.beginPath();
+            ctx.arc(x + 42, y + 14, 23, 0, Math.PI * 2);
+            ctx.arc(x + 72, y + 4, 31, 0, Math.PI * 2);
+            ctx.arc(x + 107, y + 16, 24, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    if (levelTheme === "cave") {
+        const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        g.addColorStop(0, "#12002b");
+        g.addColorStop(0.5, "#092b45");
+        g.addColorStop(1, "#010712");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Rocas de fondo
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        for (let i = -1; i < 9; i++) {
+            let x = i * 180 - (camX * 0.12 % 180);
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x + 70, 165);
+            ctx.lineTo(x + 140, 0);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Cristales brillantes
+        for (let i = 0; i < 26; i++) {
+            let x = (i * 190 - camX * 0.20) % 1200;
+            if (x < -80) x += 1200;
+            let y = 80 + (i * 47) % 245;
+            drawGlowScreen(x + 18, y + 24, 42, i % 2 ? "rgba(168,85,255,0.25)" : "rgba(93,252,255,0.25)");
+            ctx.fillStyle = i % 2 ? "#a855ff" : "#5dfcff";
+            ctx.beginPath();
+            ctx.moveTo(x, y + 55);
+            ctx.lineTo(x + 18, y);
+            ctx.lineTo(x + 36, y + 55);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        ctx.fillStyle = "rgba(0,255,255,0.06)";
+        for (let i = 0; i < 6; i++) {
+            ctx.beginPath();
+            ctx.arc((i * 240 - camX * 0.07) % 1100, 280, 140, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    if (levelTheme === "factory") {
+        const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        g.addColorStop(0, "#232323");
+        g.addColorStop(0.58, "#361d1d");
+        g.addColorStop(1, "#4b1d1d");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Rejilla industrial
+        ctx.strokeStyle = "rgba(255,120,40,0.18)";
+        ctx.lineWidth = 2;
+        for (let x = -200; x < canvas.width + 200; x += 80) {
+            let xx = x - (camX * 0.25 % 80);
+            ctx.beginPath();
+            ctx.moveTo(xx, 0);
+            ctx.lineTo(xx, canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 40; y < canvas.height; y += 80) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+
+        // Tuberías fondo
+        for (let i = 0; i < 8; i++) {
+            let x = (i * 210 - camX * 0.16) % 1200;
+            if (x < -120) x += 1200;
+            ctx.fillStyle = "rgba(70,70,70,0.7)";
+            ctx.fillRect(x, 45, 42, 300);
+            ctx.fillStyle = "rgba(255,90,40,0.35)";
+            ctx.fillRect(x + 7, 65 + (i % 4) * 34, 28, 10);
+        }
+
+        // Luces parpadeantes
+        for (let i = 0; i < 7; i++) {
+            let x = (i * 260 - camX * 0.22) % 1300;
+            let alpha = 0.25 + Math.sin(t * 3 + i) * 0.18;
+            drawGlowScreen(x, 105, 70, `rgba(255,70,20,${alpha})`);
+        }
+    }
+
+    if (levelTheme === "ice") {
+        const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        g.addColorStop(0, "#e8fdff");
+        g.addColorStop(0.48, "#9ee8ff");
+        g.addColorStop(1, "#244b77");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Montañas lejanas con parallax
+        ctx.fillStyle = "rgba(255,255,255,0.18)";
+        for (let i = -1; i < 7; i++) {
+            let x = i * 260 - (camX * 0.10 % 260);
+            ctx.beginPath();
+            ctx.moveTo(x, 350);
+            ctx.lineTo(x + 120, 175);
+            ctx.lineTo(x + 245, 350);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Columnas de hielo medias
+        ctx.fillStyle = "rgba(185,250,255,0.18)";
+        for (let i = 0; i < 8; i++) {
+            let x = (i * 180 - camX * 0.18) % 1200;
+            if (x < -80) x += 1200;
+            ctx.beginPath();
+            ctx.moveTo(x, 360);
+            ctx.lineTo(x + 35, 110 + (i % 3) * 30);
+            ctx.lineTo(x + 78, 360);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Copos pantalla
+        ctx.fillStyle = "rgba(255,255,255,0.65)";
+        for (let i = 0; i < 55; i++) {
+            let x = (i * 97 - camX * 0.22 + Math.sin(t + i) * 18) % 1000;
+            let y = (20 + (i * 53) % 360 + t * 20) % 390;
+            ctx.fillRect(x, y, 2, 2);
+        }
+    }
+}
+
+
+function drawBlock(b) {
+    let body, top, edge, detail;
+    if (levelTheme === "grass") {
+        body = "#247a18"; top = "#53c33f"; edge = "rgba(0,0,0,0.25)"; detail = "rgba(70,35,12,0.28)";
+    } else if (levelTheme === "cave") {
+        body = "#2d1b4e"; top = "#9b6cff"; edge = "rgba(0,255,255,0.20)"; detail = "rgba(0,255,255,0.14)";
+    } else if (levelTheme === "factory") {
+        body = "#454545"; top = "#999"; edge = "rgba(0,0,0,0.45)"; detail = "rgba(15,15,15,0.75)";
+    } else {
+        body = "#7edfff"; top = "#e6ffff"; edge = "rgba(255,255,255,0.55)"; detail = "rgba(255,255,255,0.28)";
+        let index = blocks.indexOf(b);
+        let type = getTileType(index, blocks);
+
+        if(type === "inicio") ctx.fillStyle = "#aef";
+        if(type === "fin") ctx.fillStyle = "#cdf";
+        
+
+    }
+
+    ctx.fillStyle = body;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+
+    // Cara superior brillante
+    ctx.fillStyle = top;
+    ctx.fillRect(b.x, b.y, b.w, 8);
+
+    // Sombra inferior
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(b.x, b.y + b.h - 10, b.w, 10);
+
+    // Textura por tile
+    for (let x = b.x + 10; x < b.x + b.w; x += 32) {
+        ctx.fillStyle = detail;
+        if (levelTheme === "factory") {
+            ctx.fillRect(x, b.y + 18, 12, 10);
+            ctx.fillStyle = "rgba(255,120,50,0.25)";
+            ctx.fillRect(x + 3, b.y + 21, 6, 3);
+        } else if (levelTheme === "ice") {
+            ctx.fillRect(x, b.y + 16, 20, 3);
+            ctx.strokeStyle = "rgba(255,255,255,0.36)";
+            ctx.beginPath();
+            ctx.moveTo(x, b.y + 30);
+            ctx.lineTo(x + 18, b.y + 38);
+            ctx.stroke();
+        } else if (levelTheme === "grass") {
+            ctx.fillRect(x, b.y + 20, 16, 4);
+            ctx.fillStyle = "rgba(25,100,20,0.32)";
+            ctx.fillRect(x + 3, b.y + 9, 4, 9);
+        } else {
+            ctx.fillRect(x, b.y + 18, 18, 3);
+        }
+    }
+
+    ctx.strokeStyle = edge;
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+}
+
+
+function drawFakeFloor(f) {
+    if (!f.active) return;
+    ctx.save();
+    ctx.globalAlpha = f.alpha;
+    drawBlock(f);
+    ctx.restore();
+}
+function drawShadowDynamic(x, y, base) {
+
+const height = Math.max(0, groundY - (player.y + player.h));
+
+// ✅ crecimiento MUY limitado
+const stretch = 1 + Math.min(height * 0.01, 0.10);
+
+// ✅ blur aumenta con altura
+const blur = Math.min(12, height * 0.15);
+
+// ✅ sombra se desvanece (clave realismo)
+const alpha = Math.max(0.08, 0.25 - height * 0.002);
+
+ctx.save();
+ctx.filter = `blur(${blur}px)`;
+ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+ctx.beginPath();
+ctx.ellipse(x, y, base * stretch, 5, 0, 0, Math.PI * 2);
+ctx.fill();
+ctx.restore();
+}
+
+function drawMovingPlatform(p) {
+    drawShadow(p.x + p.w / 2, p.y + p.h + 6, p.w / 2, 0.18);
+    ctx.fillStyle =
+        levelTheme === "factory" ? "#ff8a1f" :
+        levelTheme === "cave" ? "#00d4ff" :
+        levelTheme === "ice" ? "#d9ffff" :
+        "#8844cc";
+    roundRect(p.x, p.y, p.w, p.h, 6, true);
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillRect(p.x + 8, p.y + 4, p.w - 16, 4);
+    ctx.strokeStyle = "rgba(0,0,0,0.25)";
+    roundRect(p.x, p.y, p.w, p.h, 6, false);
+}
+
+
+function drawVanishingPlatform(p) {
+    if (!p.active) return;
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    drawShadow(p.x + p.w / 2, p.y + p.h + 6, p.w / 2, 0.16);
+    ctx.fillStyle =
+        levelTheme === "factory" ? "#ff3333" :
+        levelTheme === "cave" ? "#00ffaa" :
+        levelTheme === "ice" ? "#aef7ff" :
+        "#00aaff";
+    roundRect(p.x, p.y, p.w, p.h, 6, true);
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillRect(p.x + 8, p.y + 4, p.w - 16, 4);
+    ctx.restore();
+}
+
+
+function drawBrittlePlatform(b) {
+    if (!b.active) return;
+    ctx.save();
+    ctx.globalAlpha = b.alpha;
+    drawShadow(b.x + b.w / 2, b.y + b.h + 6, b.w / 2, 0.16);
+    ctx.fillStyle = "#bfffff";
+    roundRect(b.x, b.y, b.w, b.h, 6, true);
+    ctx.strokeStyle = "#ffffff";
+    roundRect(b.x, b.y, b.w, b.h, 6, false);
+    ctx.strokeStyle = b.cracking ? "#004466" : "#62cfe8";
+    for (let x = b.x + 10; x < b.x + b.w; x += 25) {
+        ctx.beginPath();
+        ctx.moveTo(x, b.y + 2);
+        ctx.lineTo(x + 12, b.y + b.h - 3);
+        ctx.stroke();
+    }
+    if (b.cracking) {
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(b.x + b.w * 0.2, b.y + 3);
+        ctx.lineTo(b.x + b.w * 0.46, b.y + b.h - 3);
+        ctx.lineTo(b.x + b.w * 0.78, b.y + 4);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+    }
+    ctx.restore();
+}
+
+
+function drawFallingBlock(b) {
+    if (b.y > canvas.height + 200) return;
+    drawShadow(b.x + b.w / 2, b.y + b.h + 6, b.w / 2, 0.18);
+    ctx.fillStyle =
+        b.used ? "#642313" :
+        levelTheme === "factory" ? "#aa2c2c" :
+        levelTheme === "ice" ? "#bfffff" :
+        "#aa4a24";
+    roundRect(b.x, b.y, b.w, b.h, 5, true);
+    ctx.strokeStyle = "#111";
+    roundRect(b.x, b.y, b.w, b.h, 5, false);
+    ctx.fillStyle = "rgba(255,255,255,0.16)";
+    ctx.fillRect(b.x + 6, b.y + 4, b.w - 12, 4);
+}
+
+
+function drawSpike(s) {
+    if (!s.active) return;
+
+    if (s.variant === "ice") {
+        ctx.fillStyle = "#bfffff";
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y + s.h);
+        ctx.lineTo(s.x + s.w * 0.22, s.y + 8);
+        ctx.lineTo(s.x + s.w * 0.5, s.y - 12);
+        ctx.lineTo(s.x + s.w * 0.78, s.y + 8);
+        ctx.lineTo(s.x + s.w, s.y + s.h);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+        return;
+    }
+
+    if (s.variant === "crystal") {
+        ctx.fillStyle = "#4dfcff";
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y + s.h);
+        ctx.lineTo(s.x + s.w * 0.25, s.y + 8);
+        ctx.lineTo(s.x + s.w * 0.5, s.y - 10);
+        ctx.lineTo(s.x + s.w * 0.75, s.y + 8);
+        ctx.lineTo(s.x + s.w, s.y + s.h);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = "#bfffff";
+        ctx.stroke();
+        return;
+    }
+
+    if (s.variant === "metal") {
+        ctx.fillStyle = "#b8b8b8";
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y + s.h);
+        ctx.lineTo(s.x + s.w * 0.2, s.y + 10);
+        ctx.lineTo(s.x + s.w * 0.5, s.y - 6);
+        ctx.lineTo(s.x + s.w * 0.8, s.y + 10);
+        ctx.lineTo(s.x + s.w, s.y + s.h);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#ff3a1f";
+        ctx.fillRect(s.x + 13, s.y + 13, 8, 8);
+        return;
+    }
+
+    ctx.fillStyle = "#e6e6e6";
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y + s.h);
+    ctx.lineTo(s.x + s.w * 0.25, s.y + 9);
+    ctx.lineTo(s.x + s.w * 0.5, s.y);
+    ctx.lineTo(s.x + s.w * 0.75, s.y + 9);
+    ctx.lineTo(s.x + s.w, s.y + s.h);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = "#777";
+    ctx.stroke();
+}
+
+function drawCrusher(c) {
+    if (!c.active) return;
+
+    ctx.fillStyle = levelTheme === "factory" ? "#222" : "#555";
+    ctx.fillRect(c.x, c.y, c.w, c.h);
+
+    ctx.fillStyle = levelTheme === "factory" ? "#ff3a1f" : "#999";
+    ctx.fillRect(c.x + 5, c.y + 5, c.w - 10, 6);
+
+    ctx.fillStyle = "#111";
+    ctx.fillRect(c.x + 5, c.y + c.h - 5, c.w - 10, 5);
+}
+
+function drawInvisibleWall(w) {
+    if (!w.active) return;
+
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+}
+
+function drawLavaPit(p) {
+    ctx.fillStyle =
+        levelTheme === "cave" ? "#00ffee" :
+        levelTheme === "factory" ? "#ff2a00" :
+        levelTheme === "ice" ? "#73e8ff" :
+        "#ff4500";
+
+    ctx.fillRect(p.x, p.y + 15, p.w, p.h);
+
+    ctx.fillStyle =
+        levelTheme === "ice" ? "#ffffff" :
+        levelTheme === "cave" ? "#bfffff" :
+        "#ffcc00";
+
+    for (let x = p.x; x < p.x + p.w; x += 22) {
+        ctx.beginPath();
+        ctx.arc(x, p.y + 18 + Math.sin(Date.now() / 120 + x) * 4, 8, 0, Math.PI);
+        ctx.fill();
+    }
+}
+
+function drawLaser(l) {
+    if (!l.active) return;
+
+    ctx.fillStyle = levelTheme === "factory" ? "rgba(255,0,0,0.85)" : "rgba(0,255,255,0.85)";
+    ctx.fillRect(l.x, l.y, l.w, l.h);
+
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.fillRect(l.x + 3, l.y, 3, l.h);
+}
+
+function drawGravityZone(g) {
+    if (!g.active) return;
+
+    ctx.fillStyle = "rgba(140,80,255,0.12)";
+    ctx.fillRect(g.x, g.y, g.w, g.h);
+
+    ctx.strokeStyle = "rgba(180,140,255,0.35)";
+    ctx.strokeRect(g.x, g.y, g.w, g.h);
+}
+
+function drawWindZone(w) {
+    ctx.fillStyle = "rgba(180,240,255,0.10)";
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+
+    ctx.strokeStyle = "rgba(220,255,255,0.32)";
+    ctx.strokeRect(w.x, w.y, w.w, w.h);
+
+    ctx.fillStyle = "rgba(220,255,255,0.65)";
+    ctx.font = "13px Arial";
+    ctx.fillText(w.label, w.x + 10, w.y + 22);
+
+    ctx.strokeStyle = "rgba(220,255,255,0.65)";
+
+    for (let i = 0; i < 6; i++) {
+        const yy = w.y + 45 + i * 32;
+        const offset = (Date.now() / 20 + i * 40) % w.w;
+
+        ctx.beginPath();
+        ctx.moveTo(w.x + offset, yy);
+        ctx.lineTo(w.x + offset + 35 * Math.sign(w.force), yy);
+        ctx.stroke();
+    }
+}
+
+function drawIceZone(z) {
+    ctx.fillStyle = "rgba(180,245,255,0.55)";
+    ctx.fillRect(z.x, z.y, z.w, z.h);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
+    ctx.beginPath();
+
+    for (let x = z.x; x < z.x + z.w; x += 28) {
+        ctx.moveTo(x, z.y + 2);
+        ctx.lineTo(x + 18, z.y + z.h - 2);
+    }
+
+    ctx.stroke();
+}
+
+function drawSawBlade(s) {
+    ctx.save();
+    ctx.translate(s.x + s.w / 2, s.y + s.h / 2);
+    ctx.rotate(s.angle);
+
+    ctx.fillStyle = "#ccc";
+
+    for (let i = 0; i < 12; i++) {
+        ctx.rotate(Math.PI / 6);
+        ctx.beginPath();
+        ctx.moveTo(0, -s.h / 2);
+        ctx.lineTo(6, -s.h / 2 + 12);
+        ctx.lineTo(-6, -s.h / 2 + 12);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    ctx.fillStyle = "#555";
+    ctx.beginPath();
+    ctx.arc(0, 0, s.w / 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ff3333";
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawCoin(c) {
+    if (c.taken) return;
+
+    const y = c.y + Math.sin(c.anim) * 4;
+
+    ctx.fillStyle = c.trap ? "#ff3333" : "#ffdf00";
+    ctx.beginPath();
+    ctx.ellipse(c.x, y, 8, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = c.trap ? "#770000" : "#b8860b";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#fff28a";
+    ctx.fillRect(c.x - 2, y - 7, 3, 14);
+}
+
+function drawEnemyProjectile(p) {
+    ctx.fillStyle = p.type === "boss" ? "#ffffff" : "#bfffff";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+
+    ctx.fillStyle = "#73e8ff";
+    ctx.fillRect(p.x + 2, p.y + 2, p.w - 4, 2);
+}
+
+function drawEnemy(e) {
+    if (!e.alive) return;
+    drawShadow(e.x + e.w / 2, e.y + e.h + 4, e.w / 2, 0.22);
+
+    if (e.type === "shooter") {
+        ctx.fillStyle = "#d9ffff";
+        ctx.fillRect(e.x, e.y + 4, e.w, e.h - 4);
+
+        ctx.fillStyle = "#5bc7e8";
+        ctx.fillRect(e.x + 4, e.y + 10, e.w - 8, 14);
+
+        ctx.fillStyle = "#003344";
+        ctx.fillRect(e.x + 8, e.y + 14, 6, 5);
+        ctx.fillRect(e.x + 22, e.y + 14, 6, 5);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(e.x + 12, e.y - 4, 12, 8);
+
+        ctx.fillStyle = "#73e8ff";
+        ctx.fillRect(e.x + 2, e.y + 26, e.w - 4, 6);
+        return;
+    }
+
+    if (e.type === "bat") {
+        ctx.fillStyle = "#9d4edd";
+        ctx.beginPath();
+        ctx.arc(e.x + 17, e.y + 18, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#5a189a";
+        ctx.beginPath();
+        ctx.moveTo(e.x + 4, e.y + 18);
+        ctx.lineTo(e.x - 16, e.y + 7);
+        ctx.lineTo(e.x - 4, e.y + 27);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(e.x + 30, e.y + 18);
+        ctx.lineTo(e.x + 50, e.y + 7);
+        ctx.lineTo(e.x + 38, e.y + 27);
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(e.x + 10, e.y + 13, 5, 5);
+        ctx.fillRect(e.x + 20, e.y + 13, 5, 5);
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(e.x + 12, e.y + 15, 2, 2);
+        ctx.fillRect(e.x + 22, e.y + 15, 2, 2);
+        return;
+    }
+
+    if (e.type === "robot") {
+        ctx.fillStyle = "#777";
+        ctx.fillRect(e.x, e.y + 6, e.w, e.h - 6);
+
+        ctx.fillStyle = "#222";
+        ctx.fillRect(e.x + 5, e.y + 12, e.w - 10, 12);
+
+        ctx.fillStyle = "#ff2a00";
+        ctx.fillRect(e.x + 9, e.y + 15, 5, 5);
+        ctx.fillRect(e.x + 22, e.y + 15, 5, 5);
+
+        ctx.fillStyle = "#333";
+        ctx.fillRect(e.x + 3, e.y + e.h - 4, 10, 5);
+        ctx.fillRect(e.x + 23, e.y + e.h - 4, 10, 5);
+
+        ctx.fillStyle = "#00ff99";
+        ctx.fillRect(e.x + 12, e.y + 5, 10, 4);
+        return;
+    }
+
+    ctx.fillStyle = "#7a3b16";
+    ctx.beginPath();
+    ctx.arc(e.x + 16, e.y + 18, 17, Math.PI, 0);
+    ctx.lineTo(e.x + 33, e.y + 32);
+    ctx.lineTo(e.x, e.y + 32);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#9b5524";
+    ctx.fillRect(e.x + 3, e.y + 14, 26, 16);
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(e.x + 7, e.y + 13, 6, 7);
+    ctx.fillRect(e.x + 19, e.y + 13, 6, 7);
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(e.x + 9, e.y + 15, 3, 3);
+    ctx.fillRect(e.x + 21, e.y + 15, 3, 3);
+}
+
+function drawIceBoss() {
+    if (!iceBoss || iceBoss.defeated || !iceBoss.active) return;
+    const b = iceBoss;
+    const phase2 = b.hp <= Math.ceil(b.maxHp / 2);
+    const pulse = 0.45 + Math.sin(Date.now() / 120) * 0.18;
+    
+if (phase2) {
+    drawGlow(b.x + b.w/2, b.y + b.h/2, 140, "rgba(120,245,255,0.45)");
+    shakePower = 4;
+}
+
+    drawShadow(b.x + b.w / 2, b.y + b.h + 8, 54, 0.32);
+    drawGlow(b.x + b.w / 2, b.y + b.h / 2, phase2 ? 115 : 85, phase2 ? `rgba(120,245,255,${pulse * 0.45})` : `rgba(180,255,255,${pulse * 0.28})`);
+
+    ctx.save();
+    if (b.hurtTimer > 0 && Math.floor(b.hurtTimer / 4) % 2 === 0) ctx.globalAlpha = 0.55;
+
+    // Cuernos / corona
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(b.x + 18, b.y + 28);
+    ctx.lineTo(b.x + 8, b.y - 18);
+    ctx.lineTo(b.x + 35, b.y + 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(b.x + 74, b.y + 28);
+    ctx.lineTo(b.x + 84, b.y - 18);
+    ctx.lineTo(b.x + 57, b.y + 18);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cuerpo cristalino
+    ctx.fillStyle = phase2 ? "#a8f6ff" : "#d9ffff";
+    roundRect(b.x, b.y + 20, b.w, b.h - 20, 10, true);
+    ctx.fillStyle = phase2 ? "#2cecff" : "#73e8ff";
+    ctx.fillRect(b.x + 8, b.y + 35, b.w - 16, 34);
+
+    // Brazos
+    ctx.fillStyle = "#bfffff";
+    roundRect(b.x - 16, b.y + 58, 16, 34, 5, true);
+    roundRect(b.x + b.w, b.y + 58, 16, 34, 5, true);
+
+    // Ojos
+    ctx.fillStyle = phase2 ? "#ff3a76" : "#003344";
+    ctx.fillRect(b.x + 24, b.y + 49, 10, 8);
+    ctx.fillRect(b.x + 58, b.y + 49, 10, 8);
+
+    // Grietas fase 2
+    if (phase2) {
+        ctx.strokeStyle = "#005577";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(b.x + 32, b.y + 75);
+        ctx.lineTo(b.x + 45, b.y + 93);
+        ctx.lineTo(b.x + 38, b.y + 115);
+        ctx.moveTo(b.x + 64, b.y + 72);
+        ctx.lineTo(b.x + 55, b.y + 96);
+        ctx.lineTo(b.x + 68, b.y + 122);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+    }
+
+    // Pies
+    ctx.fillStyle = "#ffffff";
+    roundRect(b.x + 18, b.y + b.h - 8, 22, 13, 5, true);
+    roundRect(b.x + 52, b.y + b.h - 8, 22, 13, 5, true);
+    ctx.restore();
+
+    // Barra de vida épica
+    ctx.fillStyle = "rgba(0,0,0,0.72)";
+    roundRect(b.x - 32, b.y - 30, b.w + 64, 16, 7, true);
+    const ratio = Math.max(0, b.hp / b.maxHp);
+    ctx.fillStyle = phase2 ? "#ff3a76" : "#73e8ff";
+    roundRect(b.x - 28, b.y - 26, (b.w + 56) * ratio, 8, 4, true);
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    roundRect(b.x - 32, b.y - 30, b.w + 64, 16, 7, false);
+}
+
+if (Math.abs(player.dx) > 0.1) {
+    player.frame += 0.25 + Math.abs(player.dx) * 0.06;
+} else {
+    player.frame = 0;
+}
+if(player.dy === 0 && Math.random() < 0.3){
+    addDust(player.x + player.w/2, player.y + player.h);
+}
+
+function drawMiniCharacter(g, type, x, y, run = false, frame = 0) {
+    if (type === "hero") {
+        g.fillStyle = "#d71920";
+        g.fillRect(x + 7, y, 20, 7);
+        g.fillRect(x + 4, y + 6, 26, 5);
+
+        g.fillStyle = "#ffd0a0";
+        g.fillRect(x + 9, y + 10, 18, 14);
+
+        g.fillStyle = "black";
+        g.fillRect(x + 22, y + 14, 3, 3);
+
+        g.fillStyle = "#fff";
+        g.fillRect(x + 7, y + 25, 20, 16);
+
+        g.fillStyle = "#ffd0a0";
+        g.fillRect(x + 2, y + 27, 6, 12);
+        g.fillRect(x + 26, y + 27, 6, 12);
+
+        g.fillStyle = "#d71920";
+        g.fillRect(x + 8, y + 38, 8, 12);
+        g.fillRect(x + 18, y + 38, 8, 12);
+
+        if (run && Math.floor(frame) % 2 === 0) {
+            g.fillRect(x + 5, y + 43, 8, 7);
+            g.fillRect(x + 21, y + 43, 8, 7);
+        }
+    }
+
+    if (type === "ninja") {
+        g.fillStyle = "#070707";
+        g.fillRect(x + 6, y, 24, 12);
+
+        g.fillStyle = "#181818";
+        g.fillRect(x + 7, y + 10, 22, 16);
+
+        g.fillStyle = "#00ffff";
+        g.fillRect(x + 11, y + 15, 16, 4);
+
+        g.fillStyle = "#101010";
+        g.fillRect(x + 6, y + 26, 24, 18);
+
+        g.fillStyle = "#2b2b2b";
+        g.fillRect(x + 1, y + 28, 6, 13);
+        g.fillRect(x + 29, y + 28, 6, 13);
+
+        g.fillStyle = "#050505";
+        g.fillRect(x + 8, y + 42, 8, 13);
+        g.fillRect(x + 20, y + 42, 8, 13);
+
+        g.fillStyle = "#00ffff";
+        g.fillRect(x + 7, y + 33, 22, 3);
+
+        if (run) {
+            g.fillStyle = "rgba(0,255,255,0.35)";
+            g.fillRect(x - 8, y + 18, 6, 20);
+        }
+    }
+
+    if (type === "robot") {
+        g.fillStyle = "#777";
+        g.fillRect(x + 7, y, 22, 18);
+
+        g.fillStyle = "#222";
+        g.fillRect(x + 10, y + 6, 16, 7);
+
+        g.fillStyle = "#ff3a1f";
+        g.fillRect(x + 12, y + 8, 4, 3);
+        g.fillRect(x + 21, y + 8, 4, 3);
+
+        g.fillStyle = "#999";
+        g.fillRect(x + 5, y + 22, 26, 22);
+
+        g.fillStyle = "#444";
+        g.fillRect(x, y + 25, 7, 16);
+        g.fillRect(x + 31, y + 25, 7, 16);
+
+        g.fillStyle = "#555";
+        g.fillRect(x + 8, y + 44, 8, 13);
+        g.fillRect(x + 21, y + 44, 8, 13);
+
+        g.fillStyle = "#00ff99";
+        g.fillRect(x + 12, y + 28, 14, 5);
+
+        g.fillStyle = "#aaa";
+        g.fillRect(x + 17, y - 6, 3, 6);
+
+        g.fillStyle = "#00ff99";
+        g.fillRect(x + 15, y - 10, 7, 5);
+    }
+}
+
+function drawPlayer() {
+    if (playerDead) return;
+    drawShadowDynamic(player.x + player.w/2, player.y + player.h + 4, 18);
+    if (player.invulnerable > 0 && Math.floor(player.invulnerable / 5) % 2 === 0) return;
+
+    ctx.save();
+
+    if (player.facing === -1) {
+        ctx.translate(player.x + player.w, player.y);
+        ctx.scale(-1, 1);
+        drawMiniCharacter(ctx, selectedCharacter, 0, 0, player.dx !== 0, player.frame);
+    } else {
+        ctx.translate(player.x, player.y);
+        drawMiniCharacter(ctx, selectedCharacter, 0, 0, player.dx !== 0, player.frame);
+    }
+
+    ctx.restore();
+}
+
+function drawCheckpoint(cp) {
+    ctx.fillStyle = cp.active ? "#00ff99" : "#fff";
+    ctx.fillRect(cp.x, cp.y, 5, cp.h);
+
+    ctx.fillStyle = cp.active ? "#00cc77" : "#ffcc00";
+    ctx.fillRect(cp.x + 5, cp.y, 35, 22);
+}
+
+function drawSign(s) {
+
+// fondo cartel (madera/hielo según nivel)
+let bg = levelTheme === "ice" ? "rgba(180,240,255,0.2)" : "rgba(0,0,0,0.6)";
+let border = levelTheme === "ice" ? "#bfffff" : "#ffffff";
+
+ctx.save();
+
+// posicion flotante suave
+let floatY = Math.sin(Date.now()/400 + s.x) * 4;
+
+let padding = 10;
+ctx.font = "14px Arial";
+
+let width = ctx.measureText(s.text).width;
+
+// glow suave
+ctx.shadowColor = "#00ffff";
+ctx.shadowBlur = 8;
+
+// fondo bonito
+ctx.fillStyle = bg;
+ctx.fillRect(
+    s.x - padding,
+    s.y - 22 + floatY,
+    width + padding*2,
+    26
+);
+
+// borde
+ctx.strokeStyle = border;
+ctx.lineWidth = 1.5;
+ctx.strokeRect(
+    s.x - padding,
+    s.y - 22 + floatY,
+    width + padding*2,
+    26
+);
+
+// texto
+ctx.shadowBlur = 0;
+ctx.fillStyle = "#ffffff";
+ctx.fillText(s.text, s.x, s.y + floatY);
+
+ctx.restore();
+}
+
+function drawCastle() {
+    const x = levelEnd - 230;
+    const y = groundY - 80;
+
+    ctx.fillStyle =
+        levelTheme === "grass" ? "#777" :
+        levelTheme === "cave" ? "#2d1b4e" :
+        levelTheme === "ice" ? "#d9ffff" :
+        "#333";
+
+    ctx.fillRect(x, y, 90, 80);
+
+    ctx.fillStyle =
+        levelTheme === "factory" ? "#ff3a1f" :
+        levelTheme === "ice" ? "#73e8ff" :
+        "#555";
+
+    ctx.fillRect(x + 10, y - 25, 20, 25);
+    ctx.fillRect(x + 60, y - 25, 20, 25);
+
+    ctx.fillStyle = "#111";
+    ctx.fillRect(x + 36, y + 35, 18, 45);
+}
+
+function drawFlag() {
+    const poleX = levelEnd - 90;
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(poleX, 230, 6, 110);
+
+    ctx.fillStyle =
+        currentLevel === 1 ? "#d71920" :
+        currentLevel === 2 ? "#00ffee" :
+        currentLevel === 3 ? "#ff7a00" :
+        "#73e8ff";
+
+    ctx.fillRect(poleX + 6, 230, 42, 28);
+
+    ctx.fillStyle = "#888";
+    ctx.beginPath();
+    ctx.arc(poleX + 3, 225, 8, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+
+function roundRect(x, y, w, h, r, fill) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    if (fill) ctx.fill(); else ctx.stroke();
+}
+
+function drawShadow(x, y, r, alpha = 0.25) {
+    ctx.save();
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawGlow(x, y, r, color) {
+    ctx.globalCompositeOperation = "lighter";
+
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = "source-over";
+}
+
+
+function drawGlowScreen(x, y, radius, color) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    g.addColorStop(0, color);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function seedLevelDecorations() {
+    levelDecorations = [];
+    if (levelTheme === "grass") {
+        for (let i = 0; i < 55; i++) levelDecorations.push({type:"tree", x:i*150+60, h:35+Math.random()*42});
+    }
+    if (levelTheme === "cave") {
+        for (let i = 0; i < 70; i++) levelDecorations.push({type:"crystal", x:i*125+40, y:135+(i*47)%180, s:26+Math.random()*32});
+    }
+    if (levelTheme === "factory") {
+        for (let i = 0; i < 55; i++) levelDecorations.push({type:"pipe", x:i*170+20, h:80+Math.random()*160});
+    }
+    if (levelTheme === "ice") {
+        for (let i = 0; i < 72; i++) levelDecorations.push({type:"icePeak", x:i*140+35, h:45+Math.random()*130});
+    }
+}
+
+function drawLevelDecorations() {
+    levelDecorations.forEach(d => {
+        if (d.x < camX - 160 || d.x > camX + canvas.width + 160) return;
+        if (d.type === "tree") {
+            ctx.fillStyle = "#6b3b19";
+            ctx.fillRect(d.x, groundY - d.h, 10, d.h);
+            ctx.fillStyle = "#2f9e44";
+            ctx.beginPath();
+            ctx.arc(d.x + 5, groundY - d.h, 23, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "rgba(255,255,255,0.15)";
+            ctx.fillRect(d.x - 4, groundY - d.h - 10, 12, 4);
+        }
+        if (d.type === "crystal") {
+            drawGlow(d.x + 18, d.y + d.s / 2, 38, "rgba(93,252,255,0.25)");
+            ctx.fillStyle = "rgba(80,255,255,0.45)";
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y + d.s);
+            ctx.lineTo(d.x + 18, d.y);
+            ctx.lineTo(d.x + 36, d.y + d.s);
+            ctx.closePath();
+            ctx.fill();
+        }
+        if (d.type === "pipe") {
+            ctx.fillStyle = "rgba(70,70,70,0.72)";
+            ctx.fillRect(d.x, groundY - d.h, 36, d.h);
+            ctx.fillStyle = "rgba(255,90,40,0.35)";
+            ctx.fillRect(d.x + 6, groundY - d.h + 12, 24, 8);
+        }
+        if (d.type === "icePeak") {
+            ctx.fillStyle = "rgba(255,255,255,0.28)";
+            ctx.beginPath();
+            ctx.moveTo(d.x, groundY);
+            ctx.lineTo(d.x + 48, groundY - d.h);
+            ctx.lineTo(d.x + 95, groundY);
+            ctx.closePath();
+            ctx.fill();
+        }
+    });
+}
+
+function seedAmbientParticles() {
+    ambientParticles = [];
+    const count = levelTheme === "factory" ? 28 : levelTheme === "ice" ? 65 : 40;
+    for (let i = 0; i < count; i++) {
+        ambientParticles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: levelTheme === "ice" ? -0.2 + Math.random() * 0.4 : -0.15 + Math.random() * 0.3,
+            vy: levelTheme === "factory" ? -0.25 - Math.random() * 0.4 : 0.25 + Math.random() * 0.35,
+            size: levelTheme === "ice" ? 1 + Math.random() * 2 : 1 + Math.random() * 3,
+            alpha: 0.25 + Math.random() * 0.45
+        });
+    }
+}
+
+function updateAmbientParticles() {
+    
+    ambientParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (levelTheme === "ice") p.x += Math.sin(Date.now() / 600 + p.y) * 0.05;
+        if (p.y > canvas.height + 10) p.y = -10;
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (levelTheme === "ice") {
+    p.x += windZones.length ? windZones[0].force * 0.3 : 0;
+}
+
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+    });
+}
+
+function drawAmbientParticles() {
+    ambientParticles.forEach(p => {
+        if (levelTheme === "grass") ctx.fillStyle = `rgba(120,190,80,${p.alpha})`;
+        if (levelTheme === "cave") ctx.fillStyle = `rgba(93,252,255,${p.alpha})`;
+        if (levelTheme === "factory") ctx.fillStyle = `rgba(255,120,40,${p.alpha})`;
+        if (levelTheme === "ice") ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+    });
+}
+
+function drawParticles() {
+    particles.forEach(p => {
+        const a = Math.max(0, p.life / p.max);
+
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.restore();
+    });
+}
+
+function draw() {
+    
+    let sx = 0;
+    let sy= 0;
+
+    if (shakeTimer > 0) {
+        sx = (Math.random() - 0.5) * shakePower;
+        sy = (Math.random() - 0.5) * shakePower;
+
+        function applyBloom(){
+  ctx.globalCompositeOperation = "lighter";
+  ctx.fillStyle = "rgba(255,255,255,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.globalCompositeOperation = "source-over";
+}
+
+    applyBloom();
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.translate(sx, sy);
+
+    drawBackground();
+    drawAmbientParticles();
+
+    ctx.save();
+    ctx.translate(-camX, 0);
+
+    drawLevelDecorations();
+    gravityZones.forEach(drawGravityZone);
+    windZones.forEach(drawWindZone);
+    iceZones.forEach(drawIceZone);
+
+    blocks.forEach(drawBlock);
+    lavaPits.forEach(drawLavaPit);
+    fakeFloors.forEach(drawFakeFloor);
+    movingPlatforms.forEach(drawMovingPlatform);
+    vanishingPlatforms.forEach(drawVanishingPlatform);
+    brittlePlatforms.forEach(drawBrittlePlatform);
+    fallingBlocks.forEach(drawFallingBlock);
+    invisibleWalls.forEach(drawInvisibleWall);
+    crushers.forEach(drawCrusher);
+    lasers.forEach(drawLaser);
+    sawBlades.forEach(drawSawBlade);
+    spikes.forEach(drawSpike);
+    coins.forEach(drawCoin);
+    enemyProjectiles.forEach(drawEnemyProjectile);
+    enemies.forEach(drawEnemy);
+
+    drawIceBoss();
+
+    checkpoints.forEach(drawCheckpoint);
+    signs.forEach(drawSign);
+
+    drawCastle();
+    drawFlag();
+    drawParticles();
+    drawPlayer();
+
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.font = "bold 15px Arial";
+    ctx.fillText("Nivel: " + currentLevel + "/" + maxLevel, 14, 24);
+    ctx.fillText("Score: " + score, 14, 44);
+    ctx.fillText("Vidas: " + lives, 14, 64);
+    ctx.fillText("Muertes: " + deaths, 14, 84);
+
+
+    //TEXTO PANTALLA
+    if (messageTimer > 0) {
+
+let alpha = Math.min(1, messageTimer / 40);
+
+ctx.save();
+ctx.globalAlpha = alpha;
+
+ctx.fillStyle = "rgba(0,0,0,0.55)";
+ctx.fillRect(canvas.width/2 - 260, 30, 520, 70);
+
+ctx.shadowColor = "#00ffff";
+ctx.shadowBlur = 12;
+
+ctx.fillStyle = "#ffffff";
+ctx.font = "bold 26px Arial";
+ctx.textAlign = "center";
+
+let lines = message.split("\n");
+
+for(let i=0;i<lines.length;i++){
+    ctx.fillText(lines[i], canvas.width/2, 60 + i * 28);
+}
+
+ctx.shadowBlur = 0;
+ctx.restore();
+}
+
+    if (paused) {
+        ctx.fillStyle = "rgba(0,0,0,0.58)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 42px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("PAUSA", canvas.width / 2, canvas.height / 2 - 10);
+
+        ctx.font = "18px Arial";
+        ctx.fillText("Pulsa ▶ para continuar", canvas.width / 2, canvas.height / 2 + 28);
+        ctx.textAlign = "left";
+    }
+
+    if (flashTimer > 0) {
+        ctx.fillStyle = "rgba(255,0,0," + (flashTimer / 45) + ")";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   18. LOOP PRINCIPAL
+========================================================= */
+
+
+function loop(){
+
+if(freezeFrames > 0){
+    freezeFrames--;
+    draw();
+    requestAnimationFrame(loop);
+    return;
+}
+
+update();
+draw();
+requestAnimationFrame(loop);
+}
+
+
+buildLevel();
+drawAllPreviews();
+loop();
+</script>
+
+</body>
+</html>
