@@ -1,31 +1,44 @@
-# dont_fall_game
 
-GIVAP FREND es un desafiante juego de plataformas en 2D donde nada es lo que parece.
-El jugador comienza eligiendo entre varios personajes, cada uno con su propio estilo visual, para luego enfrentarse a niveles llenos de trampas ocultas, enemigos impredecibles y mecánicas engañosas.
-A lo largo de la aventura, deberás:
+**GIVAP FREND** es un juego de plataformas 2D desafiante donde nada es lo que parece. Salta, esquiva trampas y sobrevive a niveles llenos de sorpresas inesperadas.
 
-Saltar entre plataformas móviles e inestables
-Esquivar pinchos, sierras, láseres y enemigos
-Descubrir suelos falsos y paredes invisibles
-Superar zonas con gravedad alterada, viento o hielo resbaladizo
-Enfrentarte a un mini jefe final en el último nivel
+---
 
-La clave del juego no es solo la habilidad, sino también la memoria y la reacción, ya que muchas trampas aparecen cuando menos lo esperas.
-💀 Cada error cuenta, y morir forma parte del aprendizaje.
-🏆 Solo los jugadores más persistentes lograrán completar todos los niveles.
+## 🕹️ Características
 
-🔥 Características principales
+- 🎮 Gameplay clásico de plataformas
+- ⚠️ Trampas ocultas y mecánicas engañosas
+- 🌍 4 niveles con temáticas únicas
+- 👾 Enemigos con distintos comportamientos
+- ❄️ Física especial (hielo, viento, gravedad)
+- 🎵 Música retro
+- 🏁 Sistema de checkpoints
 
-🎮 Gameplay estilo clásico con física fluida
-⚠️ Trampas sorpresa y mecánicas troll
-🌍 4 mundos temáticos únicos
-👾 Enemigos variados con comportamientos distintos
-❄️ Física especial (hielo, viento, gravedad)
-🎵 Música retro dinámica
-🏁 Sistema de checkpoints y progresión
+---
 
+## 🎯 Objetivo
 
-🎯 Objetivo
-Llega al final de cada nivel superando todos los obstáculos…
-pero recuerda:
-👉 el camino más lógico casi nunca es el correcto.
+Llega al final de cada nivel evitando obstáculos, enemigos y trampas sorpresa. Aprende de cada muerte y mejora tu estrategia.
+
+---
+
+## 🧠 Jugabilidad
+
+Este juego no solo pone a prueba tus reflejos, sino también tu memoria:
+
+- Algunos suelos desaparecen
+- Hay paredes invisibles
+- Las trampas se activan al avanzar
+- El último nivel incluye un mini jefe
+
+---
+
+## 🎮 Controles
+
+### Teclado
+- ⬅️ Flecha izquierda: Moverse a la izquierda
+- ➡️ Flecha derecha: Moverse a la derecha
+- ⬆️ Espacio: Saltar
+
+### Móvil
+- Botones en pantalla para moverte y saltar
+- Botón de pausa en la esquina
