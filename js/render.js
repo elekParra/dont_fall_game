@@ -19,7 +19,7 @@ function draw(ctx, canvas) {
     ctx.translate(sx, sy);
 
     drawBackground(ctx, canvas);
-    drawAmbientParticles(ctx);
+    drawAmbientParticles(ctx, canvas);
 
     ctx.save();
     ctx.translate(-state.camX, 0);
@@ -56,7 +56,7 @@ function draw(ctx, canvas) {
 
     drawCastle(ctx);
     drawFlag(ctx);
-    drawParticles(ctx);
+    drawParticles(ctx, canvas);
     drawPlayer(ctx);
 
     ctx.restore();
@@ -1371,14 +1371,60 @@ function drawLevelDecorations(ctx, canvas) {
     lists.levelDecorations.forEach(d => {
         if (d.x < state.camX - 160 || d.x > state.camX + canvas.width + 160) return;
         if (d.type === "tree") {
-            ctx.fillStyle = "#6b3b19";
-            ctx.fillRect(d.x, state.groundY - d.h, 10, d.h);
-            ctx.fillStyle = "#2f9e44";
+            // Wind animation factor
+            let wind = Math.sin(Date.now() / 1000 + d.x * 0.05) * 5;
+            
+            // Trunk with shadow and highlight
+            ctx.fillStyle = "#381a0b";
             ctx.beginPath();
-            ctx.arc(d.x + 5, state.groundY - d.h, 23, 0, Math.PI * 2);
+            ctx.moveTo(d.x - 4, state.groundY);
+            ctx.lineTo(d.x + 14, state.groundY);
+            ctx.lineTo(d.x + 8 + wind*0.2, state.groundY - d.h);
+            ctx.lineTo(d.x + 2 + wind*0.2, state.groundY - d.h);
             ctx.fill();
-            ctx.fillStyle = "rgba(255,255,255,0.15)";
-            ctx.fillRect(d.x - 4, state.groundY - d.h - 10, 12, 4);
+            
+            // Trunk highlight
+            ctx.fillStyle = "#5c2f16";
+            ctx.beginPath();
+            ctx.moveTo(d.x - 1, state.groundY);
+            ctx.lineTo(d.x + 6, state.groundY);
+            ctx.lineTo(d.x + 5 + wind*0.2, state.groundY - d.h);
+            ctx.lineTo(d.x + 2 + wind*0.2, state.groundY - d.h);
+            ctx.fill();
+
+            // Leaves base position
+            let lx = d.x + 5 + wind;
+            let ly = state.groundY - d.h + Math.sin(Date.now() / 800 + d.x) * 2; // Slight vertical bob
+
+            // Shadow under leaves
+            ctx.fillStyle = "rgba(0,40,0,0.8)";
+            ctx.beginPath();
+            ctx.arc(lx, ly + 8, 28, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main dark leaves
+            ctx.fillStyle = "#1e5c12";
+            ctx.beginPath();
+            ctx.arc(lx - 12, ly + 2, 22, 0, Math.PI * 2);
+            ctx.arc(lx + 12, ly + 4, 24, 0, Math.PI * 2);
+            ctx.arc(lx, ly - 12, 26, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Midtone leaves
+            ctx.fillStyle = "#2d8a20";
+            ctx.beginPath();
+            ctx.arc(lx - 14, ly - 2, 18, 0, Math.PI * 2);
+            ctx.arc(lx + 10, ly, 20, 0, Math.PI * 2);
+            ctx.arc(lx, ly - 16, 22, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Highlight leaves (3D volume)
+            ctx.fillStyle = "#5edc45";
+            ctx.beginPath();
+            ctx.arc(lx - 10, ly - 6, 10, 0, Math.PI * 2);
+            ctx.arc(lx + 8, ly - 4, 12, 0, Math.PI * 2);
+            ctx.arc(lx, ly - 20, 14, 0, Math.PI * 2);
+            ctx.fill();
         }
         if (d.type === "crystal") {
             drawGlow(ctx, d.x + 18, d.y + d.s / 2, 38, "rgba(93,252,255,0.25)");
@@ -1408,25 +1454,36 @@ function drawLevelDecorations(ctx, canvas) {
     });
 }
 
-function drawAmbientParticles(ctx) {
+function drawAmbientParticles(ctx, canvas) {
+    const leftEdge = state.camX - 50;
+    const rightEdge = state.camX + canvas.width + 50;
+    
+    // Set colors once per theme rather than per particle
+    if (state.levelTheme === "grass") ctx.fillStyle = "rgba(120,190,80,1)";
+    else if (state.levelTheme === "cave") ctx.fillStyle = "rgba(93,252,255,1)";
+    else if (state.levelTheme === "factory") ctx.fillStyle = "rgba(255,120,40,1)";
+    else if (state.levelTheme === "ice") ctx.fillStyle = "rgba(255,255,255,1)";
+    
     lists.ambientParticles.forEach(p => {
-        if (state.levelTheme === "grass") ctx.fillStyle = `rgba(120,190,80,${p.alpha})`;
-        if (state.levelTheme === "cave") ctx.fillStyle = `rgba(93,252,255,${p.alpha})`;
-        if (state.levelTheme === "factory") ctx.fillStyle = `rgba(255,120,40,${p.alpha})`;
-        if (state.levelTheme === "ice") ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        if (p.x < leftEdge || p.x > rightEdge) return;
+        ctx.globalAlpha = p.alpha;
         ctx.fillRect(p.x, p.y, p.size, p.size);
     });
+    ctx.globalAlpha = 1.0;
 }
 
-function drawParticles(ctx) {
+function drawParticles(ctx, canvas) {
+    const leftEdge = state.camX - 50;
+    const rightEdge = state.camX + canvas.width + 50;
+    
     lists.particles.forEach(p => {
+        if (p.x < leftEdge || p.x > rightEdge) return;
         const a = Math.max(0, p.life / p.max);
-        ctx.save();
         ctx.globalAlpha = a;
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x, p.y, p.size, p.size);
-        ctx.restore();
     });
+    ctx.globalAlpha = 1.0;
 }
 
 function drawHUD(ctx, canvas) {
