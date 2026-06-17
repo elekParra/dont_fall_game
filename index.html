@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/ui.css">
     <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Fuente Pixelada -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -54,6 +57,21 @@
 
         <div class="right-controls">
             <button id="btnJump" class="game-btn jump-btn">⬆</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Transición -->
+    <div id="transitionScreen">
+        <div class="transition-content">
+            <div class="level-text">NIVEL</div>
+            <div class="level-numbers">
+                <div class="number-col">
+                    <span id="transOldLevel">1</span>
+                    <span id="transNewLevel">2</span>
+                </div>
+                <span class="slash">/</span>
+                <span id="transMaxLevel">4</span>
+            </div>
         </div>
     </div>
 

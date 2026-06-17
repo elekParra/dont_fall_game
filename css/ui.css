@@ -278,3 +278,90 @@ body.game-running .mobile-hud {
     background: rgba(0,255,153,0.38);
     box-shadow: 0 0 24px rgba(0,255,153,0.65), 0 3px 8px rgba(0,0,0,0.4);
 }
+
+/* =========================================================
+   05. PANTALLA DE TRANSICIÓN
+========================================================= */
+
+#transitionScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transition: background 0.8s ease, backdrop-filter 0.8s ease;
+}
+
+#transitionScreen.active {
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
+.transition-content {
+    font-family: 'Press Start 2P', cursive;
+    color: white;
+    font-size: clamp(30px, 8vw, 55px);
+    text-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#transitionScreen.active .transition-content {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.level-text {
+    letter-spacing: 4px;
+}
+
+.level-numbers {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #00ffff;
+}
+
+.number-col {
+    position: relative;
+    height: 1.2em;
+    width: 1.2em;
+    overflow: hidden;
+}
+
+.number-col span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#transNewLevel {
+    transform: translateY(100%);
+}
+
+#transitionScreen.animate-numbers #transOldLevel {
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease;
+}
+
+#transitionScreen.animate-numbers #transNewLevel {
+    transform: translateY(0);
+}
+

@@ -84,26 +84,57 @@ function nextLevel() {
         return;
     }
 
-    state.currentLevel++;
-    state.checkpointIndex = -1;
-    state.checkpoint = { x: 100, y: 290 };
+    const transScreen = document.getElementById('transitionScreen');
+    const transOldLevel = document.getElementById('transOldLevel');
+    const transNewLevel = document.getElementById('transNewLevel');
+    const transMaxLevel = document.getElementById('transMaxLevel');
 
-    player.x = 100;
-    player.y = 290;
-    player.prevX = 100;
-    player.prevY = 290;
-    player.dx = 0;
-    player.dy = 0;
-    player.invulnerable = 120;
+    transOldLevel.innerText = state.currentLevel;
+    transNewLevel.innerText = state.currentLevel + 1;
+    transMaxLevel.innerText = state.maxLevel;
 
-    resetKeys();
-    buildLevel(canvas.width, canvas.height);
-
-    showMessage("Nivel " + state.currentLevel + " desbloqueado", 140);
-
+    // Reset animations
+    transScreen.style.display = "flex";
+    transScreen.classList.remove('animate-numbers');
+    
+    // Trigger fade to black and blur
     setTimeout(() => {
+        transScreen.classList.add('active');
+    }, 50);
+
+    // Trigger number roll animation
+    setTimeout(() => {
+        transScreen.classList.add('animate-numbers');
+        vibrate(30);
+    }, 1100);
+
+    // Actual level load
+    setTimeout(() => {
+        state.currentLevel++;
+        state.checkpointIndex = -1;
+        state.checkpoint = { x: 100, y: 290 };
+
+        player.x = 100;
+        player.y = 290;
+        player.prevX = 100;
+        player.prevY = 290;
+        player.dx = 0;
+        player.dy = 0;
+        player.invulnerable = 120;
+
+        resetKeys();
+        buildLevel(canvas.width, canvas.height);
+    }, 1500);
+
+    // Fade out and return to game
+    setTimeout(() => {
+        transScreen.classList.remove('active');
         state.changingLevel = false;
-    }, 700);
+        
+        setTimeout(() => {
+            transScreen.style.display = "none";
+        }, 800);
+    }, 2800);
 }
 
 function update() {

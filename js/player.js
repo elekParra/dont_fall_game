@@ -156,10 +156,12 @@ function updatePlayer(killPlayer) {
     // Animations
     if (Math.abs(player.dx) > 0.1) {
         player.frame += 0.25 + Math.abs(player.dx) * 0.06;
+        player.idleTimer = 0;
     } else {
         player.frame = 0;
+        player.idleTimer += 1;
     }
-    if (player.dy === 0 && Math.random() < 0.3) {
+    if (player.dy === 0 && Math.abs(player.dx) > 0.1 && Math.random() < 0.3) {
         addDust(player.x + player.w / 2, player.y + player.h);
     }
 }

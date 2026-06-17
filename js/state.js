@@ -69,6 +69,7 @@ const player = {
     gravity: 0.55,
     grounded: false,
     frame: 0,
+    idleTimer: 0,
     facing: 1,
     invulnerable: 0
 };
