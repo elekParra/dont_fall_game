@@ -86,7 +86,7 @@ function updatePlayer(killPlayer) {
 
     // Base Jump (Ground)
     if (state.jumpBuffer > 0 && state.coyoteTime > 0) {
-        let pwr = state.selectedCharacter === "ninja" ? -9.5 : player.jumpPower;
+        let pwr = state.selectedCharacter === "ninja" ? -10 : player.jumpPower;
         player.dy = pwr;
         player.grounded = false;
         player.jumpCount = 1;
@@ -98,7 +98,7 @@ function updatePlayer(killPlayer) {
     else if (!player.grounded) {
         // Ninja Double Jump
         if (state.selectedCharacter === "ninja" && jumpJustPressed && player.jumpCount < 2) {
-            player.dy = -9.5;
+            player.dy = -10;
             player.jumpCount = 2;
             player.isFlipping = true;
             player.flipAngle = 0;

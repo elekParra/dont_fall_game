@@ -50,6 +50,39 @@ function setupUI() {
         lastTouchEnd = now;
     }, { passive: false });
 
+    // Restart buttons
+    document.getElementById("btnRetry").addEventListener("click", () => {
+        document.getElementById("gameOverScreen").classList.remove("active");
+        
+        // Reset full game state
+        state.gameOver = false;
+        state.lives = state.selectedCharacter === "hero" ? 10 : 6;
+        state.deaths = 0;
+        state.score = 0;
+        state.currentLevel = 1;
+        state.checkpointIndex = -1;
+        state.checkpoint = { x: 100, y: 290 };
+        
+        buildLevel(canvas.width, canvas.height);
+        
+        player.x = 100;
+        player.y = 290;
+        player.prevX = 100;
+        player.prevY = 290;
+        player.dx = 0;
+        player.dy = 0;
+        player.invulnerable = 100;
+        resetKeys();
+        
+        state.playerDead = false;
+        state.respawnTimer = 0;
+    });
+
+    document.getElementById("btnMenu").addEventListener("click", () => {
+        location.reload();
+    });
+
+    // Disable context menu on mobile
     document.addEventListener("contextmenu", e => e.preventDefault());
 
     bindMobileButtons();

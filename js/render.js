@@ -1557,35 +1557,30 @@ function drawLevelDecorations(ctx, canvas) {
             let lx = d.x + 5 + wind;
             let ly = state.groundY - d.h + Math.sin(Date.now() / 800 + d.x) * 2; // Slight vertical bob
 
+            function drawLeaf(x, y, r, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
             // Shadow under leaves
-            ctx.fillStyle = "rgba(0,40,0,0.8)";
-            ctx.beginPath();
-            ctx.arc(lx, ly + 8, 28, 0, Math.PI * 2);
-            ctx.fill();
+            drawLeaf(lx, ly + 8, 28, "rgba(0,40,0,0.8)");
 
             // Main dark leaves
-            ctx.fillStyle = "#1e5c12";
-            ctx.beginPath();
-            ctx.arc(lx - 12, ly + 2, 22, 0, Math.PI * 2);
-            ctx.arc(lx + 12, ly + 4, 24, 0, Math.PI * 2);
-            ctx.arc(lx, ly - 12, 26, 0, Math.PI * 2);
-            ctx.fill();
+            drawLeaf(lx - 12, ly + 2, 22, "#1e5c12");
+            drawLeaf(lx + 12, ly + 4, 24, "#1e5c12");
+            drawLeaf(lx, ly - 12, 26, "#1e5c12");
             
             // Midtone leaves
-            ctx.fillStyle = "#2d8a20";
-            ctx.beginPath();
-            ctx.arc(lx - 14, ly - 2, 18, 0, Math.PI * 2);
-            ctx.arc(lx + 10, ly, 20, 0, Math.PI * 2);
-            ctx.arc(lx, ly - 16, 22, 0, Math.PI * 2);
-            ctx.fill();
+            drawLeaf(lx - 14, ly - 2, 18, "#2d8a20");
+            drawLeaf(lx + 10, ly, 20, "#2d8a20");
+            drawLeaf(lx, ly - 16, 22, "#2d8a20");
 
             // Highlight leaves (3D volume)
-            ctx.fillStyle = "#5edc45";
-            ctx.beginPath();
-            ctx.arc(lx - 10, ly - 6, 10, 0, Math.PI * 2);
-            ctx.arc(lx + 8, ly - 4, 12, 0, Math.PI * 2);
-            ctx.arc(lx, ly - 20, 14, 0, Math.PI * 2);
-            ctx.fill();
+            drawLeaf(lx - 10, ly - 6, 10, "#5edc45");
+            drawLeaf(lx + 8, ly - 4, 12, "#5edc45");
+            drawLeaf(lx, ly - 20, 14, "#5edc45");
         }
         if (d.type === "crystal") {
             drawGlow(ctx, d.x + 18, d.y + d.s / 2, 38, "rgba(93,252,255,0.25)");
@@ -1648,10 +1643,78 @@ function drawParticles(ctx, canvas) {
 }
 
 function drawHUD(ctx, canvas) {
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    ctx.font = "bold 15px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-    ctx.fillText("Nivel: " + state.currentLevel + "/" + state.maxLevel, 14, 24);
-    ctx.fillText("Score: " + state.score, 14, 44);
-    ctx.fillText("Vidas: " + state.lives, 14, 64);
-    ctx.fillText("Muertes: " + state.deaths, 14, 84);
+    ctx.save();
+    
+    const startX = 20;
+    let startY = 32;
+    const spacing = 28;
+
+    ctx.font = "11px 'Press Start 2P', monospace";
+
+    // 1. Nivel
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(0, 255, 255, 0.8)";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`NIVEL: ${state.currentLevel}/${state.maxLevel}`, startX + 28, startY);
+    // Draw Flag Icon
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff"; // pole
+    ctx.fillRect(startX + 4, startY - 14, 2, 16);
+    ctx.fillStyle = "#00ffee"; // flag
+    ctx.beginPath(); 
+    ctx.moveTo(startX + 6, startY - 14); 
+    ctx.lineTo(startX + 16, startY - 10); 
+    ctx.lineTo(startX + 6, startY - 6); 
+    ctx.fill();
+    
+    startY += spacing;
+
+    // 2. Score
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
+    ctx.fillStyle = "#ffd700";
+    ctx.fillText(`SCORE: ${state.score}`, startX + 28, startY);
+    // Draw Coin Icon
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffaa00";
+    ctx.beginPath(); ctx.arc(startX + 10, startY - 4, 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ffee55";
+    ctx.beginPath(); ctx.arc(startX + 10, startY - 4, 4, 0, Math.PI*2); ctx.fill();
+
+    startY += spacing;
+
+    // 3. Vidas
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(255, 58, 31, 0.8)";
+    ctx.fillStyle = "#ff3a1f";
+    ctx.fillText(`VIDAS: ${state.lives}`, startX + 28, startY);
+    // Draw Heart Icon
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ff1f1f";
+    ctx.beginPath();
+    let hx = startX + 10, hy = startY - 5;
+    ctx.moveTo(hx, hy + 4);
+    ctx.lineTo(hx - 7, hy - 3);
+    ctx.arc(hx - 3.5, hy - 3, 3.5, Math.PI, 0);
+    ctx.arc(hx + 3.5, hy - 3, 3.5, Math.PI, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    startY += spacing;
+
+    // 4. Muertes
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(180, 180, 180, 0.8)";
+    ctx.fillStyle = "#e0e0e0";
+    ctx.fillText(`MUERTES: ${state.deaths}`, startX + 28, startY);
+    // Draw Skull Icon
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(startX + 10, startY - 6, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillRect(startX + 6, startY - 2, 8, 4);
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(startX + 6, startY - 7, 2, 2);
+    ctx.fillRect(startX + 11, startY - 7, 2, 2);
+
+    ctx.restore();
 }

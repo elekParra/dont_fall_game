@@ -66,8 +66,8 @@ function killPlayer(reason = "Has muerto", kind = "generic") {
         state.gameOver = true;
 
         setTimeout(() => {
-            alert("GAME OVER. Muertes: " + state.deaths + " | Nivel alcanzado: " + state.currentLevel);
-            location.reload();
+            document.getElementById("gameOverStats").innerText = `Muertes: ${state.deaths} | Nivel: ${state.currentLevel}`;
+            document.getElementById("gameOverScreen").classList.add("active");
         }, 500);
     }
 }

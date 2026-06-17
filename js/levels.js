@@ -199,17 +199,39 @@ function setLevel(theme, end, ground) {
 
 function seedLevelDecorations() {
     lists.levelDecorations = [];
+    
+    // Helper to check if there's solid ground at a specific x coordinate
+    const hasGround = (x) => lists.blocks.some(b => x >= b.x && x <= b.x + b.w);
+
     if (state.levelTheme === "grass") {
-        for (let i = 0; i < 55; i++) lists.levelDecorations.push({type:"tree", x:i*150+60, h:35+Math.random()*42});
+        for (let i = 0; i < 55; i++) {
+            let dx = i * 150 + 60;
+            if (hasGround(dx + 5)) {
+                lists.levelDecorations.push({type:"tree", x:dx, h:35+Math.random()*42});
+            }
+        }
     }
     if (state.levelTheme === "cave") {
-        for (let i = 0; i < 70; i++) lists.levelDecorations.push({type:"crystal", x:i*125+40, y:135+(i*47)%180, s:26+Math.random()*32});
+        for (let i = 0; i < 70; i++) {
+            // Crystals are embedded in background walls, they don't need ground checks
+            lists.levelDecorations.push({type:"crystal", x:i*125+40, y:135+(i*47)%180, s:26+Math.random()*32});
+        }
     }
     if (state.levelTheme === "factory") {
-        for (let i = 0; i < 55; i++) lists.levelDecorations.push({type:"pipe", x:i*170+20, h:80+Math.random()*160});
+        for (let i = 0; i < 55; i++) {
+            let dx = i * 170 + 20;
+            if (hasGround(dx + 18)) {
+                lists.levelDecorations.push({type:"pipe", x:dx, h:80+Math.random()*160});
+            }
+        }
     }
     if (state.levelTheme === "ice") {
-        for (let i = 0; i < 72; i++) lists.levelDecorations.push({type:"icePeak", x:i*140+35, h:45+Math.random()*130});
+        for (let i = 0; i < 72; i++) {
+            let dx = i * 140 + 35;
+            if (hasGround(dx + 48)) {
+                lists.levelDecorations.push({type:"icePeak", x:dx, h:45+Math.random()*130});
+            }
+        }
     }
 }
 
