@@ -1,0 +1,280 @@
+/* =========================================================
+   02. MENÚ DE PERSONAJES
+========================================================= */
+
+#characterMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+
+    padding:
+        calc(18px + env(safe-area-inset-top))
+        14px
+        calc(18px + env(safe-area-inset-bottom));
+
+    box-sizing: border-box;
+
+    background:
+        radial-gradient(circle at top, rgba(0,255,255,0.18), transparent 36%),
+        linear-gradient(180deg, #18244a 0%, #050509 100%);
+    
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#characterMenu.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#characterMenu h1 {
+    font-size: clamp(25px, 7vw, 42px);
+    margin: 8px 0 18px;
+    text-align: center;
+    text-shadow: 0 0 12px #00ffff, 0 0 28px rgba(0,255,255,0.55);
+}
+
+.character-options {
+    width: 100%;
+    max-width: 760px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.character-card {
+    min-height: 210px;
+    border: 3px solid rgba(255,255,255,0.22);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at top, rgba(255,255,255,0.14), transparent 45%),
+        rgba(255,255,255,0.075);
+    text-align: center;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.42);
+    box-sizing: border-box;
+}
+
+.character-card:hover {
+    background: rgba(255,255,255,0.12);
+    transform: translateY(-2px);
+}
+
+.character-card.selected {
+    border-color: #00ff99;
+    box-shadow: 0 0 26px rgba(0,255,153,0.8), 0 12px 24px rgba(0,0,0,0.42);
+    transform: translateY(-4px) scale(1.03);
+}
+
+.character-card canvas {
+    width: 72px;
+    height: 90px;
+    background: transparent;
+}
+
+.character-card h3 {
+    margin: 6px 0 4px;
+    font-size: clamp(14px, 3.8vw, 18px);
+}
+
+.character-card p {
+    margin: 0;
+    font-size: clamp(11px, 3.2vw, 13px);
+    color: #cfcfcf;
+}
+
+#startBtn {
+    margin-top: 18px;
+    padding: 14px 48px;
+    min-height: 54px;
+    font-size: clamp(18px, 5vw, 24px);
+    border: none;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 35% 20%, rgba(255,255,255,0.45), transparent 32%),
+        linear-gradient(145deg, #00ff99, #00a86b);
+    color: #07130d;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(0,255,153,0.75), 0 10px 24px rgba(0,0,0,0.5);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+#startBtn:active {
+    transform: scale(0.94) translateY(3px);
+    box-shadow: 0 0 12px rgba(0,255,153,0.5), 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* =========================================================
+   03. RESPONSIVE MENÚ
+========================================================= */
+
+@media (max-width: 520px) {
+    #characterMenu {
+        padding-top: calc(12px + env(safe-area-inset-top));
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    #characterMenu h1 {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .character-options {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+        gap: 10px;
+    }
+
+    .character-card {
+        min-height: 112px;
+        display: grid;
+        grid-template-columns: 82px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 8px;
+        align-items: center;
+        text-align: left;
+        padding: 8px 10px;
+    }
+
+    .character-card canvas {
+        grid-row: 1 / span 2;
+        width: 68px;
+        height: 86px;
+        margin: 0 auto;
+    }
+
+    .character-card h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+    }
+
+    .character-card p {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    #startBtn {
+        pointer-events: auto;
+        touch-action: manipulation;
+        position: relative;
+        z-index: 200;
+    }
+}
+
+/* =========================================================
+   04. CONTROLES MÓVILES
+========================================================= */
+
+.mobile-hud {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
+    z-index: 60;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.pause-btn {
+    pointer-events: auto;
+    width: 46px;
+    height: 46px;
+    border: 2px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    font-size: 19px;
+    font-weight: bold;
+    color: white;
+    background: rgba(0,0,0,0.20);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    backdrop-filter: blur(3px);
+    opacity: 0.62;
+    touch-action: none;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(7px + env(safe-area-inset-bottom));
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 clamp(6px, 2.2vw, 16px);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 50;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+body.game-running .controls,
+body.game-running .mobile-hud {
+    visibility: visible !important;
+    opacity: 1;
+}
+
+.left-controls,
+.right-controls {
+    display: flex;
+    gap: clamp(7px, 2vw, 12px);
+    pointer-events: auto;
+}
+
+.game-btn {
+    border: 2px solid rgba(255,255,255,0.20);
+    border-radius: 50%;
+    font-weight: 900;
+    color: rgba(255,255,255,0.88);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.16), transparent 36%),
+        rgba(0,0,0,0.20);
+    box-shadow: 0 5px 13px rgba(0,0,0,0.25);
+    backdrop-filter: blur(3px);
+    touch-action: none;
+    opacity: 0.58;
+    transition: 0.06s ease;
+}
+
+.move-btn {
+    width: clamp(70px, 25vw, 85px);
+    height: clamp(70px, 25vw, 85px);
+    font-size: clamp(25px, 6vw, 33px);
+}
+
+.jump-btn {
+    width: clamp(82px, 25vw, 98px);
+    height: clamp(82px, 25vw, 98px);
+    font-size: clamp(31px, 7.5vw, 40px);
+    background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 36%),
+        rgba(0,160,100,0.25);
+}
+
+.game-btn.pressed,
+.pause-btn.pressed {
+    transform: scale(0.90) translateY(3px);
+    opacity: 0.95;
+    background: rgba(255,255,255,0.22);
+}
+
+.jump-btn.pressed {
+    background: rgba(0,255,153,0.38);
+    box-shadow: 0 0 24px rgba(0,255,153,0.65), 0 3px 8px rgba(0,0,0,0.4);
+}

@@ -1,0 +1,36 @@
+/* =========================================================
+   05. ANIMACIONES MODERNAS
+========================================================= */
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 12px rgba(0, 255, 153, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 24px rgba(0, 255, 153, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 12px rgba(0, 255, 153, 0.4); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#characterMenu h1 {
+    animation: float 4s ease-in-out infinite;
+}
+
+#startBtn {
+    animation: pulse 2s infinite;
+}
+
+.character-card {
+    animation: fadeIn 0.5s ease backwards;
+}
+
+.character-card:nth-child(1) { animation-delay: 0.1s; }
+.character-card:nth-child(2) { animation-delay: 0.2s; }
+.character-card:nth-child(3) { animation-delay: 0.3s; }
