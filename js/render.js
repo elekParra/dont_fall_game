@@ -1143,7 +1143,7 @@ function drawIceBoss(ctx) {
     roundRect(ctx, b.x - 32, b.y - 30, b.w + 64, 16, 7, false);
 }
 
-function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0) {
+function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0, playerObj = null) {
     if (type === "hero") {
         let breathe = (!run && idleTimer) ? Math.sin(idleTimer * 0.1) * 1.5 : 0;
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
@@ -1163,9 +1163,9 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0)
         g.save();
         g.translate(x + 8, py + 26);
         g.rotate(-armRot);
-        g.fillStyle = "#b51218"; // Manga trasera oscura
+        g.fillStyle = "#6b6b6b"; // Manga trasera oscura (Sudadera gris sombra)
         g.fillRect(-4, 0, 8, 11);
-        g.fillStyle = "#e0e0e0"; // Guante
+        g.fillStyle = "#e0e0e0"; // Mano/Guante
         g.fillRect(-5, 11, 10, 8);
         g.restore();
 
@@ -1173,36 +1173,33 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0)
         g.save();
         g.translate(x + 12, py + 38);
         g.rotate(-legRot);
-        g.fillStyle = "#16417c"; // Overol oscuro
+        g.fillStyle = "#3b3b3b"; // Pantalon oscuro trasero
         g.fillRect(-4, 0, 8, 8);
-        g.fillStyle = "#4a2c11"; // Zapato oscuro
+        g.fillStyle = "#2b2b2b"; // Zapato oscuro
         g.fillRect(-5, 8, 10, 6);
         g.restore();
 
         // --- CUERPO ---
-        // Camisa roja
-        g.fillStyle = "#d71920"; 
+        // Sudadera gris
+        g.fillStyle = "#8c8c8c"; 
         g.fillRect(x + 9, py + 22, 16, 12);
         
-        // Overol azul
-        g.fillStyle = "#205ab0";
+        // Pantalones grises oscuros
+        g.fillStyle = "#555555";
         g.fillRect(x + 10, py + 30, 14, 11);
         
-        // Tirantes y botones
-        g.fillStyle = "#205ab0";
-        g.fillRect(x + 11, py + 25, 3, 5);
-        g.fillRect(x + 20, py + 25, 3, 5);
-        g.fillStyle = "#ffcc00"; // Botones
-        g.fillRect(x + 11, py + 28, 3, 3);
-        g.fillRect(x + 20, py + 28, 3, 3);
+        // Cintas sudadera
+        g.fillStyle = "#cccccc";
+        g.fillRect(x + 11, py + 24, 2, 6);
+        g.fillRect(x + 20, py + 24, 2, 6);
 
         // --- PIERNA FRONTAL ---
         g.save();
         g.translate(x + 22, py + 38);
         g.rotate(legRot);
-        g.fillStyle = "#286cdc"; // Overol brillante
+        g.fillStyle = "#555555"; // Pantalon frontal
         g.fillRect(-4, 0, 8, 8);
-        g.fillStyle = "#6e421a"; // Zapato
+        g.fillStyle = "#444444"; // Zapato
         g.fillRect(-4, 8, 11, 6);
         g.restore();
 
@@ -1226,71 +1223,226 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0)
         g.fillRect(x + 19, headY + 11, 12, 4); // Bigote
         g.fillRect(x + 7, headY + 3, 4, 9);    // Cabello atrás
 
-        // Gorra roja
-        g.fillStyle = "#d71920"; 
-        g.fillRect(x + 7, headY - 8, 18, 8); // Cúpula
-        g.fillRect(x + 7, headY, 24, 3);     // Visera
+        // Capucha gris
+        g.fillStyle = "#8c8c8c"; 
+        g.fillRect(x + 7, headY - 8, 18, 10); // Cúpula
+        g.fillRect(x + 5, headY - 2, 5, 12);  // Borde nuca
         
-        // Sombra de gorra
-        g.fillStyle = "#b51218";
+        // Sombra de capucha
+        g.fillStyle = "#6b6b6b";
         g.fillRect(x + 7, headY - 2, 18, 2);
 
         // --- BRAZO FRONTAL ---
         g.save();
         g.translate(x + 24, py + 26);
         g.rotate(armRot);
-        g.fillStyle = "#d71920"; // Manga roja brillante
+        g.fillStyle = "#8c8c8c"; // Manga gris brillante
         g.fillRect(-4, 0, 8, 11);
-        g.fillStyle = "#ffffff"; // Guante blanco
+        g.fillStyle = "#ffffff"; // Mano/Guante
         g.fillRect(-5, 11, 10, 8);
-        g.fillStyle = "#cccccc"; // Detalle guante
+        g.fillStyle = "#cccccc"; // Detalle
         g.fillRect(-5, 17, 10, 2);
         g.restore();
     }
     if (type === "ninja") {
-        g.fillStyle = "#070707";
-        g.fillRect(x + 6, y, 24, 12);
-        g.fillStyle = "#181818";
-        g.fillRect(x + 7, y + 10, 22, 16);
-        g.fillStyle = "#00ffff";
-        g.fillRect(x + 11, y + 15, 16, 4);
-        g.fillStyle = "#101010";
-        g.fillRect(x + 6, y + 26, 24, 18);
-        g.fillStyle = "#2b2b2b";
-        g.fillRect(x + 1, y + 28, 6, 13);
-        g.fillRect(x + 29, y + 28, 6, 13);
-        g.fillStyle = "#050505";
-        g.fillRect(x + 8, y + 42, 8, 13);
-        g.fillRect(x + 20, y + 42, 8, 13);
-        g.fillStyle = "#00ffff";
-        g.fillRect(x + 7, y + 33, 22, 3);
-        if (run) {
-            g.fillStyle = "rgba(0,255,255,0.35)";
-            g.fillRect(x - 8, y + 18, 6, 20);
+        let breathe = (!run && idleTimer) ? Math.sin(idleTimer * 0.1) * 1.5 : 0;
+        let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
+        let py = y + breathe - walkY;
+        
+        g.fillStyle = "rgba(0,0,0,0.25)";
+        g.beginPath();
+        g.ellipse(x + 17, y + 48, 14 - walkY, 3, 0, 0, Math.PI * 2);
+        g.fill();
+
+        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
+        let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
+
+        if (playerObj && playerObj.isFlipping) {
+            armRot = 1.8;   // Arms reach down towards knees
+            legRot = -2.0;  // Legs tuck up tightly
         }
+
+        // Scarf trailing
+        let scarfWind = Math.sin(Date.now() / 150) * 4;
+        g.fillStyle = "#00bfff";
+        g.beginPath();
+        g.moveTo(x + 12, py + 18);
+        g.lineTo(x - 8 + (run ? -10 : 0), py + 22 + scarfWind);
+        g.lineTo(x - 6 + (run ? -10 : 0), py + 28 + scarfWind * 0.5);
+        g.lineTo(x + 12, py + 24);
+        g.fill();
+
+        // --- BRAZO TRASERO ---
+        g.save();
+        g.translate(x + 8, py + 26);
+        g.rotate(-armRot);
+        g.fillStyle = "#111111"; // Manga trasera
+        g.fillRect(-4, 0, 8, 11);
+        g.fillStyle = "#222222"; // Guante
+        g.fillRect(-5, 11, 10, 8);
+        g.restore();
+
+        // --- PIERNA TRASERA ---
+        g.save();
+        g.translate(x + 12, py + 38);
+        g.rotate(-legRot);
+        g.fillStyle = "#111111"; // Pantalon trasero
+        g.fillRect(-4, 0, 8, 8);
+        g.fillStyle = "#0a0a0a"; // Zapato trasero
+        g.fillRect(-5, 8, 10, 6);
+        g.restore();
+
+        // --- CUERPO ---
+        g.fillStyle = "#1a1a1a"; 
+        g.fillRect(x + 9, py + 22, 16, 18);
+        g.fillStyle = "#00bfff"; // Cinturon
+        g.fillRect(x + 9, py + 34, 16, 3);
+
+        // --- PIERNA FRONTAL ---
+        g.save();
+        g.translate(x + 22, py + 38);
+        g.rotate(legRot);
+        g.fillStyle = "#222222"; 
+        g.fillRect(-4, 0, 8, 8);
+        g.fillStyle = "#111111"; 
+        g.fillRect(-4, 8, 11, 6);
+        g.restore();
+
+        // --- CABEZA ---
+        let headY = py + 8 + (run ? Math.sin(frame * 0.6) * 0.8 : Math.sin(idleTimer * 0.1) * 0.5);
+        g.fillStyle = "#111111"; // Capucha ninja
+        g.fillRect(x + 7, headY - 4, 20, 19);
+        
+        // Piel visible (ojos)
+        g.fillStyle = "#ffd0a0"; 
+        g.fillRect(x + 13, headY + 3, 14, 6);
+        
+        // Ojos ninja
+        g.fillStyle = "white";
+        g.fillRect(x + 17, headY + 4, 3, 3);
+        g.fillRect(x + 23, headY + 4, 3, 3);
+        g.fillStyle = "#00bfff"; // Pupila
+        g.fillRect(x + 18, headY + 4, 2, 2);
+        g.fillRect(x + 24, headY + 4, 2, 2);
+
+        // Diadema
+        g.fillStyle = "#00bfff";
+        g.fillRect(x + 7, headY, 20, 3);
+
+        // --- BRAZO FRONTAL ---
+        g.save();
+        g.translate(x + 24, py + 26);
+        g.rotate(armRot);
+        g.fillStyle = "#222222"; 
+        g.fillRect(-4, 0, 8, 11);
+        g.fillStyle = "#333333"; // Guante frontal
+        g.fillRect(-5, 11, 10, 8);
+        g.fillStyle = "#00bfff"; // Pulsera
+        g.fillRect(-4, 10, 8, 2);
+        g.restore();
     }
     if (type === "robot") {
-        g.fillStyle = "#777";
-        g.fillRect(x + 7, y, 22, 18);
-        g.fillStyle = "#222";
-        g.fillRect(x + 10, y + 6, 16, 7);
+        let breathe = (!run && idleTimer) ? Math.sin(idleTimer * 0.2) * 1 : 0;
+        let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
+        let py = y + breathe - walkY;
+        
+        g.fillStyle = "rgba(0,0,0,0.25)";
+        g.beginPath();
+        g.ellipse(x + 17, y + 48, 14 - walkY, 3, 0, 0, Math.PI * 2);
+        g.fill();
+
+        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
+        let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
+
+        // Jetpack Fire
+        if (playerObj && playerObj.jetpackActive) {
+            g.fillStyle = "#00ffcc";
+            g.beginPath();
+            g.moveTo(x, py + 30);
+            g.lineTo(x + 8, py + 30);
+            g.lineTo(x + 4, py + 50 + Math.random() * 15);
+            g.fill();
+        }
+
+        // Jetpack Backpack
+        g.fillStyle = "#555555";
+        g.fillRect(x - 2, py + 18, 12, 16);
+        g.fillStyle = "#00ffcc";
+        g.fillRect(x - 1, py + 22, 4, 8);
+
+        // --- BRAZO TRASERO ---
+        g.save();
+        g.translate(x + 8, py + 26);
+        g.rotate(-armRot);
+        g.fillStyle = "#444444"; 
+        g.fillRect(-3, 0, 6, 11);
+        g.fillStyle = "#666666"; 
+        g.beginPath(); g.arc(0, 12, 5, 0, Math.PI*2); g.fill(); // Pinza
+        g.restore();
+
+        // --- PIERNA TRASERA ---
+        g.save();
+        g.translate(x + 12, py + 38);
+        g.rotate(-legRot);
+        g.fillStyle = "#444444"; 
+        g.fillRect(-3, 0, 6, 10);
+        g.fillStyle = "#333333"; 
+        g.fillRect(-5, 8, 10, 4);
+        g.restore();
+
+        // --- CUERPO ---
+        g.fillStyle = "#999999"; 
+        g.fillRect(x + 9, py + 20, 16, 18);
+        // Detalles pecho
         g.fillStyle = "#ff3a1f";
-        g.fillRect(x + 12, y + 8, 4, 3);
-        g.fillRect(x + 21, y + 8, 4, 3);
-        g.fillStyle = "#999";
-        g.fillRect(x + 5, y + 22, 26, 22);
-        g.fillStyle = "#444";
-        g.fillRect(x, y + 25, 7, 16);
-        g.fillRect(x + 31, y + 25, 7, 16);
-        g.fillStyle = "#555";
-        g.fillRect(x + 8, y + 44, 8, 13);
-        g.fillRect(x + 21, y + 44, 8, 13);
-        g.fillStyle = "#00ff99";
-        g.fillRect(x + 12, y + 28, 14, 5);
-        g.fillStyle = "#aaa";
-        g.fillRect(x + 17, y - 6, 3, 6);
-        g.fillStyle = "#00ff99";
-        g.fillRect(x + 15, y - 10, 7, 5);
+        g.fillRect(x + 12, py + 24, 4, 3);
+        g.fillStyle = "#00ffcc";
+        g.fillRect(x + 18, py + 24, 4, 3);
+        g.fillStyle = "#555555";
+        g.fillRect(x + 12, py + 30, 10, 6); // Rejilla
+
+        // --- PIERNA FRONTAL ---
+        g.save();
+        g.translate(x + 22, py + 38);
+        g.rotate(legRot);
+        g.fillStyle = "#777777"; 
+        g.fillRect(-3, 0, 6, 10);
+        g.fillStyle = "#555555"; 
+        g.fillRect(-4, 8, 11, 4);
+        g.restore();
+
+        // --- CABEZA ---
+        let headY = py + 4 + (run ? Math.sin(frame * 0.6) * 0.8 : Math.sin(idleTimer * 0.2) * 0.5);
+        
+        g.fillStyle = "#888888"; // Bloque cabeza
+        g.fillRect(x + 7, headY, 20, 16);
+        
+        // Visor
+        g.fillStyle = "#222222"; 
+        g.fillRect(x + 10, headY + 4, 16, 6);
+        g.fillStyle = "#00ffcc"; // Ojos luz
+        g.fillRect(x + 12, headY + 5, 12, 4);
+
+        // Antena
+        g.fillStyle = "#666666";
+        g.fillRect(x + 15, headY - 6, 2, 6);
+        g.fillStyle = "#ff3a1f";
+        let antGlow = Math.abs(Math.sin(Date.now()/200));
+        g.globalAlpha = 0.5 + antGlow * 0.5;
+        g.beginPath(); g.arc(x + 16, headY - 7, 3, 0, Math.PI*2); g.fill();
+        g.globalAlpha = 1.0;
+
+        // --- BRAZO FRONTAL ---
+        g.save();
+        g.translate(x + 24, py + 26);
+        g.rotate(armRot);
+        g.fillStyle = "#aaaaaa"; 
+        g.fillRect(-3, 0, 6, 11);
+        g.fillStyle = "#cccccc"; 
+        g.beginPath(); g.arc(0, 12, 5, 0, Math.PI*2); g.fill(); // Pinza
+        g.fillStyle = "#555555";
+        g.beginPath(); g.arc(0, 12, 3, 0, Math.PI*2); g.fill(); // Agujero pinza
+        g.restore();
     }
 }
 
@@ -1300,13 +1452,22 @@ function drawPlayer(ctx) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable / 5) % 2 === 0) return;
 
     ctx.save();
+    
+    // Apply flip rotation if flipping (Ninja Double Jump)
+    if (player.isFlipping) {
+        player.flipAngle += (player.facing === 1 ? 0.38 : -0.38);
+        ctx.translate(player.x + player.w/2, player.y + player.h/2);
+        ctx.rotate(player.flipAngle);
+        ctx.translate(-(player.x + player.w/2), -(player.y + player.h/2));
+    }
+
     if (player.facing === -1) {
         ctx.translate(player.x + player.w, player.y);
         ctx.scale(-1, 1);
-        drawMiniCharacter(ctx, state.selectedCharacter, 0, 0, player.dx !== 0, player.frame, player.idleTimer);
+        drawMiniCharacter(ctx, state.selectedCharacter, 0, 0, player.dx !== 0, player.frame, player.idleTimer, player);
     } else {
         ctx.translate(player.x, player.y);
-        drawMiniCharacter(ctx, state.selectedCharacter, 0, 0, player.dx !== 0, player.frame, player.idleTimer);
+        drawMiniCharacter(ctx, state.selectedCharacter, 0, 0, player.dx !== 0, player.frame, player.idleTimer, player);
     }
     ctx.restore();
 }

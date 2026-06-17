@@ -3,6 +3,9 @@
 // =========================================================
 
 
+let menuTimer = 0;
+let menuLoopId = null;
+
 function setupUI() {
     // Character selection logic
     const cards = document.querySelectorAll('.character-card');
@@ -50,15 +53,31 @@ function setupUI() {
     document.addEventListener("contextmenu", e => e.preventDefault());
 
     bindMobileButtons();
+    startMenuLoop();
+}
+
+function startMenuLoop() {
+    if (state.gameStarted) return;
+    menuTimer++;
     drawAllPreviews();
+    menuLoopId = requestAnimationFrame(startMenuLoop);
 }
 
 function startGame() {
+    if (menuLoopId) cancelAnimationFrame(menuLoopId);
+
     const menu = document.getElementById("characterMenu");
     menu.classList.add("hidden");
     setTimeout(() => {
         menu.style.display = "none";
     }, 400);
+
+    // Set lives based on character
+    if (state.selectedCharacter === "ninja" || state.selectedCharacter === "robot") {
+        state.lives = 6;
+    } else {
+        state.lives = 10;
+    }
 
     document.body.classList.add("game-running");
     state.gameStarted = true;
@@ -138,8 +157,8 @@ function drawCharacterPreview(id, type) {
 
     pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     pctx.save();
-    pctx.translate(23, 18);
-    drawMiniCharacter(pctx, type, 0, 0, false, 0);
+    pctx.translate(33, 28);
+    drawMiniCharacter(pctx, type, 0, 0, false, 0, menuTimer, state.selectedCharacter === type ? {jetpackActive: true} : null);
     pctx.restore();
 }
 

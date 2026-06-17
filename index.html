@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- CSS Modulares -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/ui.css">
-    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/ui.css?v=1.1">
+    <link rel="stylesheet" href="css/animations.css?v=1.1">
     
     <!-- Fuente Pixelada -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -23,21 +23,33 @@
 
         <div class="character-options">
             <div class="character-card selected" data-type="hero" id="card-hero">
-                <canvas width="80" height="100" id="preview-hero"></canvas>
-                <h3>Rojo Clásico</h3>
-                <p>MORIO</p>
+                <canvas width="100" height="120" id="preview-hero"></canvas>
+                <div class="card-info">
+                    <h3>Principal</h3>
+                    <p class="desc">Chico Equilibrado</p>
+                    <p class="lives">Vidas: 10</p>
+                    <p class="ability">Habilidad: Ninguna</p>
+                </div>
             </div>
 
             <div class="character-card" data-type="ninja" id="card-ninja">
-                <canvas width="80" height="100" id="preview-ninja"></canvas>
-                <h3>Ninja Sombra</h3>
-                <p>Ágil y oscuro</p>
+                <canvas width="100" height="120" id="preview-ninja"></canvas>
+                <div class="card-info">
+                    <h3>Ninja Sombra</h3>
+                    <p class="desc">Ágil y oscuro</p>
+                    <p class="lives">Vidas: 6</p>
+                    <p class="ability">Habilidad: Doble Salto</p>
+                </div>
             </div>
 
             <div class="character-card" data-type="robot" id="card-robot">
-                <canvas width="80" height="100" id="preview-robot"></canvas>
-                <h3>Robot MK‑7</h3>
-                <p>Industrial</p>
+                <canvas width="100" height="120" id="preview-robot"></canvas>
+                <div class="card-info">
+                    <h3>Robot MK‑7</h3>
+                    <p class="desc">Pesado y mecánico</p>
+                    <p class="lives">Vidas: 6</p>
+                    <p class="ability">Habilidad: Jetpack</p>
+                </div>
             </div>
         </div>
 
@@ -76,17 +88,17 @@
     </div>
 
     <!-- Lógica Modular del Juego (Carga tradicional para soportar file://) -->
-    <script src="js/state.js"></script>
-    <script src="js/utilities.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/levels.js"></script>
-    <script src="js/render.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/enemies.js"></script>
-    <script src="js/traps.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/state.js?v=1.1"></script>
+    <script src="js/utilities.js?v=1.1"></script>
+    <script src="js/audio.js?v=1.1"></script>
+    <script src="js/particles.js?v=1.1"></script>
+    <script src="js/levels.js?v=1.1"></script>
+    <script src="js/render.js?v=1.1"></script>
+    <script src="js/player.js?v=1.1"></script>
+    <script src="js/enemies.js?v=1.1"></script>
+    <script src="js/traps.js?v=1.1"></script>
+    <script src="js/ui.js?v=1.1"></script>
+    <script src="js/main.js?v=1.1"></script>
 
 </body>
 </html>

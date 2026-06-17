@@ -65,19 +65,62 @@ function updatePlayer(killPlayer) {
         }
     });
 
+    // Input edge detection
+    const jumpJustPressed = state.keys.jump && !state.prevKeys.jump;
+    state.prevKeys.jump = state.keys.jump;
+
     // Jump logic
-    if (state.keys.jump) state.jumpBuffer = 8;
+    if (jumpJustPressed) state.jumpBuffer = 8;
     else state.jumpBuffer--;
 
-    if (player.grounded) state.coyoteTime = 8;
-    else state.coyoteTime--;
+    if (player.grounded) {
+        state.coyoteTime = 8;
+        player.jumpCount = 0;
+        player.isFlipping = false;
+        player.jetpackFuel = 15;
+        player.jetpackActive = false;
+    } else {
+        state.coyoteTime--;
+        player.jetpackActive = false; // Reset unless holding
+    }
 
+    // Base Jump (Ground)
     if (state.jumpBuffer > 0 && state.coyoteTime > 0) {
-        player.dy = player.jumpPower;
+        let pwr = state.selectedCharacter === "ninja" ? -9.5 : player.jumpPower;
+        player.dy = pwr;
         player.grounded = false;
+        player.jumpCount = 1;
         state.jumpBuffer = 0;
         state.coyoteTime = 0;
         addDust(player.x + player.w / 2, player.y + player.h, 8);
+    } 
+    // Air Jumps & Abilities
+    else if (!player.grounded) {
+        // Ninja Double Jump
+        if (state.selectedCharacter === "ninja" && jumpJustPressed && player.jumpCount < 2) {
+            player.dy = -9.5;
+            player.jumpCount = 2;
+            player.isFlipping = true;
+            player.flipAngle = 0;
+            addDust(player.x + player.w / 2, player.y + player.h, 6); // Mid-air dust
+            playTone(800, 0.1, "sine");
+            setTimeout(() => playTone(1100, 0.15, "sine"), 50);
+        }
+        // Robot Jetpack
+        else if (state.selectedCharacter === "robot" && state.keys.jump) {
+            // Activate near apex of jump (-3 to 3 velocity) and if fuel remains
+            if (player.dy > -3.5 && player.dy < 4 && player.jetpackFuel > 0) {
+                player.dy -= 0.65; // Impulse
+                player.jetpackFuel--;
+                player.jetpackActive = true;
+                if (Math.random() < 0.6) {
+                    addExplosion(player.x + player.w/2, player.y + player.h, "#ff9900", 3);
+                }
+                if (Math.random() < 0.3) {
+                    playTone(60 + Math.random() * 40, 0.1, "sawtooth");
+                }
+            }
+        }
     }
 
     player.prevX = player.x;

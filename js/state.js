@@ -50,6 +50,9 @@ const state = {
         right: false,
         jump: false
     },
+    prevKeys: {
+        jump: false
+    },
 
     // Audio
     musicEnabled: false
@@ -71,7 +74,12 @@ const player = {
     frame: 0,
     idleTimer: 0,
     facing: 1,
-    invulnerable: 0
+    invulnerable: 0,
+    jumpCount: 0,
+    isFlipping: false,
+    flipAngle: 0,
+    jetpackFuel: 0,
+    jetpackActive: false
 };
 
 // Lists of level objects
