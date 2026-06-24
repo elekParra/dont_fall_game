@@ -1837,19 +1837,65 @@ function drawHUD(ctx, canvas) {
     });
 
     // 2. Score
-    drawHUDText("SCORE: ", `${state.score}`, "#ffaa00", (c) => {
-        c.fillStyle = "#ffaa00"; c.beginPath(); c.arc(0, 0, 6, 0, Math.PI*2); c.fill();
-        c.fillStyle = "#ffee55"; c.beginPath(); c.arc(0, 0, 3, 0, Math.PI*2); c.fill();
-    });
+    ctx.save();
+    let scoreStr = `${state.score}`;
+    
+    // Icon
+    ctx.save();
+    ctx.translate(panelX + 18, startY);
+    ctx.fillStyle = "#ffaa00"; ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = (state.scoreTimer > 10) ? "#ffffff" : "#ffee55"; 
+    ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+    
+    // Label
+    ctx.fillStyle = textColor; 
+    ctx.fillText("SCORE: ", startX, startY);
+    let scoreLabelW = ctx.measureText("SCORE: ").width;
+    
+    // Value (Bouncy)
+    ctx.translate(startX + scoreLabelW, startY);
+    if (state.scoreScale !== 1.0) {
+        ctx.scale(state.scoreScale, state.scoreScale);
+    }
+    ctx.fillStyle = (state.scoreTimer > 5) ? "#ffff00" : "#ffaa00";
+    ctx.fillText(scoreStr, 0, 0);
+    ctx.restore();
+    
+    startY += spacing;
 
-    // 3. Vidas
-    drawHUDText("VIDAS: ", `${state.lives}`, "#ff3a1f", (c) => {
-        c.fillStyle = "#ff1f1f"; c.beginPath();
-        let hx = 0, hy = -1;
-        c.moveTo(hx, hy + 4); c.lineTo(hx - 5, hy - 2);
-        c.arc(hx - 2.5, hy - 2, 2.5, Math.PI, 0); c.arc(hx + 2.5, hy - 2, 2.5, Math.PI, 0);
-        c.fill();
-    });
+    // 3. Vidas (Hearts)
+    // Icon (Label)
+    ctx.save();
+    ctx.translate(panelX + 18, startY);
+    ctx.fillStyle = "#ff1f1f"; ctx.beginPath();
+    let hx = 0, hy = -1;
+    ctx.moveTo(hx, hy + 4); ctx.lineTo(hx - 5, hy - 2);
+    ctx.arc(hx - 2.5, hy - 2, 2.5, Math.PI, 0); ctx.arc(hx + 2.5, hy - 2, 2.5, Math.PI, 0);
+    ctx.fill();
+    ctx.restore();
+    
+    ctx.fillStyle = textColor; 
+    ctx.fillText("VIDAS: ", startX, startY);
+    let vidasLabelW = ctx.measureText("VIDAS: ").width;
+    
+    for(let i = 0; i < state.lives; i++) {
+        let heartX = startX + vidasLabelW + (i * 12);
+        
+        ctx.save();
+        ctx.translate(heartX, startY);
+        // Little heartbeat scale if low on lives
+        if (state.lives <= 2 && Math.sin(Date.now() / 150) > 0.5) {
+            ctx.scale(1.2, 1.2);
+        }
+        ctx.fillStyle = "#ff1f1f"; 
+        ctx.beginPath();
+        ctx.moveTo(0, 3); ctx.lineTo(-4, -2);
+        ctx.arc(-2, -2, 2, Math.PI, 0); ctx.arc(2, -2, 2, Math.PI, 0);
+        ctx.fill();
+        ctx.restore();
+    }
+    startY += spacing;
 
     // 4. Muertes
     drawHUDText("MUERTES: ", `${state.deaths}`, textColor === "#E0FFFF" ? "#AAB" : "#555", (c) => {

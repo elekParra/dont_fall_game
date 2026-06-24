@@ -188,6 +188,14 @@ function update() {
     if (state.messageTimer > 0) state.messageTimer--;
     if (state.flashTimer > 0) state.flashTimer--;
     if (state.shakeTimer > 0) state.shakeTimer--;
+
+    // Decay HUD animations
+    if (state.scoreTimer > 0) {
+        state.scoreTimer--;
+        state.scoreScale = 1.0 + (0.5 * (state.scoreTimer / 15));
+    } else {
+        state.scoreScale = 1.0;
+    }
 }
 
 let lastTime = 0;

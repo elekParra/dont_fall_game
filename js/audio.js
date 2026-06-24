@@ -16,9 +16,8 @@ const melodies = {
     ice:     [330,392,494,587,494,392,330,294,330,392,440,392]
 };
 
-function startMusic() {
-    if (state.musicEnabled) return;
-
+function initAudio() {
+    if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     musicGain = audioCtx.createGain();
@@ -29,6 +28,11 @@ function startMusic() {
 
     musicGain.connect(audioCtx.destination);
     bassGain.connect(audioCtx.destination);
+}
+
+function startMusic() {
+    if (state.musicEnabled) return;
+    initAudio();
 
     state.musicEnabled = true;
     scheduleMusic();

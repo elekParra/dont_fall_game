@@ -143,6 +143,8 @@ function updateTraps(killPlayer) {
         if (dist < 28) {
             c.taken = true;
             state.score++;
+            state.scoreScale = 1.5;
+            state.scoreTimer = 15;
             addExplosion(c.x, c.y, c.trap ? "#ff3333" : "#ffdf00", 10);
 
             if (c.trap) {

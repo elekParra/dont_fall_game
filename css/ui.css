@@ -24,11 +24,20 @@
 
     box-sizing: border-box;
 
-    background:
-        radial-gradient(circle at top, rgba(0,255,255,0.08), transparent 46%),
-        linear-gradient(180deg, #0f0f15 0%, #030305 100%);
+    background-color: #050509;
+    background-image:
+        linear-gradient(rgba(0, 255, 255, 0.07) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.07) 2px, transparent 2px),
+        radial-gradient(circle at top, rgba(0,255,255,0.15), transparent 46%);
+    background-size: 40px 40px, 40px 40px, 100% 100%;
+    animation: slideGrid 3s linear infinite;
     
     transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+@keyframes slideGrid {
+    0% { background-position: 0 0, 0 0, 0 0; }
+    100% { background-position: -40px 40px, -40px 40px, 0 0; }
 }
 
 #characterMenu.hidden {
@@ -518,14 +527,14 @@ body.game-running .mobile-hud {
     display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    clip-path: circle(0% at 50% 50%);
+    transition: clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.6s;
 }
 
 .overlay-screen.active {
-    opacity: 1;
     visibility: visible;
+    clip-path: circle(150% at 50% 50%);
     pointer-events: auto;
 }
 

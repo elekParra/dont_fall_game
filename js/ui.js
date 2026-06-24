@@ -11,6 +11,8 @@ function setupUI() {
     const cards = document.querySelectorAll('.character-card');
     cards.forEach(card => {
         card.addEventListener('click', () => {
+            initAudio();
+            playTone(880, 0.05, "sine");
             const type = card.getAttribute('data-type');
             state.selectedCharacter = type;
             cards.forEach(c => c.classList.remove('selected'));
@@ -84,11 +86,13 @@ function setupUI() {
 
     // Pause Menu Buttons
     document.getElementById("btnPauseResume").addEventListener("click", () => {
+        initAudio(); playTone(600, 0.08, "square");
         state.paused = false;
         document.getElementById("pauseMenuScreen").classList.remove("active");
     });
 
     document.getElementById("btnPauseRestart").addEventListener("click", () => {
+        initAudio(); playTone(600, 0.08, "square");
         document.getElementById("pauseMenuScreen").classList.remove("active");
         state.paused = false;
         state.deaths++;
@@ -108,6 +112,7 @@ function setupUI() {
     });
 
     document.getElementById("btnPauseMenu").addEventListener("click", () => {
+        initAudio(); playTone(600, 0.08, "square");
         location.reload();
     });
 
@@ -136,6 +141,11 @@ function startMenuLoop(timestamp) {
 }
 
 function startGame() {
+    initAudio();
+    playTone(440, 0.1, "square");
+    setTimeout(() => playTone(660, 0.1, "square"), 100);
+    setTimeout(() => playTone(880, 0.3, "square"), 200);
+
     if (menuLoopId) cancelAnimationFrame(menuLoopId);
 
     const menu = document.getElementById("characterMenu");
@@ -204,6 +214,7 @@ function bindPauseButton() {
         e.preventDefault();
         if (!state.gameStarted || state.gameOver || state.win) return;
 
+        initAudio(); playTone(150, 0.1, "sawtooth");
         state.paused = true;
         document.getElementById("pauseMenuScreen").classList.add("active");
         

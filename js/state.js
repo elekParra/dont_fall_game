@@ -23,6 +23,8 @@ const state = {
 
     // Progression
     score: 0,
+    scoreScale: 1.0,
+    scoreTimer: 0,
     lives: 10,
     deaths: 0,
     win: false,
