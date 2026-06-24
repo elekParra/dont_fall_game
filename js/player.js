@@ -77,7 +77,9 @@ function updatePlayer(killPlayer) {
         state.coyoteTime = 8;
         player.jumpCount = 0;
         player.isFlipping = false;
-        player.jetpackFuel = 15;
+        if (player.jetpackFuel < 30) {
+            player.jetpackFuel = Math.min(30, player.jetpackFuel + 1);
+        }
         player.jetpackActive = false;
     } else {
         state.coyoteTime--;
@@ -86,7 +88,7 @@ function updatePlayer(killPlayer) {
 
     // Base Jump (Ground)
     if (state.jumpBuffer > 0 && state.coyoteTime > 0) {
-        let pwr = state.selectedCharacter === "ninja" ? -10 : player.jumpPower;
+        let pwr = state.selectedCharacter === "ninja" ? -9.5 : player.jumpPower;
         player.dy = pwr;
         player.grounded = false;
         player.jumpCount = 1;
@@ -98,7 +100,7 @@ function updatePlayer(killPlayer) {
     else if (!player.grounded) {
         // Ninja Double Jump
         if (state.selectedCharacter === "ninja" && jumpJustPressed && player.jumpCount < 2) {
-            player.dy = -10;
+            player.dy = -9.5;
             player.jumpCount = 2;
             player.isFlipping = true;
             player.flipAngle = 0;
@@ -108,17 +110,15 @@ function updatePlayer(killPlayer) {
         }
         // Robot Jetpack
         else if (state.selectedCharacter === "robot" && state.keys.jump) {
-            // Activate near apex of jump (-3 to 3 velocity) and if fuel remains
-            if (player.dy > -3.5 && player.dy < 4 && player.jetpackFuel > 0) {
-                player.dy -= 0.65; // Impulse
-                player.jetpackFuel--;
+            if (player.jetpackFuel > 0) {
+                player.dy -= 0.8; 
+                if (player.dy < -5) player.dy = -5;
+                
+                player.jetpackFuel -= 1;
                 player.jetpackActive = true;
-                if (Math.random() < 0.6) {
-                    addExplosion(player.x + player.w/2, player.y + player.h, "#ff9900", 3);
-                }
-                if (Math.random() < 0.3) {
-                    playTone(60 + Math.random() * 40, 0.1, "sawtooth");
-                }
+                addJetpackFire(player.x + 10, player.y + player.h, 3); // Jetpack exhaust
+                addJetpackFire(player.x + 24, player.y + player.h, 3);
+                if (Math.floor(player.jetpackFuel) % 5 === 0) playTone(150, 0.1, "sawtooth");
             }
         }
     }

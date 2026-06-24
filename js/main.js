@@ -190,17 +190,30 @@ function update() {
     if (state.shakeTimer > 0) state.shakeTimer--;
 }
 
-function loop() {
-    if (state.freezeFrames > 0) {
-        state.freezeFrames--;
-        draw(ctx, canvas);
-        requestAnimationFrame(loop);
-        return;
-    }
+let lastTime = 0;
+const frameDuration = 1000 / 60; // 60 FPS cap
 
-    update();
-    draw(ctx, canvas);
+function loop(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    let elapsed = timestamp - lastTime;
+    
+    // Always request the next frame immediately
     requestAnimationFrame(loop);
+
+    // Only update and draw if enough time has passed
+    if (elapsed >= frameDuration) {
+        // Adjust lastTime to prevent drift, capping at current time
+        lastTime = timestamp - (elapsed % frameDuration);
+
+        if (state.freezeFrames > 0) {
+            state.freezeFrames--;
+            draw(ctx, canvas);
+            return;
+        }
+
+        update();
+        draw(ctx, canvas);
+    }
 }
 
 window.addEventListener('load', init);

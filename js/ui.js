@@ -89,11 +89,21 @@ function setupUI() {
     startMenuLoop();
 }
 
-function startMenuLoop() {
+let lastMenuTime = 0;
+
+function startMenuLoop(timestamp) {
     if (state.gameStarted) return;
-    menuTimer++;
-    drawAllPreviews();
+    
+    if (!lastMenuTime) lastMenuTime = timestamp;
+    let elapsed = timestamp - lastMenuTime;
+    
     menuLoopId = requestAnimationFrame(startMenuLoop);
+
+    if (elapsed >= 1000 / 60) {
+        lastMenuTime = timestamp - (elapsed % (1000 / 60));
+        menuTimer++;
+        drawAllPreviews();
+    }
 }
 
 function startGame() {

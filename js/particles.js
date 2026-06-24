@@ -51,6 +51,23 @@ function addDust(x, y, count = 12) {
     }
 }
 
+function addJetpackFire(x, y, count = 3) {
+    const colors = ["#ffcc00", "#ff6600", "#ff3300", "rgba(200, 200, 200, 0.5)"];
+    for (let i = 0; i < count; i++) {
+        lists.particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 2,
+            vy: Math.random() * 4 + 1, // shoot downwards
+            life: 10 + Math.random() * 10,
+            max: 20,
+            size: 3 + Math.random() * 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            gravity: 0 // Fire doesn't fall like dust, it just dissipates
+        });
+    }
+}
+
 function updateParticles() {
     lists.particles.forEach(p => {
         p.x += p.vx;

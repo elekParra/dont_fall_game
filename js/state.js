@@ -67,9 +67,9 @@ const player = {
     h: 50,
     dx: 0,
     dy: 0,
-    speed: 4.6,
-    jumpPower: -11.5,
-    gravity: 0.58,
+    speed: 4.3,
+    jumpPower: -11.2,
+    gravity: 0.52,
     grounded: false,
     frame: 0,
     idleTimer: 0,
@@ -124,6 +124,21 @@ function resetKeys() {
 function showMessage(text, time = 100) {
     state.message = text;
     state.messageTimer = time;
+    state.messageMaxTime = time;
+
+    const container = document.getElementById("ui-message-container");
+    const textEl = document.getElementById("ui-message-text");
+    if (container && textEl) {
+        textEl.innerText = text;
+        container.classList.add("active");
+        
+        const ms = time * (1000 / 60);
+        if (state.messageTimeout) clearTimeout(state.messageTimeout);
+        
+        state.messageTimeout = setTimeout(() => {
+            container.classList.remove("active");
+        }, ms);
+    }
 }
 
 function vibrate(ms = 18) {

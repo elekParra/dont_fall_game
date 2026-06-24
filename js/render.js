@@ -33,6 +33,7 @@ function draw(ctx, canvas) {
     const leftEdge = state.camX - 200;
     const rightEdge = state.camX + canvas.width + 200;
 
+    lists.signs.forEach(s => drawSign(ctx, s));
     lists.blocks.forEach(b => { if (b.x + b.w > leftEdge && b.x < rightEdge) drawBlock(ctx, b); });
     lists.lavaPits.forEach(p => { if (p.x + p.w > leftEdge && p.x < rightEdge) drawLavaPit(ctx, p); });
     lists.fakeFloors.forEach(f => { if (f.x + f.w > leftEdge && f.x < rightEdge) drawFakeFloor(ctx, f); });
@@ -52,7 +53,6 @@ function draw(ctx, canvas) {
     drawIceBoss(ctx);
 
     lists.checkpoints.forEach(cp => drawCheckpoint(ctx, cp));
-    lists.signs.forEach(s => drawSign(ctx, s));
 
     drawCastle(ctx);
     drawFlag(ctx);
@@ -64,22 +64,7 @@ function draw(ctx, canvas) {
     drawHUD(ctx, canvas);
 
     if (state.messageTimer > 0) {
-        let alpha = Math.min(1, state.messageTimer / 40);
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillRect(canvas.width / 2 - 260, 30, 520, 70);
-        ctx.shadowColor = "#00ffff";
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 26px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-        ctx.textAlign = "center";
-        let lines = state.message.split("\n");
-        for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], canvas.width / 2, 60 + i * 28);
-        }
-        ctx.shadowBlur = 0;
-        ctx.restore();
+        // Message is now handled via HTML overlay in showMessage
     }
 
     if (state.paused) {
@@ -130,7 +115,7 @@ function drawBackground(ctx, canvas) {
         // Distant mountains (Darker, less saturated)
         ctx.fillStyle = "rgba(100,160,180,0.4)";
         for (let i = -1; i < 7; i++) {
-            let x = i * 310 - (state.camX * 0.08 % 310);
+            let x = i * 310 - (state.camX * 0.3 % 310);
             ctx.beginPath();
             ctx.moveTo(x, 380);
             ctx.lineTo(x + 155, 150);
@@ -150,7 +135,7 @@ function drawBackground(ctx, canvas) {
 
         // Foreground hills (Greener)
         for (let i = -1; i < 8; i++) {
-            let x = i * 420 - (state.camX * 0.16 % 420);
+            let x = i * 420 - (state.camX * 0.6 % 420);
             const hillG = ctx.createLinearGradient(x, 240, x, 400);
             hillG.addColorStop(0, "#67bd56");
             hillG.addColorStop(1, "#267318");
@@ -163,7 +148,7 @@ function drawBackground(ctx, canvas) {
         // Volumetric clouds (optimized)
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         for (let i = 0; i < 9; i++) {
-            let x = (i * 520 - state.camX * 0.28 + Math.sin(t + i) * 8) % 1500;
+            let x = (i * 520 - state.camX * 0.85 + Math.sin(t + i) * 8) % 1500;
             if (x < -220) x += 1500;
             let y = 70 + (i % 3) * 38;
             
@@ -195,7 +180,7 @@ function drawBackground(ctx, canvas) {
 
         // Distant stalagmites with gradient
         for (let i = -1; i < 12; i++) {
-            let x = i * 160 - (state.camX * 0.1 % 160);
+            let x = i * 160 - (state.camX * 0.3 % 160);
             const mGrad = ctx.createLinearGradient(x, 0, x, 250);
             mGrad.addColorStop(0, "rgba(0,0,0,0)");
             mGrad.addColorStop(1, "rgba(0,20,40,0.7)");
@@ -210,7 +195,7 @@ function drawBackground(ctx, canvas) {
 
         // Glowing crystals
         for (let i = 0; i < 26; i++) {
-            let x = (i * 190 - state.camX * 0.20) % 1200;
+            let x = (i * 190 - state.camX * 0.5) % 1200;
             if (x < -80) x += 1200;
             let y = 80 + (i * 47) % 245;
             let color = i % 2 ? "rgba(168,85,255,0.6)" : "rgba(93,252,255,0.6)";
@@ -239,7 +224,7 @@ function drawBackground(ctx, canvas) {
         ctx.fillStyle = "rgba(0,100,150,0.08)";
         for (let i = 0; i < 6; i++) {
             ctx.beginPath();
-            ctx.arc((i * 240 - state.camX * 0.05) % 1100, 320, 180, 0, Math.PI * 2);
+            ctx.arc((i * 240 - state.camX * 0.7) % 1100, 320, 180, 0, Math.PI * 2);
             ctx.fill();
         }
     }
@@ -256,7 +241,7 @@ function drawBackground(ctx, canvas) {
         ctx.strokeStyle = "rgba(255,80,20,0.12)";
         ctx.lineWidth = 2;
         for (let x = -200; x < canvas.width + 200; x += 80) {
-            let xx = x - (state.camX * 0.15 % 80);
+            let xx = x - (state.camX * 0.4 % 80);
             ctx.beginPath();
             ctx.moveTo(xx, 0);
             ctx.lineTo(xx, canvas.height);
@@ -271,7 +256,7 @@ function drawBackground(ctx, canvas) {
 
         // Massive pipes
         for (let i = 0; i < 8; i++) {
-            let x = (i * 210 - state.camX * 0.25) % 1200;
+            let x = (i * 210 - state.camX * 0.7) % 1200;
             if (x < -120) x += 1200;
             
             const pipeG = ctx.createLinearGradient(x, 0, x+42, 0);
@@ -291,7 +276,7 @@ function drawBackground(ctx, canvas) {
 
         // Smog/glow at the bottom
         for (let i = 0; i < 7; i++) {
-            let x = (i * 260 - state.camX * 0.3) % 1300;
+            let x = (i * 260 - state.camX * 0.9) % 1300;
             let alpha = 0.3 + Math.sin(t * 2 + i) * 0.2;
             drawGlowScreen(ctx, x, 350, 180, `rgba(255,50,0,${alpha})`);
         }
@@ -307,7 +292,7 @@ function drawBackground(ctx, canvas) {
 
         // Distant mountains
         for (let i = -1; i < 7; i++) {
-            let x = i * 260 - (state.camX * 0.12 % 260);
+            let x = i * 260 - (state.camX * 0.3 % 260);
             const mG = ctx.createLinearGradient(x, 150, x, 400);
             mG.addColorStop(0, "rgba(255,255,255,0.6)");
             mG.addColorStop(1, "rgba(100,180,255,0.1)");
@@ -396,12 +381,12 @@ function drawBlock(ctx, b) {
             ctx.fillRect(x - 5, b.y + 24, 10, 2);
         }
     } else {
-        // Brick pattern for grass/cave
         for (let y = b.y + 14; y < b.y + b.h; y += 14) {
             ctx.fillRect(b.x, y, b.w, 2); // Horizontal lines
             let offset = ((y - b.y) / 14 % 2 === 0) ? 0 : 16;
+            let vHeight = Math.min(14, b.y + b.h - y);
             for (let x = b.x + offset; x < b.x + b.w; x += 32) {
-                ctx.fillRect(x, y, 2, 14); // Vertical lines
+                ctx.fillRect(x, y, 2, vHeight); // Vertical lines
             }
         }
     }
@@ -438,32 +423,28 @@ function drawFakeFloor(ctx, f) {
     ctx.restore();
 }
 
-function drawShadowDynamic(ctx, x, y, base) {
-    const height = Math.max(0, state.groundY - (player.y + player.h));
-    const stretch = 1 + Math.min(height * 0.01, 0.10);
-    const alpha = Math.max(0.08, 0.25 - height * 0.002);
-
+function drawContactShadow(ctx, x, y, radius, alpha = 0.2) {
     ctx.save();
-    // Replaced expensive ctx.filter = blur() with a simple radial gradient for performance
-    const r = base * stretch;
-    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
-    g.addColorStop(0.8, `rgba(0,0,0,${alpha * 0.5})`);
-    g.addColorStop(1, "rgba(0,0,0,0)");
+    const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    g.addColorStop(0, `rgba(25, 40, 60, ${alpha})`);
+    g.addColorStop(0.5, `rgba(25, 40, 60, ${alpha * 0.5})`);
+    g.addColorStop(1, "rgba(25, 40, 60, 0)");
     
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.ellipse(x, y, r, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y, radius, Math.max(3, radius * 0.3), 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 }
 
-function drawShadow(ctx, x, y, r, alpha = 0.25) {
+function drawPlatformShadow(ctx, x, y, width, height) {
+    const shadowHeight = 10;
     ctx.save();
-    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
-    ctx.beginPath();
-    ctx.ellipse(x, y, r, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
+    const g = ctx.createLinearGradient(x, y + height, x, y + height + shadowHeight);
+    g.addColorStop(0, "rgba(25, 40, 60, 0.25)");
+    g.addColorStop(1, "rgba(25, 40, 60, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(x + 4, y + height, width - 8, shadowHeight);
     ctx.restore();
 }
 
@@ -491,7 +472,7 @@ function drawGlowScreen(ctx, x, y, radius, color) {
 
 // Draw methods for all game objects...
 function drawMovingPlatform(ctx, p) {
-    drawShadowDynamic(ctx, p.x + p.w / 2, p.y + p.h + 8, p.w / 2);
+    drawPlatformShadow(ctx, p.x, p.y, p.w, p.h);
     ctx.fillStyle = state.levelTheme === "factory" ? "#ff8a1f" : state.levelTheme === "cave" ? "#00d4ff" : state.levelTheme === "ice" ? "#d9ffff" : "#8844cc";
     roundRect(ctx, p.x, p.y, p.w, p.h, 6, true);
     // Inner shadow
@@ -509,7 +490,7 @@ function drawVanishingPlatform(ctx, p) {
     if (!p.active) return;
     ctx.save();
     ctx.globalAlpha = p.alpha;
-    drawShadowDynamic(ctx, p.x + p.w / 2, p.y + p.h + 8, p.w / 2);
+    drawPlatformShadow(ctx, p.x, p.y, p.w, p.h);
     ctx.fillStyle = state.levelTheme === "factory" ? "#ff3333" : state.levelTheme === "cave" ? "#00ffaa" : state.levelTheme === "ice" ? "#aef7ff" : "#00aaff";
     roundRect(ctx, p.x, p.y, p.w, p.h, 6, true);
     ctx.fillStyle = "rgba(0,0,0,0.25)";
@@ -525,7 +506,7 @@ function drawBrittlePlatform(ctx, b) {
     if (!b.active) return;
     ctx.save();
     ctx.globalAlpha = b.alpha;
-    drawShadowDynamic(ctx, b.x + b.w / 2, b.y + b.h + 8, b.w / 2);
+    drawPlatformShadow(ctx, b.x, b.y, b.w, b.h);
     ctx.fillStyle = "#a8f2f2";
     roundRect(ctx, b.x, b.y, b.w, b.h, 6, true);
     ctx.fillStyle = "rgba(0,100,150,0.15)";
@@ -554,7 +535,7 @@ function drawBrittlePlatform(ctx, b) {
 
 function drawFallingBlock(ctx, b, canvas) {
     if (b.y > canvas.height + 200) return;
-    drawShadowDynamic(ctx, b.x + b.w / 2, b.y + b.h + 8, b.w / 2);
+    drawPlatformShadow(ctx, b.x, b.y, b.w, b.h);
     ctx.fillStyle = b.used ? "#4a170a" : state.levelTheme === "factory" ? "#8a1c1c" : state.levelTheme === "ice" ? "#96e3ff" : "#8a3a14";
     roundRect(ctx, b.x, b.y, b.w, b.h, 5, true);
     // Inner shadow
@@ -586,7 +567,7 @@ function drawSpike(ctx, s) {
     }
 
     // Shadow
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillStyle = "rgba(25, 40, 60, 0.3)";
     ctx.beginPath();
     ctx.moveTo(s.x + 4, s.y + s.h);
     ctx.lineTo(s.x + s.w * 0.5, s.y);
@@ -633,8 +614,8 @@ function drawSpike(ctx, s) {
 function drawCrusher(ctx, c) {
     if (!c.active) return;
     
-    // Massive drop shadow
-    drawShadowDynamic(ctx, c.x + c.w / 2, c.y + c.h + 20, c.w * 0.6);
+    // Soft drop shadow
+    drawContactShadow(ctx, c.x + c.w / 2, c.y + c.h, c.w * 0.6, 0.25);
     
     ctx.fillStyle = state.levelTheme === "factory" ? "#222" : "#3b3b3b";
     ctx.fillRect(c.x, c.y, c.w, c.h);
@@ -761,7 +742,7 @@ function drawIceZone(ctx, z) {
 }
 
 function drawSawBlade(ctx, s) {
-    drawShadowDynamic(ctx, s.x + s.w / 2, s.y + s.h + 10, s.w / 2);
+    drawContactShadow(ctx, s.x + s.w / 2, s.y + s.h + 4, s.w / 2, 0.2);
     ctx.save();
     ctx.translate(s.x + s.w / 2, s.y + s.h / 2);
     ctx.rotate(s.angle);
@@ -817,13 +798,13 @@ function drawSawBlade(ctx, s) {
 function drawCoin(ctx, c) {
     if (c.taken) return;
     
-    // Spinning animation
+    // Spin animation
     let t = Date.now() / 200 + c.x;
     let spinWidth = Math.max(0.1, Math.abs(Math.cos(t)));
     const y = c.y + Math.sin(c.anim) * 4;
     
-    // Drop shadow
-    drawShadowDynamic(ctx, c.x, y + 15, 12);
+    // Soft shadow
+    drawContactShadow(ctx, c.x, y + 15, 12, 0.2);
     
     // Core glow
     drawGlow(ctx, c.x, y, 20, c.trap ? "rgba(255,50,50,0.5)" : "rgba(255,223,0,0.5)");
@@ -867,7 +848,7 @@ function drawEnemyProjectile(ctx, p) {
 
 function drawEnemy(ctx, e) {
     if (!e.alive) return;
-    drawShadowDynamic(ctx, e.x + e.w / 2, e.y + e.h + 6, e.w / 2);
+    drawContactShadow(ctx, e.x + e.w / 2, e.y + e.h, e.w / 2 + 4, 0.25);
     
     let t = Date.now() / 100;
     
@@ -1082,7 +1063,7 @@ function drawIceBoss(ctx) {
         state.shakePower = 4;
     }
 
-    drawShadow(ctx, b.x + b.w / 2, b.y + b.h + 8, 54, 0.32);
+    drawContactShadow(ctx, b.x + b.w / 2, b.y + b.h, 54, 0.32);
     drawGlow(ctx, b.x + b.w / 2, b.y + b.h / 2, phase2 ? 115 : 85, phase2 ? `rgba(120,245,255,${pulse * 0.45})` : `rgba(180,255,255,${pulse * 0.28})`);
 
     ctx.save();
@@ -1150,11 +1131,8 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         
         let py = y + breathe - walkY;
         
-        // Sombra de los pies (no se mueve con breathe ni rebota)
-        g.fillStyle = "rgba(0,0,0,0.25)";
-        g.beginPath();
-        g.ellipse(x + 17, y + 48, 14 - walkY, 3, 0, 0, Math.PI * 2);
-        g.fill();
+        // Sombra de los pies
+        drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
         let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
@@ -1249,10 +1227,7 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
         let py = y + breathe - walkY;
         
-        g.fillStyle = "rgba(0,0,0,0.25)";
-        g.beginPath();
-        g.ellipse(x + 17, y + 48, 14 - walkY, 3, 0, 0, Math.PI * 2);
-        g.fill();
+        drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
         let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
@@ -1346,10 +1321,7 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
         let py = y + breathe - walkY;
         
-        g.fillStyle = "rgba(0,0,0,0.25)";
-        g.beginPath();
-        g.ellipse(x + 17, y + 48, 14 - walkY, 3, 0, 0, Math.PI * 2);
-        g.fill();
+        drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
         let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
@@ -1448,7 +1420,7 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
 function drawPlayer(ctx) {
     if (state.playerDead) return;
-    drawShadowDynamic(ctx, player.x + player.w/2, player.y + player.h + 4, 18);
+    drawContactShadow(ctx, player.x + player.w/2, state.groundY, 18, 0.25);
     if (player.invulnerable > 0 && Math.floor(player.invulnerable / 5) % 2 === 0) return;
 
     ctx.save();
@@ -1470,6 +1442,19 @@ function drawPlayer(ctx) {
         drawMiniCharacter(ctx, state.selectedCharacter, 0, 0, player.dx !== 0, player.frame, player.idleTimer, player);
     }
     ctx.restore();
+
+        // Draw Jetpack Fuel Bar for Robot
+    if (state.selectedCharacter === "robot") {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(player.x - 2, player.y - 12, 38, 6);
+        
+        if (player.jetpackFuel > 15) ctx.fillStyle = "#00ffcc";
+        else if (player.jetpackFuel > 6) ctx.fillStyle = "#ffaa00";
+        else ctx.fillStyle = "#ff3a1f";
+        
+        let fillWidth = (player.jetpackFuel / 30) * 36;
+        ctx.fillRect(player.x - 1, player.y - 11, Math.max(0, fillWidth), 4);
+    }
 }
 
 function drawCheckpoint(ctx, cp) {
@@ -1479,29 +1464,130 @@ function drawCheckpoint(ctx, cp) {
     ctx.fillRect(cp.x + 5, cp.y, 35, 22);
 }
 
-function drawSign(ctx, s) {
-    let bg = state.levelTheme === "ice" ? "rgba(180,240,255,0.2)" : "rgba(0,0,0,0.6)";
-    let border = state.levelTheme === "ice" ? "#bfffff" : "#ffffff";
-
+function drawCartoonBanner(ctx, text, x, y, alpha, scale, theme, isSign = false) {
     ctx.save();
-    let floatY = Math.sin(Date.now() / 400 + s.x) * 4;
-    let padding = 10;
-    ctx.font = "14px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-    let width = ctx.measureText(s.text).width;
+    ctx.globalAlpha = alpha;
     
-    ctx.shadowColor = "#00ffff";
-    ctx.shadowBlur = 8;
+    // Animate scale
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    
+    // Choose colors based on theme
+    let bg, border, textColor;
+    if (theme === "grass") {
+        bg = "#FFF6D9"; border = "#7A5C4A"; textColor = "#4A3022";
+    } else if (theme === "cave") {
+        bg = "#1A1A3A"; border = "#00FFFF"; textColor = "#E0FFFF";
+    } else if (theme === "factory") {
+        bg = "#FFD54F"; border = "#37474F"; textColor = "#B71C1C";
+    } else if (theme === "ice") {
+        bg = "#E0F7FA"; border = "#00B8D4"; textColor = "#01579B";
+    } else {
+        bg = "#FFF6D9"; border = "#7A5C4A"; textColor = "#4A3022";
+    }
+
+    // Font
+    let fontSize = isSign ? 14 : 28;
+    ctx.font = `bold ${fontSize}px "Fredoka", "Varela Round", "Arial Rounded MT Bold", sans-serif`;
+    
+    // Measure text
+    let lines = text.split("\n");
+    let maxWidth = 0;
+    lines.forEach(l => {
+        let w = ctx.measureText(l).width;
+        if (w > maxWidth) maxWidth = w;
+    });
+    
+    let paddingX = isSign ? 12 : 48;
+    let paddingY = isSign ? 8 : 24;
+    let boxWidth = maxWidth + paddingX * 2;
+    let boxHeight = (fontSize * lines.length) + ((lines.length - 1) * 8) + paddingY * 2;
+    let r = isSign ? 10 : 28;
+    let bx = -boxWidth/2, by = -boxHeight/2;
+    
+    // Drop Shadow
+    ctx.shadowColor = "rgba(25, 40, 60, 0.3)";
+    ctx.shadowOffsetY = isSign ? 6 : 10;
+    ctx.shadowBlur = isSign ? 6 : 12;
+    
+    // Base Box
     ctx.fillStyle = bg;
-    ctx.fillRect(s.x - padding, s.y - 22 + floatY, width + padding * 2, 26);
+    roundRect(ctx, bx, by, boxWidth, boxHeight, r, true, false);
     
-    ctx.strokeStyle = border;
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(s.x - padding, s.y - 22 + floatY, width + padding * 2, 26);
+    ctx.shadowColor = "transparent"; // disable shadow for inner elements
     
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(s.text, s.x, s.y + floatY);
+    // Highlight / Glossy top half
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(bx + r, by);
+    ctx.lineTo(bx + boxWidth - r, by);
+    ctx.quadraticCurveTo(bx + boxWidth, by, bx + boxWidth, by + r);
+    ctx.lineTo(bx + boxWidth, by + boxHeight - r);
+    ctx.quadraticCurveTo(bx + boxWidth, by + boxHeight, bx + boxWidth - r, by + boxHeight);
+    ctx.lineTo(bx + r, by + boxHeight);
+    ctx.quadraticCurveTo(bx, by + boxHeight, bx, by + boxHeight - r);
+    ctx.lineTo(bx, by + r);
+    ctx.quadraticCurveTo(bx, by, bx + r, by);
+    ctx.clip();
+    
+    ctx.fillStyle = theme === "cave" ? "rgba(0, 255, 255, 0.15)" : "rgba(255,255,255,0.35)";
+    ctx.fillRect(bx, by, boxWidth, boxHeight * 0.45);
     ctx.restore();
+
+    // Border
+    ctx.strokeStyle = border;
+    ctx.lineWidth = isSign ? 4 : 6;
+    roundRect(ctx, bx, by, boxWidth, boxHeight, r, false, true);
+
+    // Decorative thematic flourishes
+    if (theme === "grass") {
+        ctx.fillStyle = "#4CAF50";
+        ctx.beginPath(); ctx.arc(bx + 12, by + 12, 6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(bx + boxWidth - 12, by + boxHeight - 12, 6, 0, Math.PI*2); ctx.fill();
+    } else if (theme === "factory") {
+        ctx.fillStyle = "#90A4AE";
+        [ [bx+12, by+12], [bx+boxWidth-12, by+12], [bx+12, by+boxHeight-12], [bx+boxWidth-12, by+boxHeight-12] ].forEach(pos => {
+            ctx.beginPath(); ctx.arc(pos[0], pos[1], 4, 0, Math.PI*2); ctx.fill();
+        });
+    } else if (theme === "ice") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(bx + r, by - 2, boxWidth - r*2, 6);
+    } else if (theme === "cave") {
+        ctx.fillStyle = "#00FFFF";
+        ctx.beginPath(); ctx.moveTo(bx + 8, by + 14); ctx.lineTo(bx + 14, by + 8); ctx.lineTo(bx + 20, by + 14); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(bx + boxWidth - 20, by + boxHeight - 14); ctx.lineTo(bx + boxWidth - 14, by + boxHeight - 8); ctx.lineTo(bx + boxWidth - 8, by + boxHeight - 14); ctx.fill();
+    }
+
+    // Text
+    ctx.fillStyle = textColor;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < lines.length; i++) {
+        // Centered vertically
+        let totalTextHeight = (lines.length * fontSize) + ((lines.length - 1) * 8);
+        let startYOffset = -totalTextHeight / 2 + (fontSize / 2);
+        let ty = startYOffset + i * (fontSize + 8);
+        ctx.fillText(lines[i], 0, ty);
+    }
+    
+    ctx.restore();
+}
+
+function drawSign(ctx, s) {
+    let dist = Math.abs(player.x - s.x);
+    if (dist > 400) return; // Completely hide when far away to save rendering cost
+    
+    let alpha = 1.0;
+    if (dist > 250) {
+        alpha = Math.max(0, 1.0 - ((dist - 250) / 150));
+    }
+    
+    let floatY = Math.sin(Date.now() / 400 + s.x) * 4;
+    // Animate scale gently for signs (breathing) and pop-in based on distance
+    let baseScale = 1.0 + Math.sin(Date.now() / 600 + s.x) * 0.02;
+    let scale = dist > 250 ? baseScale * alpha : baseScale;
+    
+    drawCartoonBanner(ctx, s.text, s.x, s.y - 10 + floatY, alpha, Math.max(0.01, scale), state.levelTheme, true);
 }
 
 function drawCastle(ctx) {

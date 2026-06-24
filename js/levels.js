@@ -329,14 +329,14 @@ function buildLevelTwo() {
     [[0, 750], [880, 650], [1700, 550], [2400, 650], [3250, 650], [4100, 550], [4850, 700], [5700, 1050]].forEach(([x, w]) => addGround(x, w, 55));
     [[750, 130], [1530, 170], [2250, 150], [3050, 200], [3900, 200], [4650, 200], [5550, 150]].forEach(([x, w]) => addLava(x, w, 55));
 
-    addMovingPlatform(760, 255, 110, 760, 1030, 2.8);
-    addMovingPlatform(1600, 235, 100, 1600, 1880, 2.6);
-    addMovingPlatform(3100, 230, 110, 3100, 3370, 3);
-    addMovingPlatform(4620, 220, 100, 4620, 4920, 3.2);
+    addMovingPlatform(760, 255, 110, 760, 1030, 3.5);
+    addMovingPlatform(1600, 235, 100, 1600, 1880, 3.5);
+    addMovingPlatform(3100, 230, 110, 3100, 3370, 4);
+    addMovingPlatform(4620, 220, 100, 4620, 4920, 4.2);
 
-    addFallingBlock(1250, 240, 110, 120);
-    addFallingBlock(2600, 230, 120, 120);
-    addFallingBlock(5200, 230, 130, 100);
+    addFallingBlock(1250, 240, 90, 60);
+    addFallingBlock(2600, 230, 90, 60);
+    addFallingBlock(5200, 230, 90, 60);
 
     addVanishingPlatform(2050, 210, 120);
     addVanishingPlatform(3700, 200, 120);
@@ -391,16 +391,16 @@ function buildLevelThree() {
     [[0, 700], [850, 600], [1650, 550], [2400, 650], [3250, 550], [4000, 600], [4800, 600], [5600, 600], [6400, 1150]].forEach(([x, w]) => addGround(x, w, 55));
     [[700, 150], [1450, 200], [2200, 200], [3050, 200], [3800, 200], [4600, 200], [5400, 200], [6200, 200]].forEach(([x, w]) => addLava(x, w, 55));
 
-    addMovingPlatform(700, 245, 100, 700, 1000, 3.3);
-    addMovingPlatform(1500, 235, 100, 1500, 1800, 3.4);
-    addMovingPlatform(3050, 225, 100, 3050, 3350, 3.7);
-    addMovingPlatform(4650, 225, 100, 4650, 5000, 3.8);
-    addMovingPlatform(6250, 220, 120, 6250, 6600, 4);
+    addMovingPlatform(700, 245, 100, 700, 1000, 4.0);
+    addMovingPlatform(1500, 235, 100, 1500, 1800, 4.2);
+    addMovingPlatform(3050, 225, 100, 3050, 3350, 4.5);
+    addMovingPlatform(4650, 225, 100, 4650, 5000, 4.6);
+    addMovingPlatform(6250, 220, 120, 6250, 6600, 4.8);
 
-    addFallingBlock(1100, 240, 100, 80);
-    addFallingBlock(2600, 225, 120, 80);
-    addFallingBlock(4300, 225, 120, 70);
-    addFallingBlock(5900, 215, 130, 60);
+    addFallingBlock(1100, 240, 80, 60);
+    addFallingBlock(2600, 225, 80, 60);
+    addFallingBlock(4300, 225, 80, 60);
+    addFallingBlock(5900, 215, 80, 60);
 
     addVanishingPlatform(1950, 205, 120);
     addVanishingPlatform(3600, 205, 120);
