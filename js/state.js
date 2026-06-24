@@ -130,13 +130,13 @@ function showMessage(text, time = 100) {
     const textEl = document.getElementById("ui-message-text");
     if (container && textEl) {
         textEl.innerText = text;
-        container.classList.add("active");
+        container.className = "ui-message-container active " + state.levelTheme;
         
         const ms = time * (1000 / 60);
         if (state.messageTimeout) clearTimeout(state.messageTimeout);
         
         state.messageTimeout = setTimeout(() => {
-            container.classList.remove("active");
+            container.className = "ui-message-container " + state.levelTheme;
         }, ms);
     }
 }

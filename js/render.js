@@ -1731,76 +1731,134 @@ function drawParticles(ctx, canvas) {
 function drawHUD(ctx, canvas) {
     ctx.save();
     
-    const startX = 20;
-    let startY = 32;
-    const spacing = 28;
+    // Choose colors based on theme
+    let bg, border, textColor;
+    if (state.levelTheme === "grass") {
+        bg = "rgba(255, 246, 217, 0.85)"; border = "#7A5C4A"; textColor = "#4A3022";
+    } else if (state.levelTheme === "cave") {
+        bg = "rgba(26, 26, 58, 0.85)"; border = "#00FFFF"; textColor = "#E0FFFF";
+    } else if (state.levelTheme === "factory") {
+        bg = "rgba(255, 213, 79, 0.85)"; border = "#37474F"; textColor = "#B71C1C";
+    } else if (state.levelTheme === "ice") {
+        bg = "rgba(224, 247, 250, 0.85)"; border = "#00B8D4"; textColor = "#01579B";
+    } else {
+        bg = "rgba(255, 246, 217, 0.85)"; border = "#7A5C4A"; textColor = "#4A3022";
+    }
 
-    ctx.font = "11px 'Press Start 2P', monospace";
+    const panelX = 15;
+    const panelY = 15;
+    const panelW = 150;
+    const panelH = 114;
+    const r = 16;
+    
+    // Drop Shadow
+    ctx.shadowColor = "rgba(25, 40, 60, 0.25)";
+    ctx.shadowOffsetY = 6;
+    ctx.shadowBlur = 8;
+    
+    // Base Box
+    ctx.fillStyle = bg;
+    roundRect(ctx, panelX, panelY, panelW, panelH, r, true, false);
+    
+    ctx.shadowColor = "transparent";
+    
+    // Highlight / Glossy top half
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(panelX + r, panelY);
+    ctx.lineTo(panelX + panelW - r, panelY);
+    ctx.quadraticCurveTo(panelX + panelW, panelY, panelX + panelW, panelY + r);
+    ctx.lineTo(panelX + panelW, panelY + panelH - r);
+    ctx.quadraticCurveTo(panelX + panelW, panelY + panelH, panelX + panelW - r, panelY + panelH);
+    ctx.lineTo(panelX + r, panelY + panelH);
+    ctx.quadraticCurveTo(panelX, panelY + panelH, panelX, panelY + panelH - r);
+    ctx.lineTo(panelX, panelY + r);
+    ctx.quadraticCurveTo(panelX, panelY, panelX + r, panelY);
+    ctx.clip();
+    
+    ctx.fillStyle = state.levelTheme === "cave" ? "rgba(0, 255, 255, 0.1)" : "rgba(255,255,255,0.4)";
+    ctx.fillRect(panelX, panelY, panelW, panelH * 0.45);
+    ctx.restore();
+
+    // Border
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 4;
+    roundRect(ctx, panelX, panelY, panelW, panelH, r, false, true);
+
+    // Thematic flourishes
+    if (state.levelTheme === "grass") {
+        ctx.fillStyle = "#4CAF50";
+        ctx.beginPath(); ctx.arc(panelX + 10, panelY + 10, 5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(panelX + panelW - 10, panelY + panelH - 10, 5, 0, Math.PI*2); ctx.fill();
+    } else if (state.levelTheme === "factory") {
+        ctx.fillStyle = "#90A4AE";
+        [ [panelX+10, panelY+10], [panelX+panelW-10, panelY+10], [panelX+10, panelY+panelH-10], [panelX+panelW-10, panelY+panelH-10] ].forEach(pos => {
+            ctx.beginPath(); ctx.arc(pos[0], pos[1], 3, 0, Math.PI*2); ctx.fill();
+        });
+    } else if (state.levelTheme === "ice") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(panelX + r, panelY - 2, panelW - r*2, 4);
+    } else if (state.levelTheme === "cave") {
+        ctx.fillStyle = "#00FFFF";
+        ctx.beginPath(); ctx.moveTo(panelX + 6, panelY + 12); ctx.lineTo(panelX + 12, panelY + 6); ctx.lineTo(panelX + 18, panelY + 12); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(panelX + panelW - 18, panelY + panelH - 12); ctx.lineTo(panelX + panelW - 12, panelY + panelH - 6); ctx.lineTo(panelX + panelW - 6, panelY + panelH - 12); ctx.fill();
+    }
+
+    // Texts inside
+    const startX = panelX + 32;
+    let startY = panelY + 22;
+    const spacing = 24;
+
+    ctx.font = `bold 14px "Fredoka", "Varela Round", "Arial Rounded MT Bold", sans-serif`;
+    ctx.textBaseline = "middle";
+    
+    // Helper to draw text with icon
+    const drawHUDText = (label, value, color, iconDrawFn) => {
+        // Icon
+        ctx.save();
+        ctx.translate(panelX + 18, startY);
+        iconDrawFn(ctx);
+        ctx.restore();
+        
+        // Text
+        ctx.fillStyle = textColor; 
+        ctx.fillText(label, startX, startY);
+        
+        let labelW = ctx.measureText(label).width;
+        ctx.fillStyle = color;
+        ctx.fillText(value, startX + labelW, startY);
+        startY += spacing;
+    };
 
     // 1. Nivel
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = "rgba(0, 255, 255, 0.8)";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`NIVEL: ${state.currentLevel}/${state.maxLevel}`, startX + 28, startY);
-    // Draw Flag Icon
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ffffff"; // pole
-    ctx.fillRect(startX + 4, startY - 14, 2, 16);
-    ctx.fillStyle = "#00ffee"; // flag
-    ctx.beginPath(); 
-    ctx.moveTo(startX + 6, startY - 14); 
-    ctx.lineTo(startX + 16, startY - 10); 
-    ctx.lineTo(startX + 6, startY - 6); 
-    ctx.fill();
-    
-    startY += spacing;
+    drawHUDText("NIVEL: ", `${state.currentLevel}/${state.maxLevel}`, textColor, (c) => {
+        c.fillStyle = "#a0a0a0"; c.fillRect(-4, -6, 2, 12);
+        c.fillStyle = "#00ffee"; c.beginPath(); c.moveTo(-2, -6); c.lineTo(5, -2); c.lineTo(-2, 2); c.fill();
+    });
 
     // 2. Score
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
-    ctx.fillStyle = "#ffd700";
-    ctx.fillText(`SCORE: ${state.score}`, startX + 28, startY);
-    // Draw Coin Icon
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ffaa00";
-    ctx.beginPath(); ctx.arc(startX + 10, startY - 4, 7, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#ffee55";
-    ctx.beginPath(); ctx.arc(startX + 10, startY - 4, 4, 0, Math.PI*2); ctx.fill();
-
-    startY += spacing;
+    drawHUDText("SCORE: ", `${state.score}`, "#ffaa00", (c) => {
+        c.fillStyle = "#ffaa00"; c.beginPath(); c.arc(0, 0, 6, 0, Math.PI*2); c.fill();
+        c.fillStyle = "#ffee55"; c.beginPath(); c.arc(0, 0, 3, 0, Math.PI*2); c.fill();
+    });
 
     // 3. Vidas
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = "rgba(255, 58, 31, 0.8)";
-    ctx.fillStyle = "#ff3a1f";
-    ctx.fillText(`VIDAS: ${state.lives}`, startX + 28, startY);
-    // Draw Heart Icon
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ff1f1f";
-    ctx.beginPath();
-    let hx = startX + 10, hy = startY - 5;
-    ctx.moveTo(hx, hy + 4);
-    ctx.lineTo(hx - 7, hy - 3);
-    ctx.arc(hx - 3.5, hy - 3, 3.5, Math.PI, 0);
-    ctx.arc(hx + 3.5, hy - 3, 3.5, Math.PI, 0);
-    ctx.closePath();
-    ctx.fill();
-
-    startY += spacing;
+    drawHUDText("VIDAS: ", `${state.lives}`, "#ff3a1f", (c) => {
+        c.fillStyle = "#ff1f1f"; c.beginPath();
+        let hx = 0, hy = -1;
+        c.moveTo(hx, hy + 4); c.lineTo(hx - 5, hy - 2);
+        c.arc(hx - 2.5, hy - 2, 2.5, Math.PI, 0); c.arc(hx + 2.5, hy - 2, 2.5, Math.PI, 0);
+        c.fill();
+    });
 
     // 4. Muertes
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = "rgba(180, 180, 180, 0.8)";
-    ctx.fillStyle = "#e0e0e0";
-    ctx.fillText(`MUERTES: ${state.deaths}`, startX + 28, startY);
-    // Draw Skull Icon
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath(); ctx.arc(startX + 10, startY - 6, 6, 0, Math.PI*2); ctx.fill();
-    ctx.fillRect(startX + 6, startY - 2, 8, 4);
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(startX + 6, startY - 7, 2, 2);
-    ctx.fillRect(startX + 11, startY - 7, 2, 2);
+    drawHUDText("MUERTES: ", `${state.deaths}`, textColor === "#E0FFFF" ? "#AAB" : "#555", (c) => {
+        c.fillStyle = textColor === "#E0FFFF" ? "#FFF" : "#444";
+        c.beginPath(); c.arc(0, -2, 4.5, 0, Math.PI*2); c.fill();
+        c.fillRect(-3, 0, 6, 4);
+        c.fillStyle = bg;
+        c.fillRect(-2, -3, 1.5, 1.5); c.fillRect(0.5, -3, 1.5, 1.5);
+    });
 
     ctx.restore();
 }
