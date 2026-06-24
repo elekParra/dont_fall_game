@@ -58,15 +58,7 @@ function updateTraps(killPlayer) {
         s.angle += 0.25;
     });
 
-    // Moving Platforms
-    lists.movingPlatforms.forEach(m => {
-        m.moveX = m.dir * m.speed;
-        m.x += m.moveX;
-        if (m.x <= m.startX || m.x >= m.endX) {
-            m.dir *= -1;
-        }
-    });
-
+    // Moving platforms logic removed from here as it is handled in player.js
     // Fade platforms
     lists.fakeFloors.forEach(f => {
         if (f.triggered) {
