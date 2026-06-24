@@ -144,56 +144,158 @@
    03. RESPONSIVE MENÚ
 ========================================================= */
 
-@media (max-width: 520px) {
+/* --- Portrait Phones --- */
+@media (max-width: 600px) and (orientation: portrait) {
     #characterMenu {
         padding-top: calc(12px + env(safe-area-inset-top));
-        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        align-items: center;
     }
 
     #characterMenu h1 {
-        font-size: 28px;
+        font-size: 24px;
         margin-bottom: 12px;
     }
 
     .character-options {
         grid-template-columns: 1fr;
+        width: 90%;
         max-width: 320px;
         gap: 10px;
     }
 
     .character-card {
-        padding: 8px;
-        min-height: 110px;
+        padding: 8px 12px;
+        min-height: 90px;
     }
 
     .character-card canvas {
-        width: 80px;
-        height: 100px;
+        width: 70px;
+        height: 85px;
     }
 
     .card-info {
-        margin-left: 10px;
+        margin-left: 12px;
     }
 
     .card-info h3 {
         font-size: 11px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .card-info .desc {
-        font-size: 8px;
-        margin-bottom: 8px;
+        font-size: 9px;
+        margin-bottom: 4px;
     }
 
     .card-info .lives, .card-info .ability {
-        font-size: 8px;
+        font-size: 9px;
+        margin-bottom: 2px;
     }
 
     #startBtn {
         pointer-events: auto;
         touch-action: manipulation;
-        position: relative;
+        position: fixed;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 300px;
+        height: 55px;
+        border-radius: 999px;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
         z-index: 200;
+        margin-top: 0;
+        box-shadow: 0 0 20px rgba(0,255,153,0.6), 0 8px 15px rgba(0,0,0,0.8);
+    }
+    
+    #startBtn:active {
+        transform: translateX(-50%) scale(0.95) translateY(3px);
+    }
+}
+
+/* --- Landscape Phones --- */
+@media (max-width: 950px) and (orientation: landscape) {
+    #characterMenu {
+        padding-top: calc(10px + env(safe-area-inset-top));
+        padding-bottom: calc(60px + env(safe-area-inset-bottom));
+        align-items: center;
+    }
+
+    #characterMenu h1 {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .character-options {
+        flex-direction: row;
+        width: 95%;
+        max-width: 700px;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .character-card {
+        flex-direction: column;
+        padding: 8px;
+        min-height: auto;
+        flex: 1;
+        text-align: center;
+    }
+
+    .character-card canvas {
+        width: 55px;
+        height: 65px;
+    }
+
+    .card-info {
+        margin-left: 0;
+        margin-top: 5px;
+        text-align: center;
+    }
+
+    .card-info h3 {
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+
+    .card-info .desc {
+        display: none; /* Hide to save vertical space in landscape */
+    }
+
+    .card-info .lives, .card-info .ability {
+        font-size: 8px;
+        margin-bottom: 2px;
+    }
+
+    #startBtn {
+        pointer-events: auto;
+        touch-action: manipulation;
+        position: fixed;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40%;
+        max-width: 300px;
+        height: 45px;
+        border-radius: 999px;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        z-index: 200;
+        margin-top: 0;
+        box-shadow: 0 0 20px rgba(0,255,153,0.6), 0 8px 15px rgba(0,0,0,0.8);
+    }
+    
+    #startBtn:active {
+        transform: translateX(-50%) scale(0.95) translateY(3px);
     }
 }
 
@@ -218,7 +320,9 @@
     height: 46px;
     border: 4px solid #444;
     border-radius: 8px;
-    font-size: 19px;
+    font-size: 16px;
+    font-family: 'Press Start 2P', cursive;
+    font-weight: 900;
     color: white;
     background: #ffb703;
     box-shadow: 0 4px 0 #b38000, 0 8px 10px rgba(0,0,0,0.3);
@@ -263,6 +367,7 @@ body.game-running .mobile-hud {
     border-radius: 8px;
     font-weight: 900;
     color: #333;
+    font-family: 'Press Start 2P', cursive;
     touch-action: none;
     opacity: 0.85;
     transition: transform 0.08s ease, box-shadow 0.08s ease;
@@ -272,9 +377,9 @@ body.game-running .mobile-hud {
 }
 
 .move-btn {
-    width: clamp(65px, 20vw, 80px);
-    height: clamp(65px, 20vw, 80px);
-    font-size: clamp(25px, 6vw, 33px);
+    width: clamp(45px, 14vw, 60px);
+    height: clamp(45px, 14vw, 60px);
+    font-size: clamp(16px, 4.5vw, 22px);
     background: #d3d3d3;
     box-shadow: 0 6px 0 #888, 0 10px 12px rgba(0,0,0,0.3);
 }
@@ -478,11 +583,75 @@ body.game-running .mobile-hud {
     box-shadow: 0 0 15px rgba(0,255,153,0.5);
 }
 
+/* Pause Transparent Overlay */
+.pause-overlay {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(3px) !important;
+    flex-direction: column;
+}
+
+.pause-title {
+    color: #fff;
+    text-shadow: 0 6px 0 #8b0000, 0 0 20px rgba(255,0,0,0.8);
+    font-family: 'Press Start 2P', cursive;
+    font-size: clamp(28px, 8vw, 42px);
+    margin: 0 0 35px 0;
+    transform: scale(0.5);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.pause-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    transform: translateY(30px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s, opacity 0.3s ease 0.1s;
+}
+
+.pause-overlay.active .pause-title {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.pause-overlay.active .pause-buttons {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.pause-buttons button {
+    width: clamp(200px, 60vw, 280px);
+    padding: 16px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: clamp(10px, 3.5vw, 14px);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 #btnMenu {
     background: #444;
     color: #fff;
     border: 2px solid #666;
 }
+
+.menu-retro-btn {
+    border: 4px solid #111 !important;
+    color: white;
+    box-shadow: 0 4px 0 #111, 0 6px 10px rgba(0,0,0,0.5);
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+    text-shadow: 2px 2px 0 #111;
+}
+
+.menu-retro-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0px 0 #111, 0 2px 5px rgba(0,0,0,0.5) !important;
+}
+
+.resume-btn { background: #4caf50; }
+.restart-btn { background: #ffb703; color: white !important; }
+.exit-btn { background: #e63946; }
 
 /* =========================================================
    07. UI MESSAGE CONTAINER (NIVEL 1)

@@ -82,6 +82,35 @@ function setupUI() {
         location.reload();
     });
 
+    // Pause Menu Buttons
+    document.getElementById("btnPauseResume").addEventListener("click", () => {
+        state.paused = false;
+        document.getElementById("pauseMenuScreen").classList.remove("active");
+    });
+
+    document.getElementById("btnPauseRestart").addEventListener("click", () => {
+        document.getElementById("pauseMenuScreen").classList.remove("active");
+        state.paused = false;
+        state.deaths++;
+        state.checkpointIndex = -1;
+        state.checkpoint = { x: 100, y: 290 };
+        buildLevel(canvas.width, canvas.height);
+        player.x = 100;
+        player.y = 290;
+        player.prevX = 100;
+        player.prevY = 290;
+        player.dx = 0;
+        player.dy = 0;
+        player.invulnerable = 100;
+        resetKeys();
+        state.playerDead = false;
+        state.respawnTimer = 0;
+    });
+
+    document.getElementById("btnPauseMenu").addEventListener("click", () => {
+        location.reload();
+    });
+
     // Disable context menu on mobile
     document.addEventListener("contextmenu", e => e.preventDefault());
 
@@ -175,8 +204,9 @@ function bindPauseButton() {
         e.preventDefault();
         if (!state.gameStarted || state.gameOver || state.win) return;
 
-        state.paused = !state.paused;
-        button.textContent = state.paused ? "▶" : "⏸";
+        state.paused = true;
+        document.getElementById("pauseMenuScreen").classList.add("active");
+        
         button.classList.add("pressed");
         vibrate(22);
 

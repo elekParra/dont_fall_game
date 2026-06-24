@@ -58,17 +58,17 @@
 
     <!-- UI Overlay for Mobile -->
     <div class="mobile-hud">
-        <button id="btnPause" class="pause-btn">⏸</button>
+        <button id="btnPause" class="pause-btn">II</button>
     </div>
 
     <div class="controls">
         <div class="left-controls">
-            <button id="btnLeft" class="game-btn move-btn">⬅</button>
-            <button id="btnRight" class="game-btn move-btn">➡</button>
+            <button id="btnLeft" class="game-btn move-btn">&#8592;</button>
+            <button id="btnRight" class="game-btn move-btn">&#8594;</button>
         </div>
 
         <div class="right-controls">
-            <button id="btnJump" class="game-btn jump-btn">⬆</button>
+            <button id="btnJump" class="game-btn jump-btn">&#8593;</button>
         </div>
     </div>
 
@@ -81,6 +81,16 @@
                 <button id="btnRetry">Reintentar</button>
                 <button id="btnMenu">Menú</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Pause Menu Popup -->
+    <div id="pauseMenuScreen" class="overlay-screen pause-overlay">
+        <h2 class="pause-title">PAUSA</h2>
+        <div class="pause-buttons">
+            <button id="btnPauseResume" class="menu-retro-btn resume-btn">Continuar</button>
+            <button id="btnPauseRestart" class="menu-retro-btn restart-btn">Reiniciar Nivel</button>
+            <button id="btnPauseMenu" class="menu-retro-btn exit-btn">Menú Principal</button>
         </div>
     </div>
 
