@@ -47,10 +47,35 @@ function addBrittlePlatform(x, y, w) {
     });
 }
 
-function addSpike(x, hidden = false, variant = "normal") {
+function addSpikePlatform(x, y, w) {
+    lists.spikePlatforms.push({
+        x, y, w, h: 22, timer: -1, triggered: false, popped: false, type: "spikePlatform"
+    });
+}
+
+function addHiddenBlock(x, y) {
+    lists.hiddenBlocks.push({
+        x, y, w: 40, h: 40, active: false, revealed: false, type: "hidden"
+    });
+}
+
+function addFallingSpike(x, y) {
+    lists.fallingSpikes.push({
+        x, y, w: 26, h: 40, startY: y, falling: false, vy: 0, active: true
+    });
+}
+
+function addSpringboard(x, y) {
+    lists.springboards.push({
+        x, y, w: 40, h: 20, active: true, animTimer: 0
+    });
+}
+
+function addSpike(x, hidden = false, variant = "normal", customY = null) {
+    let baseY = customY !== null ? customY : state.groundY;
     lists.spikes.push({
-        x, y: hidden ? state.groundY : state.groundY - 28,
-        w: 36, h: 28, active: !hidden, hidden, rising: false, targetY: state.groundY - 28, variant
+        x, y: hidden ? baseY : baseY - 28,
+        w: 36, h: 28, active: !hidden, hidden, rising: false, targetY: baseY - 28, variant
     });
 }
 
@@ -183,6 +208,12 @@ function clearLevelObjects() {
     bossState.iceBoss = null;
     lists.ambientParticles = [];
     lists.levelDecorations = [];
+    
+    // New mechanics
+    lists.spikePlatforms = [];
+    lists.hiddenBlocks = [];
+    lists.fallingSpikes = [];
+    lists.springboards = [];
 }
 
 function restoreReachedCheckpoints() {
@@ -259,9 +290,9 @@ function buildLevelOne() {
     [[850, 130], [1480, 170], [2250, 200], [2950, 250], [3850, 250], [4750, 250]].forEach(([x, w]) => addLava(x, w));
 
     addPlatform(520, 265, 100);
-    addPlatform(1180, 250, 110);
+    addSpikePlatform(1180, 250, 110);
     addPlatform(1850, 250, 120);
-    addPlatform(3420, 250, 120);
+    addSpikePlatform(3420, 250, 120);
     addPlatform(5300, 240, 120);
 
     addFakeFloor(690, 160);
@@ -274,6 +305,19 @@ function buildLevelOne() {
     addFallingBlock(2750, 220, 120, 130);
     addFallingBlock(4450, 240, 110, 200);
 
+    // New Mechanics
+    addHiddenBlock(1000, 180);
+    addHiddenBlock(1950, 160);
+    addHiddenBlock(3500, 150);
+    addHiddenBlock(4600, 140);
+
+    addFallingSpike(1200, 60);
+    addFallingSpike(2050, 70);
+    addFallingSpike(4200, 80);
+
+    addSpringboard(820, 320);
+    addSpringboard(2220, 320);
+
     addMovingPlatform(1320, 235, 100, 1320, 1560, 1.9);
     addMovingPlatform(2350, 245, 100, 2350, 2600, 2.2);
     addMovingPlatform(3920, 245, 110, 3920, 4200, 2.3);
@@ -283,6 +327,7 @@ function buildLevelOne() {
     addVanishingPlatform(4900, 230, 120);
 
     [430, 1120, 1740, 3330, 5120].forEach(x => addSpike(x, false, "grass"));
+    addSpike(959, true, "grass", 255); // Spike on right edge of falling block
     [610, 1260, 1990, 2860, 3580, 4610, 5450].forEach(x => addSpike(x, true, "grass"));
 
     addCrusher(1600, 80, 70, 30, false);
@@ -316,6 +361,13 @@ function buildLevelOne() {
     addSign(5400, 285, "Último tramo seguro");
 
     addTrigger(560, () => { revealSpikeAt(610); showMessage("¡Pinchos sorpresa!", 80); });
+    addTrigger(900, () => { 
+        let spike = lists.spikes.find(s => s.x === 959);
+        if (spike) {
+            spike.active = true;
+            spike.rising = true;
+        }
+    });
     addTrigger(1540, () => { lists.crushers[0].active = true; lists.crushers[0].dropping = true; showMessage("Mira arriba.", 75); });
     addTrigger(2480, () => { lists.invisibleWalls[0].active = true; revealSpikeAt(2860); showMessage("Pared invisible activada", 80); });
     addTrigger(3520, () => { revealSpikeAt(3580); if (lists.vanishingPlatforms[1]) lists.vanishingPlatforms[1].touched = true; showMessage("Ahora desaparece", 80); });
@@ -337,6 +389,21 @@ function buildLevelTwo() {
     addFallingBlock(1250, 240, 90, 60);
     addFallingBlock(2600, 230, 90, 60);
     addFallingBlock(5200, 230, 90, 60);
+
+    // New Mechanics
+    addHiddenBlock(1500, 160);
+    addHiddenBlock(2800, 140);
+    addHiddenBlock(4400, 150);
+
+    addFallingSpike(1800, 60);
+    addFallingSpike(3200, 50);
+    addFallingSpike(4700, 70);
+
+    addSpringboard(2200, 320);
+    addSpringboard(3850, 320);
+    
+    addSpikePlatform(4000, 250, 100);
+    addSpikePlatform(5400, 240, 100);
 
     addVanishingPlatform(2050, 210, 120);
     addVanishingPlatform(3700, 200, 120);
@@ -406,6 +473,21 @@ function buildLevelThree() {
     addVanishingPlatform(3600, 205, 120);
     addVanishingPlatform(5200, 205, 120);
     addVanishingPlatform(6900, 205, 120);
+
+    // New Mechanics Level 3
+    addHiddenBlock(2000, 140);
+    addHiddenBlock(3600, 150);
+    addHiddenBlock(5200, 150);
+
+    addFallingSpike(2100, 70);
+    addFallingSpike(3750, 70);
+    addFallingSpike(5350, 70);
+
+    addSpringboard(2300, 320);
+    addSpringboard(5500, 320);
+    
+    addSpikePlatform(4400, 250, 100);
+    addSpikePlatform(6000, 250, 100);
 
     [500, 1750, 3400, 5000, 6600].forEach(x => addSpike(x, false, "metal"));
     [1150, 2750, 4400, 6000, 7100].forEach(x => addSpike(x, true, "metal"));
@@ -500,6 +582,21 @@ function buildLevelFour() {
     addFallingBlock(2700, 215, 120, 90);
     addFallingBlock(4900, 215, 120, 80);
     addFallingBlock(7450, 205, 120, 70);
+
+    // New Mechanics Level 4
+    addHiddenBlock(1550, 160);
+    addHiddenBlock(3050, 160);
+    addHiddenBlock(5500, 160);
+
+    addFallingSpike(1750, 50);
+    addFallingSpike(3450, 60);
+    addFallingSpike(6600, 60);
+
+    addSpringboard(2280, 320);
+    addSpringboard(4700, 320);
+    
+    addSpikePlatform(2800, 230, 100);
+    addSpikePlatform(4400, 225, 120);
 
     addWindZone(2300, 40, 420, 300, 1.15, "VIENTO →");
     addWindZone(4050, 40, 440, 300, -1.2, "← VIENTO");

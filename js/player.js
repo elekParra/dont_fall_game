@@ -143,6 +143,14 @@ function updatePlayer(killPlayer) {
         }
     });
 
+    lists.hiddenBlocks.forEach(h => {
+        if (!h.active) return;
+        if (rectsCollide(player, h)) {
+            if (player.dx > 0) player.x = h.x - player.w;
+            if (player.dx < 0) player.x = h.x + h.w;
+        }
+    });
+
     // Vert movement
     player.y += player.dy;
     player.grounded = false;
@@ -154,6 +162,9 @@ function updatePlayer(killPlayer) {
     lists.movingPlatforms.forEach(m => solids.push(m));
     lists.vanishingPlatforms.forEach(v => { if (v.active) solids.push(v); });
     lists.brittlePlatforms.forEach(b => { if (b.active) solids.push(b); });
+    lists.spikePlatforms.forEach(p => solids.push(p));
+    lists.hiddenBlocks.forEach(h => { if (h.active) solids.push(h); });
+    lists.springboards.forEach(sb => { if (sb.active) solids.push(sb); });
 
     solids.forEach(s => {
         if (!rectsCollide(player, s)) return;
@@ -190,9 +201,48 @@ function updatePlayer(killPlayer) {
                 s.crackTimer = 45;
                 showMessage("El hielo se rompe...", 55);
             }
+
+            if (s.type === "spikePlatform" && !s.triggered) {
+                s.triggered = true;
+                s.timer = 45; // 0.75 seconds
+                showMessage("Cuidado dónde pisas...", 45);
+            }
+
+            if (lists.springboards.includes(s)) {
+                player.dy = -15; // huge boost
+                player.grounded = false;
+                s.animTimer = 15;
+                playTone(200, 0.1, "sine");
+                setTimeout(() => playTone(400, 0.2, "sine"), 100);
+            }
+
         } else if (player.dy < 0 && wasBelow) {
             player.y = s.y + s.h;
             player.dy = 0;
+
+            if (s.type === "hidden" && !s.revealed) {
+                s.revealed = true;
+                playTone(440, 0.1, "square");
+                addExplosion(s.x + s.w/2, s.y + s.h/2, "#ffffff", 15);
+            }
+        }
+    });
+
+    // Check hidden blocks trigger before they are solid
+    lists.hiddenBlocks.forEach(h => {
+        if (!h.active && !h.revealed) {
+            if (rectsCollide(player, h)) {
+                const wasBelow = player.prevY >= h.y + h.h;
+                if (player.dy < 0 && wasBelow) {
+                    player.y = h.y + h.h;
+                    player.dy = 0;
+                    h.revealed = true;
+                    h.active = true;
+                    playTone(440, 0.1, "square");
+                    addExplosion(h.x + h.w/2, h.y + h.h/2, "#ffffff", 15);
+                    showMessage("¿Un bloque invisible?", 60);
+                }
+            }
         }
     });
 

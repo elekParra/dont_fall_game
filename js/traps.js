@@ -42,6 +42,14 @@ function updateTraps(killPlayer) {
         if (b.falling) {
             b.vy += 0.35;
             b.y += b.vy;
+            
+            // Attached spikes fall with the block
+            lists.spikes.forEach(s => {
+                if (s.x >= b.x - 20 && s.x <= b.x + b.w + 20 && Math.abs((s.targetY + 28) - (b.y - b.vy)) < 5) {
+                    s.y += b.vy;
+                    s.targetY += b.vy;
+                }
+            });
         }
     });
 
@@ -84,6 +92,52 @@ function updateTraps(killPlayer) {
                 addExplosion(b.x + b.w / 2, b.y + 10, "#bfffff", 18);
             }
         }
+    });
+
+    // New Traps
+    lists.spikePlatforms.forEach(p => {
+        if (p.triggered && !p.popped) {
+            p.timer--;
+            if (p.timer <= 0) {
+                p.popped = true;
+                p.retractTimer = 60; // 1 second before retracting
+                addExplosion(p.x + p.w / 2, p.y, "#aaaaaa", 12);
+                playTone(250, 0.1, "sawtooth");
+            }
+        } else if (p.popped) {
+            const spikeRect = { x: p.x + 2, y: p.y - 12, w: p.w - 4, h: 12 };
+            if (rectsCollide(player, spikeRect)) killPlayer("Trampa oculta", "spike");
+            
+            p.retractTimer--;
+            if (p.retractTimer <= 0) {
+                p.popped = false;
+                p.triggered = false;
+            }
+        }
+    });
+
+    lists.fallingSpikes.forEach(s => {
+        if (!s.active) return;
+        
+        if (!s.falling) {
+            if (Math.abs((player.x + player.w / 2) - (s.x + s.w / 2)) < 40 && player.y > s.y) {
+                s.falling = true;
+                playTone(700, 0.15, "triangle");
+            }
+        } else {
+            s.vy += 0.6;
+            s.y += s.vy;
+            if (rectsCollide(player, s)) killPlayer("Estalactita mortal", "spike");
+            
+            if (s.y > state.groundY || s.y > 1000) {
+                s.active = false;
+                addExplosion(s.x + s.w / 2, s.y + s.h, "#ffffff", 15);
+            }
+        }
+    });
+
+    lists.springboards.forEach(sb => {
+        if (sb.animTimer > 0) sb.animTimer--;
     });
 
     // Triggers

@@ -45,6 +45,10 @@ function draw(ctx, canvas) {
     lists.crushers.forEach(c => { if (c.x + c.w > leftEdge && c.x < rightEdge) drawCrusher(ctx, c); });
     lists.lasers.forEach(l => { if (l.x + l.w > leftEdge && l.x < rightEdge) drawLaser(ctx, l); });
     lists.sawBlades.forEach(s => { if (s.x + s.w > leftEdge && s.x < rightEdge) drawSawBlade(ctx, s); });
+    lists.spikePlatforms.forEach(p => { if (p.x + p.w > leftEdge && p.x < rightEdge) drawSpikePlatform(ctx, p); });
+    lists.hiddenBlocks.forEach(h => { if (h.x + h.w > leftEdge && h.x < rightEdge) drawHiddenBlock(ctx, h); });
+    lists.fallingSpikes.forEach(s => { if (s.x + s.w > leftEdge && s.x < rightEdge) drawFallingSpike(ctx, s); });
+    lists.springboards.forEach(sb => { if (sb.x + sb.w > leftEdge && sb.x < rightEdge) drawSpringboard(ctx, sb); });
     lists.spikes.forEach(s => { if (s.x + s.w > leftEdge && s.x < rightEdge) drawSpike(ctx, s); });
     lists.coins.forEach(c => { if (c.x + 20 > leftEdge && c.x - 20 < rightEdge) drawCoin(ctx, c); });
     lists.enemyProjectiles.forEach(p => { if (p.x + p.w > leftEdge && p.x < rightEdge) drawEnemyProjectile(ctx, p); });
@@ -654,6 +658,96 @@ function drawCrusher(ctx, c) {
         ctx.lineTo(c.x + i - 10, c.y + c.h);
         ctx.fill();
     }
+}
+
+function drawSpikePlatform(ctx, p) {
+    // Base Platform
+    ctx.fillStyle = p.triggered ? (p.timer % 10 < 5 ? "#ff3333" : "#aa0000") : "#888888";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = "#aaaaaa";
+    ctx.fillRect(p.x, p.y, p.w, 4);
+
+    if (p.popped) {
+        ctx.fillStyle = "#aaaaaa";
+        for (let i = 2; i < p.w - 8; i += 12) {
+            ctx.beginPath();
+            ctx.moveTo(p.x + i, p.y);
+            ctx.lineTo(p.x + i + 4, p.y - 12);
+            ctx.lineTo(p.x + i + 8, p.y);
+            ctx.fill();
+        }
+    }
+}
+
+function drawHiddenBlock(ctx, h) {
+    if (!h.active && !h.revealed) {
+        // Very subtle hint
+        ctx.strokeStyle = "rgba(255,255,255,0.03)";
+        ctx.strokeRect(h.x, h.y, h.w, h.h);
+    } else if (h.revealed) {
+        ctx.fillStyle = "#d4af37"; // Gold color
+        ctx.fillRect(h.x, h.y, h.w, h.h);
+        ctx.fillStyle = "#ffdf73";
+        ctx.fillRect(h.x, h.y, h.w, 4);
+        ctx.fillRect(h.x, h.y, 4, h.h);
+        // Exclamation mark
+        ctx.fillStyle = "#8a6d1c";
+        ctx.font = "bold 24px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("!", h.x + h.w/2, h.y + 28);
+        ctx.textAlign = "left";
+    }
+}
+
+function drawFallingSpike(ctx, s) {
+    if (!s.active) return;
+    ctx.fillStyle = "#778899";
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x + s.w/2, s.y + s.h);
+    ctx.lineTo(s.x + s.w, s.y);
+    ctx.fill();
+    ctx.fillStyle = "#99aabb";
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(s.x + s.w/2, s.y + s.h);
+    ctx.lineTo(s.x + s.w/2, s.y);
+    ctx.fill();
+}
+
+function drawSpringboard(ctx, sb) {
+    // Base
+    ctx.fillStyle = "#333";
+    ctx.fillRect(sb.x + 2, sb.y + sb.h - 4, sb.w - 4, 4);
+    
+    let squish = sb.animTimer > 0 ? 8 : 0;
+    let topY = sb.y + squish;
+    
+    // Coils (Zig-Zag)
+    ctx.strokeStyle = "#aaa";
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
+    
+    let coilW = sb.w - 16;
+    let cx = sb.x + 8;
+    let botY = sb.y + sb.h - 4;
+    let diff = botY - (topY + 6);
+    
+    ctx.beginPath();
+    ctx.moveTo(cx + coilW/2, botY);
+    ctx.lineTo(cx + coilW, botY - diff * 0.25);
+    ctx.lineTo(cx, botY - diff * 0.5);
+    ctx.lineTo(cx + coilW, botY - diff * 0.75);
+    ctx.lineTo(cx + coilW/2, topY + 6);
+    ctx.stroke();
+    
+    // Top Pad
+    ctx.fillStyle = "#e63900"; // Deep orange red
+    ctx.fillRect(sb.x, topY, sb.w, 8);
+    
+    // Highlight
+    ctx.fillStyle = "#ff9900";
+    ctx.fillRect(sb.x + 2, topY + 1, sb.w - 4, 2);
 }
 
 function drawInvisibleWall(ctx, w) {
@@ -1747,7 +1841,7 @@ function drawHUD(ctx, canvas) {
 
     const panelX = 15;
     const panelY = 15;
-    const panelW = 150;
+    const panelW = 185;
     const panelH = 114;
     const r = 16;
     
@@ -1880,7 +1974,9 @@ function drawHUD(ctx, canvas) {
     let vidasLabelW = ctx.measureText("VIDAS: ").width;
     
     for(let i = 0; i < state.lives; i++) {
-        let heartX = startX + vidasLabelW + (i * 12);
+        // Closer spacing if there are many hearts
+        let heartSpacing = state.lives > 6 ? 9 : 12;
+        let heartX = startX + vidasLabelW + (i * heartSpacing);
         
         ctx.save();
         ctx.translate(heartX, startY);
