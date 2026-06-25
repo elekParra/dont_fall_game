@@ -320,6 +320,8 @@ function buildLevelOne() {
 
     addMovingPlatform(1320, 235, 100, 1320, 1560, 1.9);
     addMovingPlatform(2350, 245, 100, 2350, 2600, 2.2);
+    addSpike(2390, true, "grass", 245);
+    lists.spikes[lists.spikes.length - 1].isMovingSpike = true;
     addMovingPlatform(3920, 245, 110, 3920, 4200, 2.3);
 
     addVanishingPlatform(3150, 210, 110);
@@ -369,6 +371,13 @@ function buildLevelOne() {
         }
     });
     addTrigger(1540, () => { lists.crushers[0].active = true; lists.crushers[0].dropping = true; showMessage("Mira arriba.", 75); });
+    addTrigger(2370, () => {
+        let spike = lists.spikes.find(s => s.isMovingSpike);
+        if (spike && !spike.rising) {
+            spike.active = true;
+            spike.rising = true;
+        }
+    });
     addTrigger(2480, () => { lists.invisibleWalls[0].active = true; revealSpikeAt(2860); showMessage("Pared invisible activada", 80); });
     addTrigger(3520, () => { revealSpikeAt(3580); if (lists.vanishingPlatforms[1]) lists.vanishingPlatforms[1].touched = true; showMessage("Ahora desaparece", 80); });
     addTrigger(4200, () => { lists.crushers[1].active = true; lists.crushers[1].dropping = true; showMessage("No corras... o sí", 75); });

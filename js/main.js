@@ -39,6 +39,7 @@ function resetAfterDeath() {
 }
 
 function killPlayer(reason = "Has muerto", kind = "generic") {
+    if (state.godMode) return;
     if (player.invulnerable > 0 || state.gameOver || state.win || state.changingLevel || state.playerDead) return;
 
     state.lives--;

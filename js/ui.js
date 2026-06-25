@@ -27,14 +27,71 @@ function setupUI() {
     document.addEventListener("keydown", e => {
         if (e.key === "ArrowLeft") state.keys.left = true;
         if (e.key === "ArrowRight") state.keys.right = true;
+        if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") state.keys.up = true;
+        if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") state.keys.down = true;
         if (e.key === " ") state.keys.jump = true;
     });
 
     document.addEventListener("keyup", e => {
         if (e.key === "ArrowLeft") state.keys.left = false;
         if (e.key === "ArrowRight") state.keys.right = false;
+        if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") state.keys.up = false;
+        if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") state.keys.down = false;
         if (e.key === " ") state.keys.jump = false;
     });
+
+    let clickCount = 0;
+    let lastClickTime = 0;
+    let isDraggingPlayer = false;
+
+    canvas.addEventListener("pointerdown", e => {
+        if (!state.gameStarted || state.paused || state.gameOver) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX + state.camX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        if (x >= player.x - 20 && x <= player.x + player.w + 20 && 
+            y >= player.y - 20 && y <= player.y + player.h + 20) {
+            
+            if (state.godMode) {
+                isDraggingPlayer = true;
+                canvas.setPointerCapture(e.pointerId);
+            }
+
+            const now = Date.now();
+            if (now - lastClickTime < 500) {
+                clickCount++;
+            } else {
+                clickCount = 1;
+            }
+            lastClickTime = now;
+            
+            if (clickCount >= 3) {
+                clickCount = 0;
+                state.godMode = !state.godMode;
+                player.dy = 0;
+                player.dx = 0;
+                showMessage(state.godMode ? "MODO DIOS: VOLANDO" : "MODO DIOS: DESACTIVADO", 90);
+            }
+        }
+    });
+
+    canvas.addEventListener("pointermove", e => {
+        if (isDraggingPlayer && state.godMode) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            player.x = (e.clientX - rect.left) * scaleX + state.camX - player.w / 2;
+            player.y = (e.clientY - rect.top) * scaleY - player.h / 2;
+            player.dy = 0;
+            player.dx = 0;
+        }
+    });
+
+    canvas.addEventListener("pointerup", () => isDraggingPlayer = false);
+    canvas.addEventListener("pointercancel", () => isDraggingPlayer = false);
 
     // Touch events for preventing defaults
     document.addEventListener("touchmove", e => {

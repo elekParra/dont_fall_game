@@ -4,6 +4,34 @@
 
 
 function updatePlayer(killPlayer) {
+    if (state.godMode) {
+        player.dy = 0;
+        player.dx = 0;
+        const speed = 10;
+        if (state.keys.left) player.dx = -speed;
+        if (state.keys.right) player.dx = speed;
+        if (state.keys.up) player.dy = -speed;
+        if (state.keys.down) player.dy = speed;
+
+        player.x += player.dx;
+        player.y += player.dy;
+
+        if (player.x < 0) player.x = 0;
+
+        if (Math.abs(player.dx) > 0.1 || Math.abs(player.dy) > 0.1) {
+            player.frame += 0.25;
+            player.idleTimer = 0;
+        } else {
+            player.frame = 0;
+            player.idleTimer += 1;
+        }
+        
+        if (player.dx > 0) player.facing = 1;
+        if (player.dx < 0) player.facing = -1;
+
+        return;
+    }
+
     if (player.invulnerable > 0) player.invulnerable--;
 
     // Moving platforms
@@ -15,6 +43,13 @@ function updatePlayer(killPlayer) {
             p.x += p.dir * p.speed;
         }
         p.moveX = p.x - oldX;
+
+        // Move attached spikes
+        lists.spikes.forEach(s => {
+            if (s.x >= p.x - 30 && s.x <= p.x + p.w + 30 && Math.abs((s.targetY + 28) - p.y) < 5) {
+                s.x += p.moveX;
+            }
+        });
     });
 
     // Check Ice

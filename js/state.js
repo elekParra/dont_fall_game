@@ -6,6 +6,7 @@ const state = {
     gameStarted: false,
     paused: false,
     selectedCharacter: "hero",
+    godMode: false,
 
     // Camera & Screen Shake
     freezeFrames: 0,
@@ -50,6 +51,8 @@ const state = {
     keys: {
         left: false,
         right: false,
+        up: false,
+        down: false,
         jump: false
     },
     prevKeys: {
