@@ -153,6 +153,7 @@ function addWindZone(x, y, w, h, force, label = "VIENTO") {
 
 function createCoins(start, end, step, y) {
     for (let i = start; i < end; i += step) {
+        if (state.collectedCoins.includes(i + "_" + y)) continue;
         lists.coins.push({
             x: i, y, r: 9, taken: false, anim: Math.random() * 10, trap: false
         });
@@ -160,6 +161,7 @@ function createCoins(start, end, step, y) {
 }
 
 function addTrapCoin(x, y, spikeX) {
+    if (state.collectedCoins.includes(x + "_" + y)) return;
     lists.coins.push({
         x, y, r: 10, taken: false, anim: 0, trap: true, spikeX
     });

@@ -1519,6 +1519,23 @@ function drawPlayer(ctx) {
 
     ctx.save();
     
+    if (player.lifeGlowTimer > 0) {
+        player.lifeGlowTimer--;
+        
+        // Cycle colors from Green to Yellow/Gold
+        const t = Date.now() / 150;
+        const r = Math.floor(100 + 155 * Math.abs(Math.sin(t)));
+        const g = 255;
+        const b = Math.floor(50 * Math.abs(Math.cos(t)));
+        
+        ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+        ctx.shadowBlur = 15 + Math.abs(Math.sin(t * 2)) * 10;
+        
+        if (Math.random() < 0.2) {
+            addExplosion(player.x + Math.random() * player.w, player.y + Math.random() * player.h, `rgb(${r}, ${g}, ${b})`, 1);
+        }
+    }
+
     // Apply flip rotation if flipping (Ninja Double Jump)
     if (player.isFlipping) {
         player.flipAngle += (player.facing === 1 ? 0.38 : -0.38);
@@ -1817,7 +1834,43 @@ function drawParticles(ctx, canvas) {
         const a = Math.max(0, p.life / p.max);
         ctx.globalAlpha = a;
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (p.spin) ctx.rotate(p.spin);
+
+        if (p.type === "dust" || p.type === "fire") {
+            // Draw circle (soft)
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (p.type === "sparkle") {
+            // Draw little cross/star
+            ctx.fillRect(-p.size/2, -p.size/8, p.size, p.size/4);
+            ctx.fillRect(-p.size/8, -p.size/2, p.size/4, p.size);
+            // Core
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath(); ctx.arc(0, 0, p.size/3, 0, Math.PI*2); ctx.fill();
+        } else if (p.type === "blood") {
+            // Tear drop / splatter
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size, 0, Math.PI);
+            ctx.lineTo(0, -p.size * 2);
+            ctx.closePath();
+            ctx.fill();
+        } else if (p.type === "explosion") {
+            // Polygon/shard
+            ctx.beginPath();
+            ctx.moveTo(0, -p.size);
+            ctx.lineTo(p.size*0.8, p.size*0.4);
+            ctx.lineTo(-p.size*0.8, p.size*0.4);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            // Fallback square
+            ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+        }
+        ctx.restore();
     });
     ctx.globalAlpha = 1.0;
 }

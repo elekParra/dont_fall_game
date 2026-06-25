@@ -26,6 +26,8 @@ const state = {
     score: 0,
     scoreScale: 1.0,
     scoreTimer: 0,
+    coinsCount: 0,
+    collectedCoins: [],
     lives: 10,
     deaths: 0,
     win: false,
@@ -84,7 +86,8 @@ const player = {
     isFlipping: false,
     flipAngle: 0,
     jetpackFuel: 0,
-    jetpackActive: false
+    jetpackActive: false,
+    lifeGlowTimer: 0
 };
 
 // Lists of level objects

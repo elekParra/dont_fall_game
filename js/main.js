@@ -34,6 +34,10 @@ function resetAfterDeath() {
 
     state.playerDead = false;
     state.respawnTimer = 0;
+    
+    // Reset points/coins progress on death
+    state.score = 0;
+    state.coinsCount = 0;
 
     resetKeys();
 }
@@ -119,6 +123,7 @@ function nextLevel() {
         player.y = 290;
         player.prevX = 100;
         player.prevY = 290;
+        state.camX = 0;
         player.dx = 0;
         player.dy = 0;
         player.invulnerable = 120;

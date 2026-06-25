@@ -196,10 +196,24 @@ function updateTraps(killPlayer) {
 
         if (dist < 28) {
             c.taken = true;
+            state.collectedCoins.push(c.x + "_" + c.y);
             state.score++;
+            state.coinsCount++;
             state.scoreScale = 1.5;
             state.scoreTimer = 15;
-            addExplosion(c.x, c.y, c.trap ? "#ff3333" : "#ffdf00", 10);
+            
+            if (c.trap) addExplosion(c.x, c.y, "#ff3333", 10);
+            else addCoinSparkle(c.x, c.y, 15);
+
+            if (state.coinsCount >= 10) {
+                state.coinsCount = 0;
+                state.lives++;
+                player.lifeGlowTimer = 90;
+                showMessage("¡+1 VIDA!", 90);
+                playTone(880, 0.1, "sine");
+                setTimeout(() => playTone(1320, 0.2, "sine"), 100);
+                addExplosion(player.x + player.w/2, player.y + player.h/2, "#00ff00", 30);
+            }
 
             if (c.trap) {
                 revealSpikeAt(c.spikeX);

@@ -173,6 +173,10 @@ function setupUI() {
         location.reload();
     });
 
+    document.getElementById("btnVictoryMenu").addEventListener("click", () => {
+        location.reload();
+    });
+
     // Disable context menu on mobile
     document.addEventListener("contextmenu", e => e.preventDefault());
 

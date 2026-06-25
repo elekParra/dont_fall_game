@@ -132,8 +132,15 @@ function updateIceBoss(killPlayer) {
                 state.score += 50;
                 state.shakeTimer = 35;
                 state.shakePower = 10;
+                state.win = true;
                 addExplosion(iceBoss.x + iceBoss.w / 2, iceBoss.y + iceBoss.h / 2, "#bfffff", 80);
                 showMessage("¡Guardián derrotado!", 120);
+                playVictoryMusic();
+                
+                setTimeout(() => {
+                    document.getElementById("victoryStats").innerText = `Muertes totales: ${state.deaths} | Puntuación: ${state.score}`;
+                    document.getElementById("victoryScreen").classList.add("active");
+                }, 2000);
             }
         } else {
             killPlayer("Aplastado por el guardián", "crush");

@@ -6,47 +6,69 @@
 function addBlood(x, y, count = 34) {
     for (let i = 0; i < count; i++) {
         lists.particles.push({
-            x,
-            y,
+            x, y,
             vx: (Math.random() - 0.5) * 8,
             vy: -Math.random() * 7 - 1,
             life: 50 + Math.random() * 25,
             max: 70,
-            size: 2 + Math.random() * 4,
+            size: 3 + Math.random() * 5,
             color: Math.random() > 0.35 ? "#d00000" : "#ff3030",
-            gravity: 0.28
+            gravity: 0.28,
+            type: "blood",
+            spin: Math.random() * Math.PI * 2,
+            spinVel: (Math.random() - 0.5) * 0.2
         });
     }
 }
 
-function addExplosion(x, y, color = "#ffcc00", count = 34) {
+function addExplosion(x, y, color = "#ffcc00", count = 25) {
     for (let i = 0; i < count; i++) {
         lists.particles.push({
-            x,
-            y,
-            vx: (Math.random() - 0.5) * 9,
-            vy: (Math.random() - 0.5) * 9,
-            life: 42 + Math.random() * 22,
-            max: 65,
-            size: 2 + Math.random() * 5,
+            x, y,
+            vx: (Math.random() - 0.5) * 12,
+            vy: (Math.random() - 0.5) * 12,
+            life: 30 + Math.random() * 20,
+            max: 50,
+            size: 4 + Math.random() * 8,
             color,
-            gravity: 0.06
+            gravity: 0.05,
+            type: "explosion",
+            spin: Math.random() * Math.PI * 2,
+            spinVel: (Math.random() - 0.5) * 0.3
         });
     }
 }
 
-function addDust(x, y, count = 12) {
+function addDust(x, y, count = 8) {
     for (let i = 0; i < count; i++) {
         lists.particles.push({
-            x,
-            y,
-            vx: (Math.random() - 0.5) * 3,
-            vy: -Math.random() * 2,
+            x, y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: -Math.random() * 3 - 0.5,
+            life: 20 + Math.random() * 20,
+            max: 40,
+            size: 4 + Math.random() * 6,
+            color: "rgba(220, 220, 220, 0.6)",
+            gravity: 0.02,
+            type: "dust"
+        });
+    }
+}
+
+function addCoinSparkle(x, y, count = 15) {
+    for (let i = 0; i < count; i++) {
+        lists.particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8 - 2,
             life: 25 + Math.random() * 15,
             max: 40,
-            size: 2 + Math.random() * 4,
-            color: "rgba(230,230,230,0.75)",
-            gravity: 0.05
+            size: 3 + Math.random() * 5,
+            color: Math.random() > 0.5 ? "#ffff00" : "#ffffff",
+            gravity: 0.1,
+            type: "sparkle",
+            spin: Math.random() * Math.PI * 2,
+            spinVel: (Math.random() - 0.5) * 0.4
         });
     }
 }
@@ -61,9 +83,10 @@ function addJetpackFire(x, y, count = 3) {
             vy: Math.random() * 4 + 1, // shoot downwards
             life: 10 + Math.random() * 10,
             max: 20,
-            size: 3 + Math.random() * 4,
+            size: 4 + Math.random() * 6,
             color: colors[Math.floor(Math.random() * colors.length)],
-            gravity: 0 // Fire doesn't fall like dust, it just dissipates
+            gravity: 0,
+            type: "fire"
         });
     }
 }
@@ -73,7 +96,10 @@ function updateParticles() {
         p.x += p.vx;
         p.y += p.vy;
         p.vy += p.gravity;
-        p.vx *= 0.98;
+        p.vx *= 0.96;
+        if (p.type === "dust") p.size += 0.15; // Dust clouds expand
+        if (p.type === "explosion" || p.type === "blood") p.size *= 0.95; // Shrink
+        if (p.spin !== undefined) p.spin += p.spinVel;
         p.life--;
     });
 

@@ -21,7 +21,9 @@
     <div id="characterMenu">
         <h1>Elige tu personaje</h1>
 
-        <div class="character-options">
+        <div class="menu-layout">
+            <div class="menu-left">
+                <div class="character-options">
             <div class="character-card selected" data-type="hero" id="card-hero">
                 <canvas width="100" height="120" id="preview-hero"></canvas>
                 <div class="card-info">
@@ -51,9 +53,50 @@
                     <p class="ability">Habilidad: Jetpack</p>
                 </div>
             </div>
-        </div>
+                </div>
 
-        <button id="startBtn">JUGAR</button>
+                <button id="startBtn">JUGAR</button>
+            </div>
+
+            <div class="menu-right">
+                <div class="rules-container">
+                    <h2>Guía del Juego</h2>
+                    
+                    <div class="rule-item">
+                        <div class="icon-box coin-icon">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#ffdf00" stroke="#ccaa00" stroke-width="2"/><rect x="10" y="7" width="4" height="10" fill="#ccaa00"/></svg>
+                        </div>
+                        <div class="rule-text">
+                            <p><strong>Vida Extra</strong><br>Recolecta 10 monedas para recuperar salud.</p>
+                        </div>
+                    </div>
+
+                    <div class="rule-item">
+                        <div class="icon-box danger-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 4.5l6.5 11.5h-13L12 6.5zM11 11v4h2v-4h-2zm0 5v2h2v-2h-2z" fill="#ff3a1f"/></svg>
+                        </div>
+                        <div class="rule-text">
+                            <p><strong>Peligro Constante</strong><br>No te fíes de nada. El suelo, las paredes y los techos ocultan trampas.</p>
+                        </div>
+                    </div>
+
+                    <div class="rule-item">
+                        <div class="icon-box level-icon">
+                            <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z" fill="#00ffff"/></svg>
+                        </div>
+                        <div class="rule-text">
+                            <p><strong>4 Zonas Únicas</strong>
+                                <br><span class="bullet">•</span> Pradera: Trampas invisibles
+                                <br><span class="bullet">•</span> Cueva: Suelos y techos falsos
+                                <br><span class="bullet">•</span> Fábrica: Sierras mecánicas
+                                <br><span class="bullet">•</span> Hielo: Suelo resbaladizo y Guardián
+                            </p>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- UI Overlay for Mobile -->
@@ -80,6 +123,18 @@
             <div class="popup-buttons">
                 <button id="btnRetry">Reintentar</button>
                 <button id="btnMenu">Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Popup -->
+    <div id="victoryScreen" class="overlay-screen">
+        <div class="popup-box victory-box">
+            <h2 class="victory-title">¡HAS GANADO!</h2>
+            <p class="victory-subtitle">El guardián ha caído</p>
+            <p id="victoryStats">Muertes totales: 0</p>
+            <div class="popup-buttons">
+                <button id="btnVictoryMenu">Volver al Menú</button>
             </div>
         </div>
     </div>
