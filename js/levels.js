@@ -109,9 +109,9 @@ function addSign(x, y, text) {
     lists.signs.push({ x, y, text });
 }
 
-function addTrigger(x, action) {
+function addTrigger(x, action, y = 0, w = 40, h = 400) {
     lists.triggers.push({
-        x, y: 0, w: 40, h: 400, done: false, action
+        x, y, w, h, done: false, action
     });
 }
 
@@ -291,7 +291,8 @@ function buildLevelOne() {
     [[0, 850], [980, 500], [1650, 600], [2450, 500], [3200, 650], [4100, 650], [5000, 1150]].forEach(([x, w]) => addGround(x, w));
     [[850, 130], [1480, 170], [2250, 200], [2950, 250], [3850, 250], [4750, 250]].forEach(([x, w]) => addLava(x, w));
 
-    addPlatform(520, 265, 100);
+    addFallingBlock(520, 265, 100, 99999);
+    lists.fallingBlocks[lists.fallingBlocks.length - 1].visualType = "grass";
     addSpikePlatform(1180, 250, 110);
     addPlatform(1850, 250, 120);
     addSpikePlatform(3420, 250, 120);
@@ -411,10 +412,18 @@ function buildLevelTwo() {
     addFallingSpike(4700, 70);
 
     addSpringboard(2200, 320);
-    // Trampa Troll: Ascensor al infierno (spikes en el techo de baja gravedad)
-    for (let i = 2170; i <= 2260; i += 30) addSpike(i, true, "crystal");
-    // Trap coin alta que activa aplastador lento
-    addTrapCoin(2210, 50, 2210);
+    // Techo dinámico mortal (aparece al saltar más alto de lo normal)
+    addTrigger(2150, () => {
+        lists.crushers.push({
+            x: 2150, y: -800, w: 300, h: 600, vy: 0, active: true, dropping: true, isSpikyCeiling: true, stopY: -500
+        });
+        showMessage("¡Sorpresa desde arriba!", 60);
+        playTone(100, 0.3, "sawtooth");
+        setTimeout(() => playTone(80, 0.4, "sawtooth"), 100);
+    }, -800, 450, 1000); // Trigger desde y=-800 hasta y=200
+
+    // Trap coin que activa un aplastador directo
+    addTrapCoin(2240, 190, 2240);
 
     addSpringboard(3850, 320);
     
@@ -442,7 +451,7 @@ function buildLevelTwo() {
     addLaser(4450, 110, 235, 120);
     addLaser(6250, 90, 255, 180);
 
-    lists.gravityZones.push({ x: 2150, y: 0, w: 200, h: 400, active: true });
+    lists.gravityZones.push({ x: 2180, y: -1000, w: 450, h: 1400, active: true });
     lists.gravityZones.push({ x: 5300, y: 0, w: 220, h: 400, active: true });
 
     addSaw(3400, 305, 3300, 3650, 3, 42);

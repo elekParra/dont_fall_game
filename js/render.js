@@ -539,6 +539,12 @@ function drawBrittlePlatform(ctx, b) {
 
 function drawFallingBlock(ctx, b, canvas) {
     if (b.y > canvas.height + 200) return;
+    
+    if (b.visualType === "grass") {
+        drawBlock(ctx, b);
+        return;
+    }
+    
     drawPlatformShadow(ctx, b.x, b.y, b.w, b.h);
     ctx.fillStyle = b.used ? "#4a170a" : state.levelTheme === "factory" ? "#8a1c1c" : state.levelTheme === "ice" ? "#96e3ff" : "#8a3a14";
     roundRect(ctx, b.x, b.y, b.w, b.h, 5, true);
@@ -618,6 +624,52 @@ function drawSpike(ctx, s) {
 function drawCrusher(ctx, c) {
     if (!c.active) return;
     
+    if (c.isSpikyCeiling) {
+        // Ominous dark massive ceiling
+        ctx.fillStyle = "#110022";
+        ctx.fillRect(c.x, c.y, c.w, c.h);
+        
+        ctx.fillStyle = "#2a003a";
+        ctx.fillRect(c.x, c.y + c.h - 12, c.w, 12);
+        
+        ctx.fillStyle = "#3d0054";
+        ctx.fillRect(c.x, c.y + c.h - 4, c.w, 4);
+
+        // Hanging crystal spikes
+        for (let i = 0; i < c.w; i += 32) {
+            let sx = c.x + i;
+            let sy = c.y + c.h;
+            let sw = 28;
+            let sh = 42; // Spikes hanging down
+            
+            // Left Facet
+            ctx.fillStyle = "#4dfcff";
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx + sw * 0.25, sy);
+            ctx.lineTo(sx + sw * 0.5, sy + sh);
+            ctx.fill();
+
+            // Right Facet
+            ctx.fillStyle = "#2b8f8f";
+            ctx.beginPath();
+            ctx.moveTo(sx + sw * 0.25, sy);
+            ctx.lineTo(sx + sw, sy);
+            ctx.lineTo(sx + sw * 0.5, sy + sh);
+            ctx.fill();
+            
+            // Front Edge Highlight
+            ctx.strokeStyle = "#b3fdff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx + sw * 0.25, sy);
+            ctx.lineTo(sx + sw * 0.5, sy + sh);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+        }
+        return;
+    }
+    
     // Soft drop shadow
     drawContactShadow(ctx, c.x + c.w / 2, c.y + c.h, c.w * 0.6, 0.25);
     
@@ -661,20 +713,87 @@ function drawCrusher(ctx, c) {
 }
 
 function drawSpikePlatform(ctx, p) {
-    // Base Platform
-    ctx.fillStyle = p.triggered ? (p.timer % 10 < 5 ? "#ff3333" : "#aa0000") : "#888888";
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    ctx.fillStyle = "#aaaaaa";
-    ctx.fillRect(p.x, p.y, p.w, 4);
+    // Sombra proyectada
+    drawPlatformShadow(ctx, p.x, p.y, p.w, p.h);
+    
+    // Base metálica de la plataforma
+    ctx.fillStyle = "#3a3a4a"; // Gris oscuro azulado
+    roundRect(ctx, p.x, p.y, p.w, p.h, 4, true);
+    
+    // Borde inferior oscuro (3D)
+    ctx.fillStyle = "#222230";
+    roundRect(ctx, p.x, p.y + p.h - 6, p.w, 6, 4, true);
+    
+    // Placa superior de metal
+    ctx.fillStyle = "#555566";
+    ctx.fillRect(p.x + 2, p.y, p.w - 4, 8);
+    
+    // Panel central con textura de rejilla
+    ctx.fillStyle = "#2a2a35";
+    ctx.fillRect(p.x + 6, p.y + 10, p.w - 12, p.h - 18);
+    
+    // Rejillas horizontales
+    ctx.fillStyle = "#1a1a25";
+    for(let y = p.y + 12; y < p.y + p.h - 10; y += 4) {
+        ctx.fillRect(p.x + 8, y, p.w - 16, 2);
+    }
+    
+    // Luces de advertencia LED
+    let ledColor = "#00ffcc"; // Estado normal (seguro)
+    let glowColor = "rgba(0, 255, 204, 0.4)";
+    
+    if (p.triggered) {
+        if (p.timer > 0 && p.timer % 10 < 5) {
+            ledColor = "#ff2200"; // Parpadeo rojo peligro
+            glowColor = "rgba(255, 34, 0, 0.6)";
+        } else if (p.timer > 0) {
+            ledColor = "#550000"; // Rojo oscuro
+            glowColor = "rgba(0, 0, 0, 0)";
+        }
+        if (p.popped) {
+            ledColor = "#ff0000"; // Rojo fijo cuando salieron
+            glowColor = "rgba(255, 0, 0, 0.5)";
+        }
+    }
+    
+    // Dibujar los LEDs a los lados
+    drawGlow(ctx, p.x + 6, p.y + 6, 8, glowColor);
+    drawGlow(ctx, p.x + p.w - 6, p.y + 6, 8, glowColor);
+    ctx.fillStyle = ledColor;
+    ctx.fillRect(p.x + 4, p.y + 4, 4, 4);
+    ctx.fillRect(p.x + p.w - 8, p.y + 4, 4, 4);
 
+    // Pinchos cuando salen
     if (p.popped) {
-        ctx.fillStyle = "#aaaaaa";
-        for (let i = 2; i < p.w - 8; i += 12) {
+        for (let i = 2; i < p.w - 8; i += 16) {
+            let sx = p.x + i;
+            let sy = p.y - 18;
+            
+            // Pinchos metálicos afilados (estilo drawSpike metal)
+            ctx.fillStyle = "#b8b8b8";
             ctx.beginPath();
-            ctx.moveTo(p.x + i, p.y);
-            ctx.lineTo(p.x + i + 4, p.y - 12);
-            ctx.lineTo(p.x + i + 8, p.y);
+            ctx.moveTo(sx, sy + 18);
+            ctx.lineTo(sx + 4, sy + 18);
+            ctx.lineTo(sx + 6, sy);
             ctx.fill();
+            
+            ctx.fillStyle = "#707070";
+            ctx.beginPath();
+            ctx.moveTo(sx + 4, sy + 18);
+            ctx.lineTo(sx + 10, sy + 18);
+            ctx.lineTo(sx + 6, sy);
+            ctx.fill();
+            
+            // Brillo
+            ctx.strokeStyle = "#dbdbdb";
+            ctx.beginPath();
+            ctx.moveTo(sx + 4, sy + 18);
+            ctx.lineTo(sx + 6, sy);
+            ctx.stroke();
+            
+            // Base del pincho rota
+            ctx.fillStyle = "#111";
+            ctx.fillRect(sx, p.y, 10, 2);
         }
     }
 }
@@ -701,18 +820,81 @@ function drawHiddenBlock(ctx, h) {
 
 function drawFallingSpike(ctx, s) {
     if (!s.active) return;
+    
+    let t = Date.now() / 400 + s.x;
+    // Ligero balanceo visual (no afecta la colisión real que sigue siendo recta)
+    let sway = s.falling ? 0 : Math.sin(t) * 3;
+    
+    // Coordenadas con balanceo
+    let cx = s.x + sway;
+    let cy = s.y;
+    
+    // Dibujar la cadena hacia arriba
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // Alternar eslabones de la cadena
+    let chainTop = s.startY - 300; // Cadena sube hasta perderse en el cielo
+    for(let y = cy; y > chainTop; y -= 12) {
+        // Oscilación de la cadena más suave arriba
+        let factor = (y - chainTop) / (cy - chainTop);
+        let chainX = s.x + sway * factor + s.w/2;
+        
+        ctx.beginPath();
+        if (Math.round(y/12) % 2 === 0) {
+            ctx.ellipse(chainX, y, 4, 6, 0, 0, Math.PI * 2);
+        } else {
+            ctx.ellipse(chainX, y, 2, 8, 0, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+    }
+    
+    // Anclaje metálico del pincho a la cadena
+    ctx.fillStyle = "#333";
+    ctx.fillRect(cx + s.w/2 - 6, cy - 4, 12, 8);
+    ctx.fillStyle = "#666";
+    ctx.fillRect(cx + s.w/2 - 4, cy - 2, 8, 4);
+
+    // Cuerpo del pincho cayendo (Estalactita de metal pesado)
+    // Left facet
     ctx.fillStyle = "#778899";
     ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x + s.w/2, s.y + s.h);
-    ctx.lineTo(s.x + s.w, s.y);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + s.w/2, cy);
+    ctx.lineTo(cx + s.w/2, cy + s.h);
     ctx.fill();
-    ctx.fillStyle = "#99aabb";
+    
+    // Right facet
+    ctx.fillStyle = "#556677";
     ctx.beginPath();
-    ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x + s.w/2, s.y + s.h);
-    ctx.lineTo(s.x + s.w/2, s.y);
+    ctx.moveTo(cx + s.w/2, cy);
+    ctx.lineTo(cx + s.w, cy);
+    ctx.lineTo(cx + s.w/2, cy + s.h);
     ctx.fill();
+    
+    // Highlights and details
+    ctx.strokeStyle = "#aaccff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + s.w/2, cy);
+    ctx.lineTo(cx + s.w/2, cy + s.h);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    
+    // Ranuras horizontales mecánicas
+    ctx.fillStyle = "#223344";
+    ctx.fillRect(cx + 4, cy + 8, s.w - 8, 2);
+    ctx.fillRect(cx + 6, cy + 18, s.w - 12, 2);
+    ctx.fillRect(cx + 8, cy + 28, s.w - 16, 2);
+    
+    // Ojos rojos brillantes si está cayendo
+    if (s.falling) {
+        drawGlow(ctx, cx + s.w/2, cy + s.h*0.7, 10, "rgba(255, 0, 0, 0.6)");
+        ctx.fillStyle = "#ff0000";
+        ctx.beginPath();
+        ctx.arc(cx + s.w/2, cy + s.h*0.7, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 function drawSpringboard(ctx, sb) {

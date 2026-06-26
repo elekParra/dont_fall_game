@@ -10,8 +10,9 @@ function updateTraps(killPlayer) {
         if (c.dropping) {
             c.vy += 0.8;
             c.y += c.vy;
-            if (c.y > state.groundY - c.h) {
-                c.y = state.groundY - c.h;
+            let targetY = c.stopY !== undefined ? c.stopY : state.groundY - c.h;
+            if (c.y > targetY) {
+                c.y = targetY;
                 c.vy = -12;
                 c.dropping = false;
             }
@@ -45,7 +46,8 @@ function updateTraps(killPlayer) {
             
             // Attached spikes fall with the block
             lists.spikes.forEach(s => {
-                if (s.x >= b.x - 20 && s.x <= b.x + b.w + 20 && Math.abs((s.targetY + 28) - (b.y - b.vy)) < 5) {
+                // Solo adjuntar si el pincho estaba encima del bloque (no en el suelo)
+                if (s.x >= b.x - 20 && s.x <= b.x + b.w + 20 && Math.abs((s.targetY + 28) - (b.y - b.vy)) < 5 && (s.targetY + 28) < state.groundY - 5) {
                     s.y += b.vy;
                     s.targetY += b.vy;
                 }
@@ -236,12 +238,20 @@ function updateTraps(killPlayer) {
             }
 
             if (c.trap) {
-                if (state.currentLevel === 2 && c.y < 100) {
+                if (state.currentLevel === 2 && c.y < 250) {
                     lists.crushers.push({
                         x: c.x - 30, y: -450, w: 60, h: 400,
                         vy: 0, active: true, dropping: true
                     });
                     showMessage("Aplastador aéreo activado", 90);
+                } else if (state.currentLevel === 1 && Math.abs(c.x - 600) < 10) {
+                    let plat = lists.fallingBlocks.find(b => Math.abs(b.x - 520) < 10);
+                    if (plat) {
+                        plat.falling = true;
+                        plat.used = true;
+                    }
+                    revealSpikeAt(c.spikeX);
+                    showMessage("¡Plataforma trampa!", 80);
                 } else {
                     revealSpikeAt(c.spikeX);
                     showMessage("Moneda trampa", 80);
