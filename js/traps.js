@@ -55,8 +55,28 @@ function updateTraps(killPlayer) {
 
     // Lasers
     lists.lasers.forEach(l => {
+        if (l.timer === undefined) l.timer = 0;
         l.timer++;
-        l.active = Math.sin(l.timer / 40) > -0.25;
+        
+        const cycle = l.timer % 220;
+        
+        if (cycle === 120) {
+            // Start warning
+            l.state = "warning";
+            l.active = false;
+            playTone(400, 0.1, "sine");
+            setTimeout(() => playTone(500, 0.1, "sine"), 150);
+        } else if (cycle === 170) {
+            // Start firing
+            l.state = "firing";
+            l.active = true;
+            playTone(120, 0.35, "sawtooth");
+            addExplosion(l.x + l.w/2, l.y, state.levelTheme === "factory" ? "#ff3333" : "#00ffff", 10);
+        } else if (cycle >= 210 || cycle < 120) {
+            // Cooldown / Off
+            l.state = "off";
+            l.active = false;
+        }
     });
 
     // Saws
@@ -216,8 +236,16 @@ function updateTraps(killPlayer) {
             }
 
             if (c.trap) {
-                revealSpikeAt(c.spikeX);
-                showMessage("Moneda trampa", 80);
+                if (state.currentLevel === 2 && c.y < 100) {
+                    lists.crushers.push({
+                        x: c.x - 30, y: -450, w: 60, h: 400,
+                        vy: 0, active: true, dropping: true
+                    });
+                    showMessage("Aplastador aéreo activado", 90);
+                } else {
+                    revealSpikeAt(c.spikeX);
+                    showMessage("Moneda trampa", 80);
+                }
             }
         }
     });

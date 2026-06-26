@@ -789,11 +789,67 @@ function drawLavaPit(ctx, p) {
 }
 
 function drawLaser(ctx, l) {
-    if (!l.active) return;
-    ctx.fillStyle = state.levelTheme === "factory" ? "rgba(255,0,0,0.85)" : "rgba(0,255,255,0.85)";
-    ctx.fillRect(l.x, l.y, l.w, l.h);
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.fillRect(l.x + 3, l.y, 3, l.h);
+    let baseColor = state.levelTheme === "factory" ? "255, 30, 30" : "0, 255, 255";
+    
+    // Emitter base (always visible)
+    ctx.fillStyle = "#222";
+    ctx.fillRect(l.x - 4, l.y, l.w + 8, 12);
+    ctx.fillStyle = "#555";
+    ctx.fillRect(l.x - 2, l.y, l.w + 4, 6);
+    
+    // Tiny glowing diode on emitter
+    ctx.fillStyle = (l.state === "warning" || l.state === "firing") ? `rgba(${baseColor}, 0.8)` : "#111";
+    ctx.fillRect(l.x + l.w/2 - 2, l.y + 6, 4, 4);
+    
+    if (l.state === "off" || !l.state) return;
+    
+    let isWarning = l.state === "warning";
+    
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    
+    if (isWarning) {
+        // Red warning thread
+        ctx.strokeStyle = `rgba(255, 0, 0, ${0.4 + Math.sin(Date.now() / 50) * 0.4})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // Skip the emitter body
+        ctx.moveTo(l.x + l.w / 2, l.y + 12);
+        ctx.lineTo(l.x + l.w / 2, l.y + l.h);
+        ctx.stroke();
+        
+        // Small target dot at the bottom
+        ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
+        ctx.beginPath();
+        ctx.arc(l.x + l.w/2, l.y + l.h, 3, 0, Math.PI*2);
+        ctx.fill();
+    } else {
+        // Firing state
+        let intensity = Math.random() * 0.2 + 0.8; // Flicker
+        
+        // Glow passes
+        ctx.fillStyle = `rgba(${baseColor}, ${0.2 * intensity})`;
+        ctx.fillRect(l.x - 12, l.y + 12, l.w + 24, l.h - 12);
+        
+        ctx.fillStyle = `rgba(${baseColor}, ${0.5 * intensity})`;
+        ctx.fillRect(l.x - 4, l.y + 12, l.w + 8, l.h - 12);
+        
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.9 * intensity})`;
+        ctx.fillRect(l.x + 2, l.y + 12, l.w - 4, l.h - 12);
+        
+        // Electrical sparks
+        ctx.strokeStyle = `rgba(${baseColor}, 0.8)`;
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+            let sparkY = l.y + 12 + Math.random() * (l.h - 12);
+            ctx.beginPath();
+            ctx.moveTo(l.x + l.w/2, sparkY);
+            ctx.lineTo(l.x + l.w/2 + (Math.random() > 0.5 ? 1 : -1) * (6 + Math.random() * 14), sparkY + (Math.random()-0.5) * 10);
+            ctx.stroke();
+        }
+    }
+    
+    ctx.restore();
 }
 
 function drawGravityZone(ctx, g) {
@@ -839,52 +895,72 @@ function drawSawBlade(ctx, s) {
     drawContactShadow(ctx, s.x + s.w / 2, s.y + s.h + 4, s.w / 2, 0.2);
     ctx.save();
     ctx.translate(s.x + s.w / 2, s.y + s.h / 2);
+    
+    let speed = Math.abs(s.dir * s.speed);
     ctx.rotate(s.angle);
     
     // Saw blade body gradient (metallic sheen)
-    const grad = ctx.createLinearGradient(-s.w/2, -s.h/2, s.w/2, s.h/2);
-    grad.addColorStop(0, "#ffffff");
-    grad.addColorStop(0.5, "#999999");
-    grad.addColorStop(1, "#333333");
+    const grad = ctx.createConicGradient ? ctx.createConicGradient(s.angle, 0, 0) : ctx.createLinearGradient(-s.w/2, -s.h/2, s.w/2, s.h/2);
+    grad.addColorStop(0, "#e6e6e6");
+    grad.addColorStop(0.25, "#808080");
+    grad.addColorStop(0.5, "#333333");
+    grad.addColorStop(0.75, "#999999");
+    grad.addColorStop(1, "#e6e6e6");
     
+    // Outer edge (teeth)
     ctx.fillStyle = grad;
-    for (let i = 0; i < 12; i++) {
-        ctx.rotate(Math.PI / 6);
-        ctx.beginPath();
-        ctx.moveTo(0, -s.h / 2 + 2);
-        ctx.lineTo(8, -s.h / 2 + 14);
-        ctx.lineTo(-2, -s.h / 2 + 10);
-        ctx.closePath();
-        ctx.fill();
-    }
-    
-    // Central metallic disc
-    ctx.fillStyle = "#666";
     ctx.beginPath();
-    ctx.arc(0, 0, s.w / 2.5, 0, Math.PI * 2);
+    let numTeeth = 14;
+    let outerR = s.w/2;
+    let innerR = s.w/2.4;
+    for (let i = 0; i < numTeeth * 2; i++) {
+        let a = (i * Math.PI) / numTeeth;
+        let r = (i % 2 === 0) ? outerR : innerR;
+        if (i % 2 === 0) {
+            ctx.lineTo(Math.cos(a + 0.15) * r, Math.sin(a + 0.15) * r);
+        } else {
+            ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+    }
+    ctx.closePath();
     ctx.fill();
     
-    ctx.fillStyle = "#333";
+    // Central metallic disc
+    ctx.fillStyle = "#4a4a4a";
     ctx.beginPath();
-    ctx.arc(0, 0, s.w / 3.5, 0, Math.PI * 2);
+    ctx.arc(0, 0, s.w / 2.8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    const innerGrad = ctx.createLinearGradient(-s.w/4, -s.h/4, s.w/4, s.h/4);
+    innerGrad.addColorStop(0, "#222");
+    innerGrad.addColorStop(1, "#888");
+    ctx.fillStyle = innerGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, s.w / 3.8, 0, Math.PI * 2);
     ctx.fill();
     
     // Core bolt
-    ctx.fillStyle = "#ff3333";
+    ctx.fillStyle = "#111";
     ctx.beginPath();
-    ctx.arc(0, 0, 6, 0, Math.PI * 2);
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#ff9999";
+    ctx.fillStyle = "#ff3a1f"; // Warning color bolt
     ctx.beginPath();
-    ctx.arc(-2, -2, 2, 0, Math.PI * 2);
+    ctx.arc(0, 0, 3, 0, Math.PI * 2);
     ctx.fill();
     
-    // Motion blur / rotation lines
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(0, 0, s.w / 2.8, 0, Math.PI);
-    ctx.stroke();
+    // Motion blur rings
+    if (speed > 0) {
+        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, s.w / 2.6, 0, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.beginPath();
+        ctx.arc(0, 0, s.w / 3.2, Math.PI, Math.PI * 2.5);
+        ctx.stroke();
+    }
     
     ctx.restore();
 }
@@ -900,44 +976,79 @@ function drawCoin(ctx, c) {
     // Soft shadow
     drawContactShadow(ctx, c.x, y + 15, 12, 0.2);
     
-    // Core glow
-    drawGlow(ctx, c.x, y, 20, c.trap ? "rgba(255,50,50,0.5)" : "rgba(255,223,0,0.5)");
+    // Core glow (same for both)
+    drawGlow(ctx, c.x, y, 20, "rgba(255,223,0,0.5)");
 
     ctx.save();
     ctx.translate(c.x, y);
     ctx.scale(spinWidth, 1);
     
     // Outer edge (thickness)
-    ctx.fillStyle = c.trap ? "#8b0000" : "#d4af37";
+    ctx.fillStyle = "#d4af37";
     ctx.beginPath();
     ctx.ellipse(0, 0, 10, 13, 0, 0, Math.PI * 2);
     ctx.fill();
     
     // Inner coin face
-    ctx.fillStyle = c.trap ? "#ff3333" : "#ffdf00";
+    ctx.fillStyle = "#ffdf00";
     ctx.beginPath();
     ctx.ellipse(0, 0, 8, 11, 0, 0, Math.PI * 2);
     ctx.fill();
     
     // Coin rim shine
-    ctx.strokeStyle = c.trap ? "#ff9999" : "#fff1b8";
+    ctx.strokeStyle = "#fff1b8";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.ellipse(0, 0, 8, 11, 0, Math.PI * 0.25, Math.PI * 1.25);
     ctx.stroke();
 
     // Central slot/mark
-    ctx.fillStyle = c.trap ? "#4a0000" : "#b8860b";
-    ctx.fillRect(-2, -6, 4, 12);
+    ctx.fillStyle = "#b8860b";
+    if (c.trap) {
+        // Subtle detail: The line is broken in the middle
+        ctx.fillRect(-2, -5, 4, 3);
+        ctx.fillRect(-2, 2, 4, 3);
+    } else {
+        ctx.fillRect(-2, -6, 4, 12);
+    }
     
     ctx.restore();
 }
 
 function drawEnemyProjectile(ctx, p) {
-    ctx.fillStyle = p.type === "boss" ? "#ffffff" : "#bfffff";
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    ctx.fillStyle = "#73e8ff";
-    ctx.fillRect(p.x + 2, p.y + 2, p.w - 4, 2);
+    let t = Date.now() / 100;
+    let isBoss = p.type === "boss";
+    let colorCore = isBoss ? "#ffffff" : "#e0ffff";
+    let colorGlow = isBoss ? "rgba(115, 232, 255, 0.6)" : "rgba(0, 255, 255, 0.5)";
+    let colorTrail = isBoss ? "rgba(115, 232, 255, 0.2)" : "rgba(0, 255, 255, 0.2)";
+    
+    ctx.save();
+    ctx.translate(p.x + p.w/2, p.y + p.h/2);
+    
+    // Direction angle (assuming it moves horizontally mostly, or we just draw it round)
+    let vx = p.vx || -4; // Guessing direction
+    
+    ctx.globalCompositeOperation = "lighter";
+    
+    // Trail
+    ctx.fillStyle = colorTrail;
+    ctx.beginPath();
+    ctx.arc(-Math.sign(vx) * 8, 0, p.w * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-Math.sign(vx) * 16, 0, p.w * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Glow
+    drawGlow(ctx, 0, 0, p.w * 1.5, colorGlow);
+    
+    // Core
+    ctx.fillStyle = colorCore;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.w/2 + Math.random(), p.h/2 + Math.random(), 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
 }
 
 function drawEnemy(ctx, e) {
@@ -990,64 +1101,70 @@ function drawEnemy(ctx, e) {
         ctx.save();
         ctx.translate(e.x + e.w/2, e.y + e.h/2 + bob);
         
-        // Wings
-        ctx.fillStyle = "#4c1a7a"; // Shadow wing
-        ctx.beginPath();
-        ctx.moveTo(-10, 0);
-        ctx.lineTo(-30, -10 + flap);
-        ctx.lineTo(-15, 10 + flap*0.5);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(10, 0);
-        ctx.lineTo(30, -10 + flap);
-        ctx.lineTo(15, 10 + flap*0.5);
-        ctx.fill();
+        // Wing gradients
+        let wGrad = ctx.createLinearGradient(0, 0, 0, 10);
+        wGrad.addColorStop(0, "#702cb3");
+        wGrad.addColorStop(1, "#2d0b50");
         
-        // Highlight wing
-        ctx.fillStyle = "#702cb3"; 
+        // Wings
+        ctx.fillStyle = wGrad;
         ctx.beginPath();
-        ctx.moveTo(-8, 0);
-        ctx.lineTo(-26, -6 + flap);
-        ctx.lineTo(-12, 6 + flap*0.5);
+        // Left
+        ctx.moveTo(-6, 0);
+        ctx.quadraticCurveTo(-18, -15 + flap, -32, -8 + flap);
+        ctx.quadraticCurveTo(-20, 10 + flap*0.5, -12, 10 + flap*0.2);
+        ctx.closePath();
         ctx.fill();
+        // Right
         ctx.beginPath();
-        ctx.moveTo(8, 0);
-        ctx.lineTo(26, -6 + flap);
-        ctx.lineTo(12, 6 + flap*0.5);
+        ctx.moveTo(6, 0);
+        ctx.quadraticCurveTo(18, -15 + flap, 32, -8 + flap);
+        ctx.quadraticCurveTo(20, 10 + flap*0.5, 12, 10 + flap*0.2);
+        ctx.closePath();
         ctx.fill();
 
         // Body
-        ctx.fillStyle = "#9d4edd";
+        let bGrad = ctx.createRadialGradient(0, -2, 0, 0, 0, 12);
+        bGrad.addColorStop(0, "#a45ce3");
+        bGrad.addColorStop(1, "#40136e");
+        ctx.fillStyle = bGrad;
         ctx.beginPath();
         ctx.arc(0, 0, 11, 0, Math.PI * 2);
         ctx.fill();
         
         // Ears
+        ctx.fillStyle = "#40136e";
         ctx.beginPath();
-        ctx.moveTo(-6, -8);
-        ctx.lineTo(-9, -16);
-        ctx.lineTo(-2, -10);
-        ctx.moveTo(6, -8);
-        ctx.lineTo(9, -16);
-        ctx.lineTo(2, -10);
+        ctx.moveTo(-5, -8); ctx.lineTo(-10, -18); ctx.lineTo(-1, -10);
+        ctx.moveTo(5, -8); ctx.lineTo(10, -18); ctx.lineTo(1, -10);
         ctx.fill();
         
-        // Eyes
-        ctx.fillStyle = "#ff2a00";
-        ctx.fillRect(-6, -2, 4, 3);
-        ctx.fillRect(2, -2, 4, 3);
+        // Glowing Eyes & Trails
+        ctx.globalCompositeOperation = "lighter";
+        // Trail
+        if (e.dy && e.dy > 0) { // If swooping down
+            ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
+            ctx.fillRect(-6, -2 - e.dy * 2, 4, e.dy * 2);
+            ctx.fillRect(2, -2 - e.dy * 2, 4, e.dy * 2);
+        }
+        
+        ctx.fillStyle = "#ff1100";
+        ctx.fillRect(-6, -2, 4, 4);
+        ctx.fillRect(2, -2, 4, 4);
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(-5, -2, 2, 1);
-        ctx.fillRect(3, -2, 2, 1);
+        ctx.fillRect(-5, -1, 2, 2);
+        ctx.fillRect(3, -1, 2, 2);
+        ctx.globalCompositeOperation = "source-over";
         
         // Fangs
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.moveTo(-3, 3); ctx.lineTo(-1, 6); ctx.lineTo(-1, 3);
-        ctx.moveTo(3, 3); ctx.lineTo(1, 6); ctx.lineTo(1, 3);
+        ctx.moveTo(-3, 4); ctx.lineTo(-1, 8); ctx.lineTo(-1, 4);
+        ctx.moveTo(3, 4); ctx.lineTo(1, 8); ctx.lineTo(1, 4);
         ctx.fill();
         
         ctx.restore();
+
         return;
     }
     if (e.type === "robot") {
@@ -1224,11 +1341,12 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
         
         let py = y + breathe - walkY;
+        let baseY = y - walkY; // Anchor for feet
         
         // Sombra de los pies
         drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
-        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
+        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : (!run && idleTimer ? Math.sin(idleTimer * 0.1) * 0.05 : 0);
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
 
         // --- BRAZO TRASERO ---
@@ -1243,10 +1361,11 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA TRASERA ---
         g.save();
-        g.translate(x + 12, py + 38);
+        g.translate(x + 12, baseY + 38);
         g.rotate(-legRot);
         g.fillStyle = "#3b3b3b"; // Pantalon oscuro trasero
-        g.fillRect(-4, 0, 8, 8);
+        // Estirar la pierna hacia arriba para que no se separe del cuerpo
+        g.fillRect(-4, -breathe, 8, 8 + breathe); 
         g.fillStyle = "#2b2b2b"; // Zapato oscuro
         g.fillRect(-5, 8, 10, 6);
         g.restore();
@@ -1267,10 +1386,10 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA FRONTAL ---
         g.save();
-        g.translate(x + 22, py + 38);
+        g.translate(x + 22, baseY + 38);
         g.rotate(legRot);
         g.fillStyle = "#555555"; // Pantalon frontal
-        g.fillRect(-4, 0, 8, 8);
+        g.fillRect(-4, -breathe, 8, 8 + breathe);
         g.fillStyle = "#444444"; // Zapato
         g.fillRect(-4, 8, 11, 6);
         g.restore();
@@ -1320,10 +1439,11 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         let breathe = (!run && idleTimer) ? Math.sin(idleTimer * 0.1) * 1.5 : 0;
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
         let py = y + breathe - walkY;
+        let baseY = y - walkY;
         
         drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
-        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
+        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : (!run && idleTimer ? Math.sin(idleTimer * 0.1) * 0.05 : 0);
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
 
         if (playerObj && playerObj.isFlipping) {
@@ -1353,10 +1473,10 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA TRASERA ---
         g.save();
-        g.translate(x + 12, py + 38);
+        g.translate(x + 12, baseY + 38);
         g.rotate(-legRot);
         g.fillStyle = "#111111"; // Pantalon trasero
-        g.fillRect(-4, 0, 8, 8);
+        g.fillRect(-4, -breathe, 8, 8 + breathe);
         g.fillStyle = "#0a0a0a"; // Zapato trasero
         g.fillRect(-5, 8, 10, 6);
         g.restore();
@@ -1369,10 +1489,10 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA FRONTAL ---
         g.save();
-        g.translate(x + 22, py + 38);
+        g.translate(x + 22, baseY + 38);
         g.rotate(legRot);
         g.fillStyle = "#222222"; 
-        g.fillRect(-4, 0, 8, 8);
+        g.fillRect(-4, -breathe, 8, 8 + breathe);
         g.fillStyle = "#111111"; 
         g.fillRect(-4, 8, 11, 6);
         g.restore();
@@ -1414,10 +1534,11 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
         let breathe = (!run && idleTimer) ? Math.sin(idleTimer * 0.2) * 1 : 0;
         let walkY = run ? Math.abs(Math.sin(frame * 0.6)) * 2 : 0;
         let py = y + breathe - walkY;
+        let baseY = y - walkY;
         
         drawContactShadow(g, x + 17, y + 48, 14 - walkY, 0.25);
 
-        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : 0;
+        let armRot = run ? Math.sin(frame * 0.6) * 0.6 : (!run && idleTimer ? Math.sin(idleTimer * 0.2) * 0.05 : 0);
         let legRot = run ? Math.sin(frame * 0.6) * 0.7 : 0;
 
         // Jetpack Fire
@@ -1448,10 +1569,10 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA TRASERA ---
         g.save();
-        g.translate(x + 12, py + 38);
+        g.translate(x + 12, baseY + 38);
         g.rotate(-legRot);
         g.fillStyle = "#444444"; 
-        g.fillRect(-3, 0, 6, 10);
+        g.fillRect(-3, -breathe, 6, 10 + breathe);
         g.fillStyle = "#333333"; 
         g.fillRect(-5, 8, 10, 4);
         g.restore();
@@ -1469,10 +1590,10 @@ function drawMiniCharacter(g, type, x, y, run = false, frame = 0, idleTimer = 0,
 
         // --- PIERNA FRONTAL ---
         g.save();
-        g.translate(x + 22, py + 38);
+        g.translate(x + 22, baseY + 38);
         g.rotate(legRot);
         g.fillStyle = "#777777"; 
-        g.fillRect(-3, 0, 6, 10);
+        g.fillRect(-3, -breathe, 6, 10 + breathe);
         g.fillStyle = "#555555"; 
         g.fillRect(-4, 8, 11, 4);
         g.restore();

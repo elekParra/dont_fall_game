@@ -411,6 +411,11 @@ function buildLevelTwo() {
     addFallingSpike(4700, 70);
 
     addSpringboard(2200, 320);
+    // Trampa Troll: Ascensor al infierno (spikes en el techo de baja gravedad)
+    for (let i = 2170; i <= 2260; i += 30) addSpike(i, true, "crystal");
+    // Trap coin alta que activa aplastador lento
+    addTrapCoin(2210, 50, 2210);
+
     addSpringboard(3850, 320);
     
     addSpikePlatform(4000, 250, 100);

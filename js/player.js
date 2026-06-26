@@ -285,11 +285,29 @@ function updatePlayer(killPlayer) {
     if (Math.abs(player.dx) > 0.1) {
         player.frame += 0.25 + Math.abs(player.dx) * 0.06;
         player.idleTimer = 0;
+        
+        if (player.dy === 0) {
+            player.runTimer = (player.runTimer || 0) + 1;
+            
+            // Power burst when just starting to run
+            if (player.runTimer === 1) {
+                addDust(player.x + player.w / 2, player.y + player.h, 20); // Big burst
+                addDust(player.x + player.w / 2, player.y + player.h, 15);
+            } 
+            // Relaxed dust once running at full speed
+            else if (player.runTimer > 15 && Math.random() < 0.15) {
+                addDust(player.x + player.w / 2, player.y + player.h, 3);
+            } 
+            // Accelerating dust
+            else if (player.runTimer <= 15 && Math.random() < 0.4) {
+                addDust(player.x + player.w / 2, player.y + player.h, 6);
+            }
+        } else {
+            player.runTimer = 0;
+        }
     } else {
         player.frame = 0;
         player.idleTimer += 1;
-    }
-    if (player.dy === 0 && Math.abs(player.dx) > 0.1 && Math.random() < 0.3) {
-        addDust(player.x + player.w / 2, player.y + player.h);
+        player.runTimer = 0;
     }
 }
