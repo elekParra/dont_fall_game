@@ -4,24 +4,33 @@
 
 
 let canvas, ctx;
+const VIRTUAL_W = 900;
+const VIRTUAL_H = 400;
 
 function init() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
+
+    // HD 2X Internal buffer resolution (crisp, high definition)
+    canvas.width = 1800;
+    canvas.height = 800;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     setupUI();
     
     // Initial build for preview (not playing yet)
-    buildLevel(canvas.width, canvas.height);
+    buildLevel(VIRTUAL_W, VIRTUAL_H);
 }
 
 function startGameLoop() {
-    loop();
+    lastFrameTime = 0;
+    requestAnimationFrame(loop);
 }
 
 function resetAfterDeath() {
-    buildLevel(canvas.width, canvas.height);
+    buildLevel(VIRTUAL_W, VIRTUAL_H);
 
     player.x = state.checkpoint.x;
     player.y = state.checkpoint.y;
@@ -129,7 +138,7 @@ function nextLevel() {
         player.invulnerable = 120;
 
         resetKeys();
-        buildLevel(canvas.width, canvas.height);
+        buildLevel(VIRTUAL_W, VIRTUAL_H);
     }, 1500);
 
     // Fade out and return to game
@@ -145,7 +154,8 @@ function nextLevel() {
 
 function update() {
     updateParticles();
-    updateAmbientParticles(canvas.width, canvas.height);
+    updateAmbientParticles(VIRTUAL_W, VIRTUAL_H);
+    updateBgShips(VIRTUAL_W, VIRTUAL_H);
 
     if (!state.gameStarted) return;
     if (state.paused) return;
@@ -165,7 +175,7 @@ function update() {
     updateEnemies(killPlayer);
 
     // Death fall checking
-    if (player.y > canvas.height + 80) {
+    if (player.y > VIRTUAL_H + 80) {
         killPlayer("Caíste al vacío", "generic");
     }
 
@@ -179,17 +189,13 @@ function update() {
         }
     }
 
-    // Smooth Camera Follow
-    let target = player.x - 260 + player.facing * 40;
+    // Smooth Continuous Camera Follow (prevents jerky speed jumps on PC)
+    let lookAhead = player.dx !== 0 ? Math.sign(player.dx) * 30 : 0;
+    let target = player.x - 260 + lookAhead;
     let diff = target - state.camX;
+    state.camX += diff * 0.06;
 
-    if (Math.abs(diff) > 30) {
-        state.camX += diff * 0.04;
-    } else {
-        state.camX += diff * 0.015;
-    }
-
-    state.camX = Math.max(0, Math.min(state.camX, state.levelEnd - canvas.width));
+    state.camX = Math.max(0, Math.min(state.camX, state.levelEnd - VIRTUAL_W));
 
     if (state.messageTimer > 0) state.messageTimer--;
     if (state.flashTimer > 0) state.flashTimer--;
@@ -204,30 +210,42 @@ function update() {
     }
 }
 
-let lastTime = 0;
-const frameDuration = 1000 / 60; // 60 FPS cap
+const TARGET_FPS = 60;
+const FRAME_DURATION = 1000 / TARGET_FPS; // 16.6667ms
+let lastFrameTime = 0;
 
 function loop(timestamp) {
-    if (!lastTime) lastTime = timestamp;
-    let elapsed = timestamp - lastTime;
-    
-    // Always request the next frame immediately
     requestAnimationFrame(loop);
 
-    // Only update and draw if enough time has passed
-    if (elapsed >= frameDuration) {
-        // Adjust lastTime to prevent drift, capping at current time
-        lastTime = timestamp - (elapsed % frameDuration);
-
+    if (!lastFrameTime) {
+        lastFrameTime = timestamp;
         if (state.freezeFrames > 0) {
             state.freezeFrames--;
-            draw(ctx, canvas);
-            return;
+        } else {
+            update();
         }
-
-        update();
         draw(ctx, canvas);
+        return;
     }
+
+    const elapsed = timestamp - lastFrameTime;
+
+    // Strict 60 FPS limiter: ignores extra frames on 120Hz/144Hz monitors
+    // 1.5ms margin allows smooth sync with 60Hz display refreshes without dropping frames
+    if (elapsed < FRAME_DURATION - 1.5) {
+        return;
+    }
+
+    // Keep accurate frame cadence without time drift
+    lastFrameTime = timestamp - (elapsed % FRAME_DURATION);
+
+    if (state.freezeFrames > 0) {
+        state.freezeFrames--;
+    } else {
+        update();
+    }
+
+    draw(ctx, canvas);
 }
 
 window.addEventListener('load', init);

@@ -21,12 +21,18 @@ function rectsCollide(a, b) {
     );
 }
 
-function roundRect(ctx, x, y, w, h, r, fill) {
+function roundRect(ctx, x, y, w, h, r, fill = true, stroke = false) {
+    if (w <= 0 || h <= 0) return;
+    if (r < 0) r = 0;
+    const maxR = Math.min(w / 2, h / 2);
+    if (r > maxR) r = maxR;
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.arcTo(x + w, y, x + w, y + h, r);
     ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r);
     ctx.arcTo(x, y, x + w, y, r);
-    if (fill) ctx.fill(); else ctx.stroke();
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
 }

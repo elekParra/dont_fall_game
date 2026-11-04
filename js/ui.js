@@ -47,8 +47,8 @@ function setupUI() {
     canvas.addEventListener("pointerdown", e => {
         if (!state.gameStarted || state.paused || state.gameOver) return;
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        const scaleX = 900 / rect.width;
+        const scaleY = 400 / rect.height;
         const x = (e.clientX - rect.left) * scaleX + state.camX;
         const y = (e.clientY - rect.top) * scaleY;
 
@@ -81,8 +81,8 @@ function setupUI() {
     canvas.addEventListener("pointermove", e => {
         if (isDraggingPlayer && state.godMode) {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
+            const scaleX = 900 / rect.width;
+            const scaleY = 400 / rect.height;
             player.x = (e.clientX - rect.left) * scaleX + state.camX - player.w / 2;
             player.y = (e.clientY - rect.top) * scaleY - player.h / 2;
             player.dy = 0;
@@ -122,7 +122,7 @@ function setupUI() {
         state.checkpointIndex = -1;
         state.checkpoint = { x: 100, y: 290 };
         
-        buildLevel(canvas.width, canvas.height);
+        buildLevel(900, 400);
         
         player.x = 100;
         player.y = 290;
@@ -155,7 +155,7 @@ function setupUI() {
         state.deaths++;
         state.checkpointIndex = -1;
         state.checkpoint = { x: 100, y: 290 };
-        buildLevel(canvas.width, canvas.height);
+        buildLevel(900, 400);
         player.x = 100;
         player.y = 290;
         player.prevX = 100;

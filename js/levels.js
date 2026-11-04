@@ -135,7 +135,7 @@ function addCrusher(x, y, w, h, active = false) {
 
 function addInvisibleWall(x, y = 160, h = 180) {
     lists.invisibleWalls.push({
-        x, y, w: 18, h, active: false
+        x, y, w: 18, h, active: false, hitTimer: 0, animProgress: 0
     });
 }
 
@@ -210,6 +210,8 @@ function clearLevelObjects() {
     bossState.iceBoss = null;
     lists.ambientParticles = [];
     lists.levelDecorations = [];
+    lists.bgShips = [];
+    if (typeof clearParticles === "function") clearParticles();
     
     // New mechanics
     lists.spikePlatforms = [];

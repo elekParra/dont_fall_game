@@ -129,6 +129,8 @@ function updatePlayer(killPlayer) {
         player.jumpCount = 1;
         state.jumpBuffer = 0;
         state.coyoteTime = 0;
+        player.squashX = 0.82;
+        player.squashY = 1.25;
         addDust(player.x + player.w / 2, player.y + player.h, 8);
     } 
     // Air Jumps & Abilities
@@ -139,6 +141,8 @@ function updatePlayer(killPlayer) {
             player.jumpCount = 2;
             player.isFlipping = true;
             player.flipAngle = 0;
+            player.squashX = 0.8;
+            player.squashY = 1.28;
             addDust(player.x + player.w / 2, player.y + player.h, 6); // Mid-air dust
             playTone(800, 0.1, "sine");
             setTimeout(() => playTone(1100, 0.15, "sine"), 50);
@@ -171,10 +175,24 @@ function updatePlayer(killPlayer) {
 
     lists.invisibleWalls.forEach(w => {
         if (!w.active) return;
+        if (w.hitTimer > 0) w.hitTimer--; // Update visual timer if not colliding but was hit recently
+
         if (rectsCollide(player, w)) {
-            if (player.dx > 0) player.x = w.x - player.w;
-            if (player.dx < 0) player.x = w.x + w.w;
-            showMessage("¿Qué ha sido eso?", 45);
+            // Force Field Repel logic
+            if (player.dx > 0 || (player.dx === 0 && player.facing === 1)) {
+                player.x = w.x - player.w - 1;
+                player.dx = -12;
+            } else {
+                player.x = w.x + w.w + 1;
+                player.dx = 12;
+            }
+            player.dy = -8; // Pop them up
+            w.hitTimer = 30; // Flash visually
+            
+            showMessage("¡Rechazado!", 45);
+            playTone(150, 0.2, "sawtooth");
+            setTimeout(() => playTone(100, 0.2, "sawtooth"), 100);
+            addExplosion(player.x + player.w/2, player.y + player.h/2, "#00ffcc", 20);
         }
     });
 
@@ -190,16 +208,20 @@ function updatePlayer(killPlayer) {
     player.y += player.dy;
     player.grounded = false;
 
-    // Collect active solids
-    let solids = [...lists.blocks];
-    lists.fakeFloors.forEach(f => { if (f.active) solids.push(f); });
-    lists.fallingBlocks.forEach(f => { if (f.y < 800) solids.push(f); });
-    lists.movingPlatforms.forEach(m => solids.push(m));
-    lists.vanishingPlatforms.forEach(v => { if (v.active) solids.push(v); });
-    lists.brittlePlatforms.forEach(b => { if (b.active) solids.push(b); });
-    lists.spikePlatforms.forEach(p => solids.push(p));
-    lists.hiddenBlocks.forEach(h => { if (h.active) solids.push(h); });
-    lists.springboards.forEach(sb => { if (sb.active) solids.push(sb); });
+    // Collect active solids near player (spatial pruning for high performance)
+    const px = player.x, pw = player.w;
+    const isNear = s => s.x < px + pw + 120 && s.x + s.w > px - 120;
+
+    let solids = [];
+    lists.blocks.forEach(b => { if (isNear(b)) solids.push(b); });
+    lists.fakeFloors.forEach(f => { if (f.active && isNear(f)) solids.push(f); });
+    lists.fallingBlocks.forEach(f => { if (f.y < 800 && isNear(f)) solids.push(f); });
+    lists.movingPlatforms.forEach(m => { if (isNear(m)) solids.push(m); });
+    lists.vanishingPlatforms.forEach(v => { if (v.active && isNear(v)) solids.push(v); });
+    lists.brittlePlatforms.forEach(b => { if (b.active && isNear(b)) solids.push(b); });
+    lists.spikePlatforms.forEach(p => { if (isNear(p)) solids.push(p); });
+    lists.hiddenBlocks.forEach(h => { if (h.active && isNear(h)) solids.push(h); });
+    lists.springboards.forEach(sb => { if (sb.active && isNear(sb)) solids.push(sb); });
 
     solids.forEach(s => {
         if (!rectsCollide(player, s)) return;
@@ -208,6 +230,11 @@ function updatePlayer(killPlayer) {
         const wasBelow = player.prevY >= s.y + s.h;
 
         if (player.dy >= 0 && wasAbove) {
+            if (!player.wasGrounded && (player.prevY < player.y || player.dy > 2)) {
+                player.squashX = 1.25;
+                player.squashY = 0.8;
+                addDust(player.x + player.w / 2, player.y + player.h, 4);
+            }
             player.y = s.y - player.h;
             player.dy = 0;
             player.grounded = true;
@@ -246,6 +273,8 @@ function updatePlayer(killPlayer) {
             if (lists.springboards.includes(s)) {
                 player.dy = -15; // huge boost
                 player.grounded = false;
+                player.squashX = 0.72;
+                player.squashY = 1.35;
                 s.animTimer = 15;
                 playTone(200, 0.1, "sine");
                 setTimeout(() => playTone(400, 0.2, "sine"), 100);
@@ -291,16 +320,15 @@ function updatePlayer(killPlayer) {
             
             // Power burst when just starting to run
             if (player.runTimer === 1) {
-                addDust(player.x + player.w / 2, player.y + player.h, 20); // Big burst
-                addDust(player.x + player.w / 2, player.y + player.h, 15);
+                addDust(player.x + player.w / 2, player.y + player.h, 4);
             } 
             // Relaxed dust once running at full speed
-            else if (player.runTimer > 15 && Math.random() < 0.15) {
-                addDust(player.x + player.w / 2, player.y + player.h, 3);
+            else if (player.runTimer > 15 && Math.random() < 0.1) {
+                addDust(player.x + player.w / 2, player.y + player.h, 2);
             } 
             // Accelerating dust
-            else if (player.runTimer <= 15 && Math.random() < 0.4) {
-                addDust(player.x + player.w / 2, player.y + player.h, 6);
+            else if (player.runTimer <= 15 && Math.random() < 0.25) {
+                addDust(player.x + player.w / 2, player.y + player.h, 3);
             }
         } else {
             player.runTimer = 0;
@@ -310,4 +338,9 @@ function updatePlayer(killPlayer) {
         player.idleTimer += 1;
         player.runTimer = 0;
     }
+
+    // Smoothly restore squash and stretch
+    player.squashX = (player.squashX || 1.0) + (1.0 - (player.squashX || 1.0)) * 0.18;
+    player.squashY = (player.squashY || 1.0) + (1.0 - (player.squashY || 1.0)) * 0.18;
+    player.wasGrounded = player.grounded;
 }

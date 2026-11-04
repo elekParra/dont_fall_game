@@ -208,15 +208,18 @@ function updateTraps(killPlayer) {
     });
 
     // Coins
+    const playerCenterX = player.x + player.w / 2;
+    const playerCenterY = player.y + player.h / 2;
     lists.coins.forEach(c => {
         c.anim += 0.1;
         if (c.taken) return;
 
-        const dx = (player.x + player.w / 2) - c.x;
-        const dy = (player.y + player.h / 2) - c.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dx = playerCenterX - c.x;
+        if (Math.abs(dx) > 30) return;
+        const dy = playerCenterY - c.y;
+        if (Math.abs(dy) > 30) return;
 
-        if (dist < 28) {
+        if (dx * dx + dy * dy < 784) { // 28 * 28 = 784, avoids Math.sqrt
             c.taken = true;
             state.collectedCoins.push(c.x + "_" + c.y);
             state.score++;
@@ -224,8 +227,13 @@ function updateTraps(killPlayer) {
             state.scoreScale = 1.5;
             state.scoreTimer = 15;
             
-            if (c.trap) addExplosion(c.x, c.y, "#ff3333", 10);
-            else addCoinSparkle(c.x, c.y, 15);
+            if (c.trap) {
+                addExplosion(c.x, c.y, "#ff3355", 14);
+                if (typeof addFloatingText === "function") addFloatingText(c.x, c.y - 12, "¡TRAMPA!", "#ff3355");
+            } else {
+                addCoinSparkle(c.x, c.y, 10);
+                if (typeof addFloatingText === "function") addFloatingText(c.x, c.y - 12, "+1", "#ffd700");
+            }
 
             if (state.coinsCount >= 10) {
                 state.coinsCount = 0;

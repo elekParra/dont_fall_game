@@ -87,7 +87,10 @@ const player = {
     flipAngle: 0,
     jetpackFuel: 0,
     jetpackActive: false,
-    lifeGlowTimer: 0
+    lifeGlowTimer: 0,
+    squashX: 1.0,
+    squashY: 1.0,
+    wasGrounded: false
 };
 
 // Lists of level objects
@@ -119,7 +122,8 @@ const lists = {
     sawBlades: [],
     particles: [],
     ambientParticles: [],
-    levelDecorations: []
+    levelDecorations: [],
+    bgShips: []
 };
 
 // Boss state
