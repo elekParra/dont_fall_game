@@ -279,4 +279,126 @@ function updateTraps(killPlayer) {
             addExplosion(cp.x, cp.y, "#00ff99", 25);
         }
     });
+
+    // --- ADVANCED ENGAGING MECHANICS ---
+
+    // 1. Troll Coins with Running Legs
+    lists.trollCoins.forEach(tc => {
+        if (tc.taken) return;
+        const dx = playerCenterX - tc.x;
+        const dy = playerCenterY - tc.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 110 && !tc.fleeing) {
+            tc.fleeing = true;
+            tc.vx = 4.3;
+            showMessage("¡La moneda se escapa!", 65);
+            playTone(600, 0.08, "triangle");
+        }
+
+        if (tc.fleeing) {
+            tc.legsAnim += 0.45;
+            tc.x += tc.vx;
+            tc.y = tc.startY + Math.sin(tc.legsAnim * 2) * 4;
+            if (Math.random() < 0.25) addDust(tc.x, tc.y + 10, 1);
+        }
+
+        if (dist < 26) {
+            tc.taken = true;
+            state.score += 5;
+            state.scoreScale = 1.6;
+            state.scoreTimer = 16;
+            showMessage("¡Moneda fugitiva atrapada! +5", 80);
+            addCoinSparkle(tc.x, tc.y, 16);
+            if (typeof addFloatingText === "function") addFloatingText(tc.x, tc.y - 12, "+5 ORO", "#ffd700");
+            playTone(880, 0.1, "sine");
+            setTimeout(() => playTone(1100, 0.15, "sine"), 80);
+        }
+    });
+
+    // 2. Secret Star Gems (Ruby, Sapphire, Emerald)
+    lists.gems.forEach(g => {
+        if (g.taken) return;
+        g.anim += 0.08;
+        g.floatY = Math.sin(g.anim) * 5;
+
+        const gemRect = { x: g.x - 14, y: g.y + g.floatY - 14, w: 28, h: 28 };
+        if (rectsCollide(player, gemRect)) {
+            g.taken = true;
+            state.collectedGems.push(g.id);
+            const idx = g.type === "ruby" ? 0 : g.type === "sapphire" ? 1 : 2;
+            state.currentGems[idx] = true;
+            state.score += 25;
+            state.scoreScale = 1.8;
+            state.scoreTimer = 20;
+
+            const name = g.type === "ruby" ? "¡RUBÍ SECRETO!" : g.type === "sapphire" ? "¡ZAFIRO SECRETO!" : "¡ESMERALDA SECRETA!";
+            const color = g.type === "ruby" ? "#ff2a55" : g.type === "sapphire" ? "#00c3ff" : "#00ff77";
+            showMessage(`${name} (+25)`, 100);
+            if (typeof addFloatingText === "function") addFloatingText(g.x, g.y - 14, name, color);
+            addExplosion(g.x, g.y, color, 30);
+            playTone(660, 0.1, "sine");
+            setTimeout(() => playTone(880, 0.1, "sine"), 80);
+            setTimeout(() => playTone(1320, 0.25, "sine"), 160);
+        }
+    });
+
+    // 3. Fake Checkpoints
+    lists.fakeCheckpoints.forEach(fcp => {
+        if (!fcp.triggered && rectsCollide(player, { x: fcp.x, y: fcp.y, w: 28, h: 50 })) {
+            fcp.triggered = true;
+            fcp.vy = -3.8;
+            showMessage("¡JAJA! ¡Checkpoint FALSO!", 90);
+            if (typeof addFloatingText === "function") addFloatingText(fcp.x, fcp.y - 15, "¡TROLLEO!", "#ff4444");
+            playTone(320, 0.15, "sawtooth");
+            setTimeout(() => playTone(160, 0.25, "sawtooth"), 120);
+        }
+        if (fcp.triggered) {
+            fcp.y += fcp.vy;
+            fcp.x += Math.sin(Date.now() / 150) * 1.5;
+            fcp.alpha = Math.max(0, fcp.alpha - 0.015);
+        }
+    });
+
+    // 4. Runaway Castle with Legs
+    lists.runawayCastles.forEach(rc => {
+        if (!rc.triggered && player.x > rc.x - 280) {
+            rc.triggered = true;
+            rc.runVx = 5.2;
+            showMessage("¿¡A DÓNDE VA EL CASTILLO!?", 100);
+            playTone(220, 0.15, "square");
+            setTimeout(() => playTone(330, 0.2, "square"), 100);
+        }
+        if (rc.triggered && rc.runX < 480) {
+            rc.runX += rc.runVx;
+            rc.legsAnim += 0.35;
+            if (Math.random() < 0.3) addDust(rc.x + rc.runX + 20, rc.y + 70, 2);
+            if (rc.runX >= 480) {
+                rc.runX = 480;
+                state.shakeTimer = 15;
+                state.shakePower = 6;
+                addExplosion(rc.x + rc.runX + 40, rc.y + 70, "#aaaaaa", 25);
+                playTone(120, 0.3, "sawtooth");
+                showMessage("¡Ahora sí puedes pasar!", 80);
+            }
+        }
+    });
+
+    // 5. Chase Wall Hazard
+    if (state.chaseWall && state.chaseWall.active) {
+        state.chaseWall.timer++;
+        state.chaseWall.x += state.chaseWall.speed;
+
+        if (Math.random() < 0.4) {
+            const debrisY = state.groundY - 10 - Math.random() * 260;
+            addExplosion(state.chaseWall.x + 20, debrisY, state.chaseWall.type === "factory" ? "#ff5500" : "#ffffff", 8);
+        }
+
+        if (player.x + player.w < state.chaseWall.x + 35) {
+            killPlayer(state.chaseWall.type === "factory" ? "Triturado por la maquinaria" : "Sepultado por la avalancha", state.chaseWall.type === "factory" ? "crush" : "ice");
+        }
+    }
+
+    // 6. Dark Zones Check
+    state.inDarkZone = lists.darkZones.some(dz => dz.active && player.x >= dz.x && player.x <= dz.x + dz.w);
 }

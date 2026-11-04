@@ -47,6 +47,9 @@ function resetAfterDeath() {
     // Reset points/coins progress on death
     state.score = 0;
     state.coinsCount = 0;
+    state.playerInCannon = null;
+    state.chaseWall = null;
+    state.inDarkZone = false;
 
     resetKeys();
 }
@@ -125,6 +128,8 @@ function nextLevel() {
     // Actual level load
     setTimeout(() => {
         state.currentLevel++;
+        state.levelTimer = 0;
+        state.currentGems = [false, false, false];
         state.checkpointIndex = -1;
         state.checkpoint = { x: 100, y: 290 };
 
@@ -160,6 +165,10 @@ function update() {
     if (!state.gameStarted) return;
     if (state.paused) return;
     if (state.gameOver || state.win) return;
+
+    state.levelTimer++;
+    state.totalTimer++;
+    if (state.switchAnim > 0) state.switchAnim--;
 
     if (state.playerDead) {
         state.respawnTimer--;

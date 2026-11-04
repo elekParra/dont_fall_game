@@ -62,6 +62,13 @@ function draw(ctx, canvas) {
     lists.hiddenBlocks.forEach(h => { if (h.x + h.w > leftEdge && h.x < rightEdge) drawHiddenBlock(ctx, h); });
     lists.fallingSpikes.forEach(s => { if (s.x + s.w > leftEdge && s.x < rightEdge) drawFallingSpike(ctx, s); });
     lists.springboards.forEach(sb => { if (sb.x + sb.w > leftEdge && sb.x < rightEdge) drawSpringboard(ctx, sb); });
+    lists.switchBlocks.forEach(sb => { if (sb.x + sb.w > leftEdge && sb.x < rightEdge) drawSwitchBlock(ctx, sb); });
+    lists.cannons.forEach(cn => { if (cn.x + cn.w > leftEdge && cn.x < rightEdge) drawCannon(ctx, cn); });
+    lists.trollCoins.forEach(tc => { if (tc.x + 30 > leftEdge && tc.x - 30 < rightEdge) drawTrollCoin(ctx, tc); });
+    lists.gems.forEach(gm => { if (gm.x + 30 > leftEdge && gm.x - 30 < rightEdge) drawGem(ctx, gm); });
+    lists.fakeCheckpoints.forEach(fcp => { if (fcp.x + 40 > leftEdge && fcp.x - 40 < rightEdge) drawFakeCheckpoint(ctx, fcp); });
+    lists.runawayCastles.forEach(rc => { if (rc.x + rc.runX + 100 > leftEdge && rc.x + rc.runX - 100 < rightEdge) drawRunawayCastle(ctx, rc); });
+    if (state.chaseWall && state.chaseWall.active) drawChaseWall(ctx, state.chaseWall);
     lists.spikes.forEach(s => { if (s.x + s.w > leftEdge && s.x < rightEdge) drawSpike(ctx, s); });
     lists.coins.forEach(c => { if (c.x + 20 > leftEdge && c.x - 20 < rightEdge) drawCoin(ctx, c); });
     lists.enemyProjectiles.forEach(p => { if (p.x + p.w > leftEdge && p.x < rightEdge) drawEnemyProjectile(ctx, p); });
@@ -77,6 +84,10 @@ function draw(ctx, canvas) {
     drawPlayer(ctx);
 
     ctx.restore(); // camera translate
+
+    if (state.inDarkZone) {
+        drawDarkZone(ctx);
+    }
 
     drawHUD(ctx, vCanvas);
 
@@ -2524,12 +2535,361 @@ function drawHUDCoin(ctx, x, y, scale = 1.1) {
     ctx.restore();
 }
 
+// =========================================================
+// ENGAGING MECHANICS RENDERING
+// =========================================================
+
+function drawSwitchBlock(ctx, sb) {
+    const isActive = sb.color === state.switchState;
+    const isRed = sb.color === "red";
+    const mainColor = isRed ? "#ff2a55" : "#00a2ff";
+    const darkEdge = isRed ? "#8a0020" : "#005599";
+
+    ctx.save();
+    if (isActive) {
+        drawPlatformShadow(ctx, sb.x, sb.y, sb.w, sb.h);
+
+        // Active solid glowing block
+        ctx.fillStyle = mainColor;
+        roundRect(ctx, sb.x, sb.y, sb.w, sb.h, 4, true);
+
+        // 3D bottom bevel
+        ctx.fillStyle = darkEdge;
+        roundRect(ctx, sb.x, sb.y + sb.h - 5, sb.w, 5, 4, true);
+
+        // Top glossy highlight
+        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+        ctx.fillRect(sb.x + 3, sb.y + 2, sb.w - 6, 3);
+
+        // Outer neon border
+        ctx.strokeStyle = isRed ? "#ff88a3" : "#80d0ff";
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, sb.x + 0.5, sb.y + 0.5, sb.w - 1, sb.h - 1, 4, false);
+
+        // Center jewel icon
+        ctx.fillStyle = "#ffffff";
+        const cx = sb.x + sb.w / 2;
+        const cy = sb.y + sb.h / 2 - 1;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 4);
+        ctx.lineTo(cx + 4, cy);
+        ctx.lineTo(cx, cy + 4);
+        ctx.lineTo(cx - 4, cy);
+        ctx.closePath();
+        ctx.fill();
+    } else {
+        // Inactive ghost outline block
+        ctx.fillStyle = isRed ? "rgba(255, 42, 85, 0.12)" : "rgba(0, 162, 255, 0.12)";
+        roundRect(ctx, sb.x, sb.y, sb.w, sb.h, 4, true);
+
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = isRed ? "rgba(255, 42, 85, 0.5)" : "rgba(0, 162, 255, 0.5)";
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, sb.x + 0.5, sb.y + 0.5, sb.w - 1, sb.h - 1, 4, false);
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = isRed ? "rgba(255, 42, 85, 0.3)" : "rgba(0, 162, 255, 0.3)";
+        const cx = sb.x + sb.w / 2;
+        const cy = sb.y + sb.h / 2;
+        ctx.fillRect(cx - 2, cy - 2, 4, 4);
+    }
+    ctx.restore();
+}
+
+function drawCannon(ctx, c) {
+    ctx.save();
+    const cx = c.x + c.w / 2;
+    const cy = c.y + c.h / 2;
+
+    // Cannon Base (Mount)
+    ctx.fillStyle = "#22252c";
+    ctx.beginPath();
+    ctx.arc(cx, cy + 10, 14, Math.PI, 0);
+    ctx.fill();
+    ctx.strokeStyle = "#434857";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Pivot bolt
+    ctx.fillStyle = "#ffd700";
+    ctx.beginPath();
+    ctx.arc(cx, cy + 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rotating Barrel
+    ctx.translate(cx, cy);
+    ctx.rotate(c.angle);
+
+    const recoil = c.anim > 0 ? -6 * (c.anim / 16) : 0;
+
+    // Barrel body
+    ctx.fillStyle = "#353b48";
+    roundRect(ctx, -8 + recoil, -10, 24, 20, 4, true);
+
+    // Barrel highlights & metallic bands
+    ctx.fillStyle = "#f5be18";
+    ctx.fillRect(2 + recoil, -10, 4, 20);
+    ctx.fillStyle = "#1e222b";
+    ctx.fillRect(14 + recoil, -11, 4, 22);
+
+    // Muzzle hole
+    ctx.fillStyle = "#0c0e12";
+    ctx.beginPath();
+    ctx.ellipse(17 + recoil, 0, 3, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawTrollCoin(ctx, tc) {
+    if (tc.taken) return;
+    ctx.save();
+
+    if (tc.fleeing) {
+        ctx.strokeStyle = "#4a2c00";
+        ctx.lineWidth = 2;
+        const step = Math.sin(tc.legsAnim);
+
+        // Leg 1
+        ctx.beginPath();
+        ctx.moveTo(tc.x - 3, tc.y + 6);
+        ctx.lineTo(tc.x - 5 + step * 5, tc.y + 14);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ff3333";
+        ctx.fillRect(tc.x - 7 + step * 5, tc.y + 13, 5, 3);
+
+        // Leg 2
+        ctx.beginPath();
+        ctx.moveTo(tc.x + 3, tc.y + 6);
+        ctx.lineTo(tc.x + 5 - step * 5, tc.y + 14);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ff3333";
+        ctx.fillRect(tc.x + 3 - step * 5, tc.y + 13, 5, 3);
+
+        // Panic sweat drop
+        ctx.fillStyle = "#00ffff";
+        ctx.beginPath();
+        ctx.arc(tc.x + 9, tc.y - 7, 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    drawHUDCoin(ctx, tc.x, tc.y, 1.25);
+    ctx.restore();
+}
+
+function drawGem(ctx, g) {
+    if (g.taken) return;
+    ctx.save();
+    const y = g.y + g.floatY;
+
+    const glow = g.type === "ruby" ? "rgba(255, 40, 80, 0.45)" : g.type === "sapphire" ? "rgba(0, 180, 255, 0.45)" : "rgba(0, 255, 120, 0.45)";
+    drawGlow(ctx, g.x, y, 16, glow);
+
+    let topColor = "#ff738e", midColor = "#ff1f4b", darkColor = "#8a0020";
+    if (g.type === "sapphire") {
+        topColor = "#8fe0ff"; midColor = "#00a2ff"; darkColor = "#004780";
+    } else if (g.type === "emerald") {
+        topColor = "#80ffb0"; midColor = "#00e660"; darkColor = "#00662a";
+    }
+
+    const r = 9;
+    ctx.fillStyle = midColor;
+    ctx.beginPath();
+    ctx.moveTo(g.x - r, y);
+    ctx.lineTo(g.x, y - r);
+    ctx.lineTo(g.x + r, y);
+    ctx.lineTo(g.x, y + r);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = topColor;
+    ctx.beginPath();
+    ctx.moveTo(g.x, y - r);
+    ctx.lineTo(g.x + r, y);
+    ctx.lineTo(g.x, y);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = darkColor;
+    ctx.beginPath();
+    ctx.moveTo(g.x - r, y);
+    ctx.lineTo(g.x, y + r);
+    ctx.lineTo(g.x, y);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(g.x - 2, y - 4, 3, 3);
+
+    ctx.restore();
+}
+
+function drawChaseWall(ctx, cw) {
+    if (!cw || !cw.active) return;
+    ctx.save();
+
+    const isFactory = cw.type === "factory";
+    const wallX = cw.x;
+
+    ctx.fillStyle = isFactory ? "#181a20" : "#d8f2ff";
+    ctx.fillRect(wallX - 300, 0, 300, 400);
+
+    const stripeW = 16;
+    for (let y = 0; y < 400; y += stripeW * 2) {
+        ctx.fillStyle = isFactory ? "#ffcc00" : "#70c8ff";
+        ctx.beginPath();
+        ctx.moveTo(wallX - 18, y);
+        ctx.lineTo(wallX, y + stripeW);
+        ctx.lineTo(wallX, y + stripeW * 2);
+        ctx.lineTo(wallX - 18, y + stripeW);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    ctx.fillStyle = isFactory ? "#b8b8b8" : "#ffffff";
+    for (let y = 10; y < 390; y += 22) {
+        ctx.beginPath();
+        ctx.moveTo(wallX, y);
+        ctx.lineTo(wallX + 18, y + 11);
+        ctx.lineTo(wallX, y + 22);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    const alarmGlow = Math.sin(Date.now() / 100) > 0 ? "rgba(255, 0, 0, 0.8)" : "rgba(255, 0, 0, 0.2)";
+    drawGlow(ctx, wallX - 8, 40, 35, alarmGlow);
+    ctx.fillStyle = "#ff0033";
+    ctx.fillRect(wallX - 14, 34, 12, 12);
+
+    ctx.restore();
+}
+
+function drawDarkZone(ctx) {
+    ctx.save();
+    const px = player.x + player.w / 2 - state.camX;
+    const py = player.y + player.h / 2;
+
+    const lanternRadius = 145;
+    const grad = ctx.createRadialGradient(px, py, 25, px, py, lanternRadius);
+    grad.addColorStop(0, "rgba(255, 230, 160, 0.0)");
+    grad.addColorStop(0.55, "rgba(5, 10, 22, 0.65)");
+    grad.addColorStop(1, "rgba(4, 7, 16, 0.97)");
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 900, 400);
+
+    ctx.strokeStyle = "rgba(255, 210, 110, 0.22)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(px, py, 45, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+function drawRunawayCastle(ctx, rc) {
+    ctx.save();
+    const x = rc.x + rc.runX;
+    const y = rc.y;
+
+    ctx.fillStyle = "#555566";
+    ctx.fillRect(x, y + 20, 80, 50);
+
+    for (let bx = 0; bx < 80; bx += 20) {
+        ctx.fillRect(x + bx, y + 10, 12, 10);
+    }
+
+    ctx.fillStyle = "#1e1e24";
+    ctx.beginPath();
+    ctx.arc(x + 40, y + 50, 14, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(x + 26, y + 50, 28, 20);
+
+    ctx.fillStyle = "#8b4513";
+    ctx.fillRect(x + 38, y - 20, 4, 30);
+    ctx.fillStyle = "#ffcc00";
+    ctx.beginPath();
+    ctx.moveTo(x + 42, y - 20);
+    ctx.lineTo(x + 65 + (rc.triggered ? -Math.sin(rc.legsAnim) * 5 : 0), y - 12);
+    ctx.lineTo(x + 42, y - 4);
+    ctx.closePath();
+    ctx.fill();
+
+    if (rc.triggered && rc.runX < 480) {
+        ctx.strokeStyle = "#222222";
+        ctx.lineWidth = 3;
+        const step = Math.sin(rc.legsAnim);
+
+        ctx.beginPath();
+        ctx.moveTo(x + 20, y + 70);
+        ctx.lineTo(x + 18 + step * 10, y + 84);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + 60, y + 70);
+        ctx.lineTo(x + 58 - step * 10, y + 84);
+        ctx.stroke();
+
+        ctx.fillStyle = "#00ffff";
+        ctx.beginPath();
+        ctx.arc(x + 82, y + 16, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+function drawFakeCheckpoint(ctx, fcp) {
+    ctx.save();
+    ctx.globalAlpha = fcp.alpha;
+
+    if (!fcp.triggered) {
+        ctx.fillStyle = "#888899";
+        ctx.fillRect(fcp.x, fcp.y, 4, 50);
+        ctx.fillStyle = "#00ffcc";
+        ctx.beginPath();
+        ctx.moveTo(fcp.x + 4, fcp.y);
+        ctx.lineTo(fcp.x + 26, fcp.y + 10);
+        ctx.lineTo(fcp.x + 4, fcp.y + 20);
+        ctx.closePath();
+        ctx.fill();
+    } else {
+        ctx.fillStyle = "#ff2244";
+        ctx.beginPath();
+        ctx.arc(fcp.x + 10, fcp.y + 10, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#cc1133";
+        ctx.fillRect(fcp.x + 8, fcp.y + 24, 4, 3);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(fcp.x + 10, fcp.y + 27);
+        ctx.quadraticCurveTo(fcp.x + 6, fcp.y + 36, fcp.x + 12, fcp.y + 44);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(fcp.x + 6, fcp.y + 7, 2, 0, Math.PI * 2);
+        ctx.arc(fcp.x + 14, fcp.y + 7, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(fcp.x + 10, fcp.y + 11, 4, 0, Math.PI);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
 function drawHUD(ctx, canvas) {
     ctx.save();
 
     const panelX = 14;
     const panelY = 12;
-    const panelW = 295;
+    const panelW = 345;
     const panelH = 68;
 
     // Theme border color accent
@@ -2586,7 +2946,7 @@ function drawHUD(ctx, canvas) {
     ctx.textBaseline = "middle";
     ctx.textAlign = "left";
 
-    // --- ROW 1: VIDAS (Pixel Hearts) & SCORE ---
+    // --- ROW 1: VIDAS, SCORE & SPEEDRUN TIMER ---
     const row1Y = panelY + 20;
 
     // 1a. VIDAS
@@ -2601,35 +2961,58 @@ function drawHUD(ctx, canvas) {
     ctx.fillStyle = lowHealth ? "#ff3355" : "#ffffff";
     ctx.fillText(`${state.lives}`, panelX + 42, row1Y + 1);
 
-    // Mini heart pips (visual indicators up to 6 hearts)
-    let pipsToShow = Math.min(state.lives, 6);
+    // Mini heart pips (visual indicators up to 5 hearts)
+    let pipsToShow = Math.min(state.lives, 5);
     for (let i = 0; i < pipsToShow; i++) {
-        drawPixelHeart(ctx, panelX + 72 + i * 11, row1Y, 0.75, false);
+        drawPixelHeart(ctx, panelX + 70 + i * 10, row1Y, 0.7, false);
     }
 
-    // 1b. SCORE (Right side of Row 1)
-    const scoreX = panelX + 168;
-    drawHUDCoin(ctx, scoreX, row1Y, 1.2);
+    // 1b. SCORE (Middle of Row 1)
+    const scoreX = panelX + 138;
+    drawHUDCoin(ctx, scoreX, row1Y, 1.15);
 
     ctx.save();
-    ctx.translate(scoreX + 13, row1Y);
+    ctx.translate(scoreX + 12, row1Y);
     if (state.scoreScale !== 1.0) {
         ctx.scale(state.scoreScale, state.scoreScale);
     }
-    // Drop shadow
-    ctx.font = 'bold 10px "Press Start 2P", monospace';
+    ctx.font = 'bold 9px "Press Start 2P", monospace';
     ctx.fillStyle = "#5c3d00";
     ctx.fillText(`${state.score}`, 1, 2);
-    // Gold text
     ctx.fillStyle = state.scoreTimer > 5 ? "#ffffff" : "#ffd700";
     ctx.fillText(`${state.score}`, 0, 1);
     ctx.restore();
+
+    // 1c. SPEEDRUN TIMER (Right side of Row 1)
+    const timerX = panelX + 235;
+    ctx.font = 'bold 8px "Press Start 2P", monospace';
+    ctx.fillStyle = "#88e0ff";
+    let totalSec = Math.floor(state.levelTimer / 60);
+    let mins = Math.floor(totalSec / 60);
+    let secs = totalSec % 60;
+    let tenths = Math.floor((state.levelTimer % 60) / 6);
+    let timeStr = `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}.${tenths}`;
+    
+    // Mini clock icon
+    ctx.strokeStyle = "#88e0ff";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(timerX, row1Y, 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(timerX, row1Y);
+    ctx.lineTo(timerX + 3, row1Y);
+    ctx.moveTo(timerX, row1Y);
+    ctx.lineTo(timerX, row1Y - 3);
+    ctx.stroke();
+
+    ctx.fillText(timeStr, timerX + 10, row1Y + 1);
 
     // Divider line between rows
     ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
     ctx.fillRect(panelX + 8, panelY + 36, panelW - 16, 1);
 
-    // --- ROW 2: COIN PROGRESS, LEVEL BADGE, DEATHS ---
+    // --- ROW 2: COINS PROGRESS, LEVEL BADGE, 3 STAR GEMS, DEATHS ---
     const row2Y = panelY + 52;
 
     // 2a. COIN PROGRESS (Coins to next life: 0/10)
@@ -2641,7 +3024,7 @@ function drawHUD(ctx, canvas) {
 
     // Mini progress bar for coins
     let barX = panelX + 76;
-    let barW = 38;
+    let barW = 34;
     let barH = 6;
     ctx.fillStyle = "#141c26";
     ctx.fillRect(barX, row2Y - 3, barW, barH);
@@ -2653,32 +3036,79 @@ function drawHUD(ctx, canvas) {
     ctx.strokeRect(barX + 0.5, row2Y - 2.5, barW - 1, barH - 1);
 
     // 2b. LEVEL BADGE
-    let badgeX = panelX + 122;
-    let badgeW = 104;
+    let badgeX = panelX + 118;
+    let badgeW = 96;
     let badgeH = 17;
     ctx.fillStyle = themeBadgeBg;
     ctx.fillRect(badgeX, row2Y - 8, badgeW, badgeH);
 
-    // Crisp 1px solid border
     ctx.fillStyle = accentBorder;
     ctx.fillRect(badgeX, row2Y - 8, badgeW, 1);
     ctx.fillRect(badgeX, row2Y + badgeH - 9, badgeW, 1);
     ctx.fillRect(badgeX, row2Y - 8, 1, badgeH);
     ctx.fillRect(badgeX + badgeW - 1, row2Y - 8, 1, badgeH);
 
-    ctx.font = 'bold 8px "Press Start 2P", monospace';
+    ctx.font = 'bold 7px "Press Start 2P", monospace';
     ctx.fillStyle = themeBadgeText;
     ctx.textAlign = "center";
     ctx.fillText(themeName, badgeX + badgeW / 2, row2Y + 1);
     ctx.textAlign = "left";
 
-    // 2c. DEATHS (Skull + count)
-    let skullX = panelX + 238;
+    // 2c. 3 SECRET STAR GEMS ([♦] [♦] [♦])
+    const gemStartX = panelX + 224;
+    const gemColors = ["#ff2a55", "#00c3ff", "#00ff77"];
+    for (let i = 0; i < 3; i++) {
+        const gx = gemStartX + i * 13;
+        const gy = row2Y;
+        const hasGem = state.currentGems[i];
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(gx, gy - 5);
+        ctx.lineTo(gx + 4.5, gy);
+        ctx.lineTo(gx, gy + 5);
+        ctx.lineTo(gx - 4.5, gy);
+        ctx.closePath();
+
+        if (hasGem) {
+            ctx.fillStyle = gemColors[i];
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            // Tiny gleam
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(gx - 1, gy - 2, 2, 2);
+        } else {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // 2d. DEATHS (Skull + count)
+    let skullX = panelX + 276;
     drawPixelSkull(ctx, skullX, row2Y, 1.1);
 
     ctx.font = 'bold 9px "Press Start 2P", monospace';
     ctx.fillStyle = "#f0a5a5";
     ctx.fillText(`${state.deaths}`, skullX + 10, row2Y + 1);
+
+    // 2e. SWITCH INDICATOR PILL (if level contains switch blocks)
+    if (lists.switchBlocks && lists.switchBlocks.length > 0) {
+        const swX = panelX + panelW - 24;
+        const isRed = state.switchState === "red";
+        ctx.fillStyle = isRed ? "#ff2a55" : "#00a2ff";
+        ctx.beginPath();
+        ctx.arc(swX, row2Y, 5 + (state.switchAnim > 0 ? 1.5 : 0), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
 
     ctx.restore();
 }

@@ -71,6 +71,62 @@ function addSpringboard(x, y) {
     });
 }
 
+function addSwitchBlock(x, y, w, h = 22, color = "red") {
+    lists.switchBlocks.push({
+        x, y, w, h, color, type: "switch"
+    });
+}
+
+function addCannon(x, y, angle = -Math.PI / 4, force = 16) {
+    lists.cannons.push({
+        x, y, w: 44, h: 44, angle, force, cooldown: 0, anim: 0
+    });
+}
+
+function addTrollCoin(x, y) {
+    lists.trollCoins.push({
+        x, y, r: 10, startX: x, startY: y, vx: 0, vy: 0, fleeing: false, legsAnim: 0, taken: false, trap: true
+    });
+}
+
+function addGem(id, x, y, type = "ruby") {
+    if (state.collectedGems.includes(id)) return;
+    lists.gems.push({
+        id, x, y, type, taken: false, anim: Math.random() * 10, floatY: 0
+    });
+}
+
+function addDarkZone(x, w) {
+    lists.darkZones.push({
+        x, w, active: true
+    });
+}
+
+function addRunawayCastle(x, y) {
+    lists.runawayCastles.push({
+        x, y, triggered: false, runX: 0, runVx: 0, legsAnim: 0
+    });
+}
+
+function addFakeCheckpoint(x, y) {
+    lists.fakeCheckpoints.push({
+        x, y, triggered: false, vy: 0, popped: false, alpha: 1
+    });
+}
+
+function startChaseWall(startX, speed = 2.4, type = "factory") {
+    state.chaseWall = {
+        active: true,
+        x: startX,
+        speed,
+        w: 90,
+        type,
+        timer: 0
+    };
+    showMessage(type === "factory" ? "¡ALARMA! ¡TRITURADORA ACTIVADA!" : "¡PELIGRO! ¡AVALANCHA DE NIEVE!", 120);
+    playTone(150, 0.4, "sawtooth");
+}
+
 function addSpike(x, hidden = false, variant = "normal", customY = null) {
     let baseY = customY !== null ? customY : state.groundY;
     lists.spikes.push({
@@ -218,6 +274,21 @@ function clearLevelObjects() {
     lists.hiddenBlocks = [];
     lists.fallingSpikes = [];
     lists.springboards = [];
+
+    // Advanced & Engaging Mechanics
+    lists.switchBlocks = [];
+    lists.cannons = [];
+    lists.trollCoins = [];
+    lists.gems = [];
+    lists.darkZones = [];
+    lists.runawayCastles = [];
+    lists.fakeCheckpoints = [];
+    state.chaseWall = null;
+    state.playerInCannon = null;
+    state.switchState = "red";
+    state.switchAnim = 0;
+    state.inDarkZone = false;
+    state.currentGems = [false, false, false];
 }
 
 function restoreReachedCheckpoints() {
@@ -288,10 +359,10 @@ function buildLevel(canvasWidth, canvasHeight) {
 // ---------------------------------------------------------
 
 function buildLevelOne() {
-    setLevel("grass", 6200, 340);
+    setLevel("grass", 6500, 340);
 
-    [[0, 850], [980, 500], [1650, 600], [2450, 500], [3200, 650], [4100, 650], [5000, 1150]].forEach(([x, w]) => addGround(x, w));
-    [[850, 130], [1480, 170], [2250, 200], [2950, 250], [3850, 250], [4750, 250]].forEach(([x, w]) => addLava(x, w));
+    [[0, 850], [980, 500], [1650, 600], [2450, 500], [3200, 650], [4100, 650], [5000, 700], [6100, 600]].forEach(([x, w]) => addGround(x, w));
+    [[850, 130], [1480, 170], [2250, 200], [2950, 250], [3850, 250], [4750, 250], [5700, 400]].forEach(([x, w]) => addLava(x, w));
 
     addFallingBlock(520, 265, 100, 99999);
     lists.fallingBlocks[lists.fallingBlocks.length - 1].visualType = "grass";
@@ -300,17 +371,45 @@ function buildLevelOne() {
     addSpikePlatform(3420, 250, 120);
     addPlatform(5300, 240, 120);
 
+    // --- On/Off Switch Blocks (Cross Lava Chasm by jumping!) ---
+    addSwitchBlock(1480, 250, 50, 20, "red");
+    addSwitchBlock(1540, 230, 50, 20, "blue");
+    addSwitchBlock(1600, 250, 50, 20, "red");
+
+    // --- Vertical High Route (Springboard up to secret treetop path) ---
+    addSpringboard(2220, 320);
+    addPlatform(2260, 150, 90);
+    addPlatform(2380, 130, 100);
+    addGem("1_0", 2430, 95, "ruby"); // Gem 1: Ruby
+
+    // --- Secret False Floor Alcove ---
     addFakeFloor(690, 160);
-    addFakeFloor(1480, 170);
     addFakeFloor(2950, 250);
-    addFakeFloor(4750, 250);
+    addFakeFloor(4200, 80);
+    addPlatform(4180, 290, 110);
+    addGem("1_1", 4235, 260, "sapphire"); // Gem 2: Sapphire
+    addSpringboard(4250, 275);
+
+    // --- Troll Coin That Runs Away ---
+    addTrollCoin(3480, 310);
+
+    // --- Emerald Gem on Switch Challenge ---
+    addSwitchBlock(5080, 210, 60, 20, "red");
+    addSwitchBlock(5160, 170, 60, 20, "blue");
+    addGem("1_2", 5190, 130, "emerald"); // Gem 3: Emerald
+
+    // --- Final Switch Bridge & Runaway Castle ---
+    addSwitchBlock(5750, 250, 60, 20, "red");
+    addSwitchBlock(5840, 230, 60, 20, "blue");
+    addSwitchBlock(5930, 250, 60, 20, "red");
+    addSwitchBlock(6020, 230, 60, 20, "blue");
+    addRunawayCastle(5650, 270);
 
     addFallingBlock(900, 255, 95, 250);
     addFallingBlock(2100, 240, 100, 180);
     addFallingBlock(2750, 220, 120, 130);
     addFallingBlock(4450, 240, 110, 200);
 
-    // New Mechanics
     addHiddenBlock(1000, 180);
     addHiddenBlock(1950, 160);
     addHiddenBlock(3500, 150);
@@ -321,7 +420,6 @@ function buildLevelOne() {
     addFallingSpike(4200, 80);
 
     addSpringboard(820, 320);
-    addSpringboard(2220, 320);
 
     addMovingPlatform(1320, 235, 100, 1320, 1560, 1.9);
     addMovingPlatform(2350, 245, 100, 2350, 2600, 2.2);
@@ -334,7 +432,7 @@ function buildLevelOne() {
     addVanishingPlatform(4900, 230, 120);
 
     [430, 1120, 1740, 3330, 5120].forEach(x => addSpike(x, false, "grass"));
-    addSpike(959, true, "grass", 255); // Spike on right edge of falling block
+    addSpike(959, true, "grass", 255);
     [610, 1260, 1990, 2860, 3580, 4610, 5450].forEach(x => addSpike(x, true, "grass"));
 
     addCrusher(1600, 80, 70, 30, false);
@@ -362,10 +460,11 @@ function buildLevelOne() {
     addCheckpoint(5050);
 
     addSign(500, 350, "SIGUE RECTO...\nSI CONFÍAS");
-    addSign(1400, 285, "Este salto es fácil");
+    addSign(1400, 285, "Salta para alternar bloques");
+    addSign(2200, 285, "Ruta alta = Gema Rubí");
     addSign(2520, 145, "Nada invisible aquí");
     addSign(3140, 180, "Confía");
-    addSign(5400, 285, "Último tramo seguro");
+    addSign(5400, 285, "¡Toca el castillo para ganar!");
 
     addTrigger(560, () => { revealSpikeAt(610); showMessage("¡Pinchos sorpresa!", 80); });
     addTrigger(900, () => { 
@@ -394,6 +493,21 @@ function buildLevelTwo() {
 
     [[0, 750], [880, 650], [1700, 550], [2400, 650], [3250, 650], [4100, 550], [4850, 700], [5700, 1050]].forEach(([x, w]) => addGround(x, w, 55));
     [[750, 130], [1530, 170], [2250, 150], [3050, 200], [3900, 200], [4650, 200], [5550, 150]].forEach(([x, w]) => addLava(x, w, 55));
+
+    // --- Directional Cannons (Launch across bottomless chasms!) ---
+    addCannon(1540, 240, -Math.PI / 4, 15);
+    addGem("2_0", 1750, 90, "ruby"); // Gem 1: Ruby in crystal ceiling
+
+    // --- Dark Zone with Lantern (Dynamic Circular Lighting) ---
+    addDarkZone(2400, 1300);
+    addGem("2_1", 2950, 160, "sapphire"); // Gem 2: Sapphire inside Dark Zone
+
+    // --- Fake Checkpoint Troll ---
+    addFakeCheckpoint(3900, 295);
+
+    // --- Cannon Launch 2 ---
+    addCannon(4650, 230, -Math.PI / 3, 16);
+    addGem("2_2", 4820, 85, "emerald"); // Gem 3: Emerald high in crystal air
 
     addMovingPlatform(760, 255, 110, 760, 1030, 3.5);
     addMovingPlatform(1600, 235, 100, 1600, 1880, 3.5);
@@ -485,6 +599,25 @@ function buildLevelThree() {
     [[0, 700], [850, 600], [1650, 550], [2400, 650], [3250, 550], [4000, 600], [4800, 600], [5600, 600], [6400, 1150]].forEach(([x, w]) => addGround(x, w, 55));
     [[700, 150], [1450, 200], [2200, 200], [3050, 200], [3800, 200], [4600, 200], [5400, 200], [6200, 200]].forEach(([x, w]) => addLava(x, w, 55));
 
+    // --- On/Off Switch Blocks over Acid ---
+    addSwitchBlock(1460, 240, 60, 20, "red");
+    addSwitchBlock(1530, 210, 60, 20, "blue");
+    addSwitchBlock(1600, 240, 60, 20, "red");
+    addGem("3_0", 1530, 95, "ruby"); // Gem 1: Ruby on high pipe
+
+    // --- Pneumatic Tube Cannon ---
+    addCannon(3020, 240, -Math.PI / 4, 16);
+
+    // --- High Risk Path during Chase ---
+    addPlatform(4750, 150, 100);
+    addGem("3_1", 4800, 115, "sapphire"); // Gem 2: Sapphire in high machinery
+
+    // --- Secret Vent Duct ---
+    addFakeFloor(6650, 120);
+    addPlatform(6660, 290, 100);
+    addGem("3_2", 6700, 255, "emerald"); // Gem 3: Emerald in maintenance duct
+    addSpringboard(6720, 275);
+
     addMovingPlatform(700, 245, 100, 700, 1000, 4.0);
     addMovingPlatform(1500, 235, 100, 1500, 1800, 4.2);
     addMovingPlatform(3050, 225, 100, 3050, 3350, 4.5);
@@ -557,11 +690,13 @@ function buildLevelThree() {
 
     addSign(900, 285, "La fábrica no perdona");
     addSign(2300, 145, "Hay paredes que no se ven");
+    addSign(4150, 240, "¡SIRENA DE EVACUACIÓN!\n¡CORRE SIN FRENAR!");
     addSign(4300, 180, "La máquina aprende");
     addSign(6800, 180, "Final verdadero... quizá");
 
     addTrigger(1100, () => { revealSpikeAt(1150); showMessage("Sistema anti-jugador", 80); });
     addTrigger(2300, () => { lists.invisibleWalls[0].active = true; showMessage("Bloqueo invisible", 75); });
+    addTrigger(4180, () => { startChaseWall(3950, 2.45, "factory"); });
     addTrigger(4300, () => { revealSpikeAt(4400); showMessage("Trampa industrial", 80); });
     addTrigger(5550, () => { lists.invisibleWalls[1].active = true; revealSpikeAt(6000); showMessage("No mires atrás", 80); });
     addTrigger(7050, () => { lists.invisibleWalls[2].active = true; revealSpikeAt(7100); showMessage("Última humillación", 90); });
@@ -583,6 +718,22 @@ function buildLevelFour() {
     addPlatform(420, 255, 110);
     addPlatform(1180, 245, 110);
     addPlatform(1900, 235, 120);
+
+    // --- Chained Cannons & Ruby Gem ---
+    addCannon(2280, 240, -Math.PI / 4, 16);
+    addCannon(2550, 190, -Math.PI / 6, 17);
+    addGem("4_0", 2415, 95, "ruby"); // Gem 1: Ruby between aerial cannons
+
+    // --- Slippery Ice Switch Blocks & Sapphire Gem ---
+    addSwitchBlock(3820, 220, 60, 20, "red");
+    addSwitchBlock(3910, 190, 60, 20, "blue");
+    addSwitchBlock(4000, 220, 60, 20, "red");
+    addGem("4_1", 3940, 135, "sapphire"); // Gem 2: Sapphire high in freezing air
+
+    // --- Ancient Ice Spire Gem 3 ---
+    addPlatform(7780, 180, 80);
+    addGem("4_2", 7820, 135, "emerald"); // Gem 3: Emerald before the Boss
+
     addPlatform(2850, 230, 120);
     addPlatform(4420, 225, 120);
     addPlatform(6150, 230, 140);
@@ -660,6 +811,7 @@ function buildLevelFour() {
     addSign(320, 285, "El suelo resbala");
     addSign(2250, 80, "El viento decide por ti");
     addSign(3700, 180, "El hielo no aguanta mucho");
+    addSign(5550, 260, "¡AVALANCHA DE NIEVE!\n¡CORRE CON EL VIENTO!");
     addSign(5950, 80, "Corre con el viento");
     addSign(7500, 180, "El templo dispara");
     addSign(8050, 180, "Guardián del hielo");
@@ -671,6 +823,7 @@ function buildLevelFour() {
     addTrigger(2920, () => { revealSpikeAt(2960); showMessage("Demasiado fácil, ¿no?", 80); });
     addTrigger(4250, () => { revealSpikeAt(4300); showMessage("El templo despierta", 80); });
     addTrigger(5400, () => { revealSpikeAt(5480); showMessage("No frenes ahora", 80); });
+    addTrigger(5600, () => { startChaseWall(5350, 2.55, "ice"); });
     addTrigger(7250, () => { revealSpikeAt(7280); showMessage("Última ventisca", 90); });
     addTrigger(7850, () => { revealSpikeAt(7900); if (bossState.iceBoss) bossState.iceBoss.active = true; showMessage("¡Mini jefe: Guardián del Hielo!", 120); });
 }

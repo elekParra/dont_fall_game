@@ -118,6 +118,12 @@ function setupUI() {
         state.lives = state.selectedCharacter === "hero" ? 10 : 6;
         state.deaths = 0;
         state.score = 0;
+        state.levelTimer = 0;
+        state.totalTimer = 0;
+        state.collectedGems = [];
+        state.currentGems = [false, false, false];
+        state.chaseWall = null;
+        state.playerInCannon = null;
         state.currentLevel = 1;
         state.checkpointIndex = -1;
         state.checkpoint = { x: 100, y: 290 };
@@ -224,6 +230,10 @@ function startGame() {
 
     document.body.classList.add("game-running");
     state.gameStarted = true;
+    state.levelTimer = 0;
+    state.totalTimer = 0;
+    state.collectedGems = [];
+    state.currentGems = [false, false, false];
     startMusic();
     showMessage("PRADERA TROLL\nNo todo es lo que parece...", 140);
     startGameLoop();

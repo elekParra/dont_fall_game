@@ -47,6 +47,20 @@ const state = {
     checkpointIndex: -1,
     checkpoint: { x: 100, y: 290 },
 
+    // Switch Blocks State (Red / Blue alternating on jump)
+    switchState: "red",
+    switchAnim: 0,
+
+    // Speedrun & Gem Collectibles
+    levelTimer: 0,
+    totalTimer: 0,
+    collectedGems: [],
+    currentGems: [false, false, false], // [Ruby, Sapphire, Emerald] for current level
+
+    // Cinematic & Dynamic Hazards
+    chaseWall: null, // { active, x, speed, w, label, type }
+    playerInCannon: null, // { cannon, timer }
+
     // Input & Jump mechanics
     jumpBuffer: 0,
     coyoteTime: 0,
@@ -123,7 +137,15 @@ const lists = {
     particles: [],
     ambientParticles: [],
     levelDecorations: [],
-    bgShips: []
+    bgShips: [],
+    // Advanced & Engaging Mechanics
+    switchBlocks: [],
+    cannons: [],
+    trollCoins: [],
+    gems: [],
+    darkZones: [],
+    runawayCastles: [],
+    fakeCheckpoints: []
 };
 
 // Boss state

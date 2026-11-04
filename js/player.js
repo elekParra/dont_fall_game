@@ -4,6 +4,26 @@
 
 
 function updatePlayer(killPlayer) {
+    if (state.playerInCannon) {
+        state.playerInCannon.timer--;
+        player.x = state.playerInCannon.cannon.x + 6;
+        player.y = state.playerInCannon.cannon.y + 6;
+        player.dx = 0;
+        player.dy = 0;
+        if (state.playerInCannon.timer <= 0) {
+            const c = state.playerInCannon.cannon;
+            player.dx = Math.cos(c.angle) * c.force;
+            player.dy = Math.sin(c.angle) * c.force;
+            player.grounded = false;
+            c.cooldown = 40;
+            c.anim = 16;
+            playTone(180, 0.25, "sawtooth");
+            addExplosion(c.x + 22, c.y + 22, "#ffcc00", 25);
+            state.playerInCannon = null;
+        }
+        return;
+    }
+
     if (state.godMode) {
         player.dy = 0;
         player.dx = 0;
@@ -103,6 +123,13 @@ function updatePlayer(killPlayer) {
     // Input edge detection
     const jumpJustPressed = state.keys.jump && !state.prevKeys.jump;
     state.prevKeys.jump = state.keys.jump;
+
+    // Flip On/Off Switch Blocks on jump
+    if (jumpJustPressed && lists.switchBlocks && lists.switchBlocks.length > 0) {
+        state.switchState = state.switchState === "red" ? "blue" : "red";
+        state.switchAnim = 14;
+        playTone(state.switchState === "red" ? 520 : 660, 0.06, "sine");
+    }
 
     // Jump logic
     if (jumpJustPressed) state.jumpBuffer = 8;
@@ -222,6 +249,17 @@ function updatePlayer(killPlayer) {
     lists.spikePlatforms.forEach(p => { if (isNear(p)) solids.push(p); });
     lists.hiddenBlocks.forEach(h => { if (h.active && isNear(h)) solids.push(h); });
     lists.springboards.forEach(sb => { if (sb.active && isNear(sb)) solids.push(sb); });
+    lists.switchBlocks.forEach(sb => { if (sb.color === state.switchState && isNear(sb)) solids.push(sb); });
+
+    // Cannons entry check
+    lists.cannons.forEach(c => {
+        if (c.cooldown > 0) c.cooldown--;
+        if (c.anim > 0) c.anim--;
+        if (c.cooldown === 0 && !state.playerInCannon && rectsCollide(player, c)) {
+            state.playerInCannon = { cannon: c, timer: 14 };
+            playTone(320, 0.08, "sine");
+        }
+    });
 
     solids.forEach(s => {
         if (!rectsCollide(player, s)) return;
