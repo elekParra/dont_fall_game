@@ -441,6 +441,34 @@ function drawBlock(ctx, b) {
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.fillRect(b.x, b.y, b.w, 2);
 
+    // Modern organic grass fringe / snow drips / cave crystal rims
+    if (state.levelTheme === "grass") {
+        ctx.fillStyle = "#41b531";
+        for (let gx = b.x + 3; gx < b.x + b.w - 3; gx += 8) {
+            let grassLen = ((gx * 7) % 5) + 3;
+            ctx.beginPath();
+            ctx.moveTo(gx - 2, b.y + 8);
+            ctx.lineTo(gx, b.y + 8 + grassLen);
+            ctx.lineTo(gx + 2, b.y + 8);
+            ctx.fill();
+        }
+    } else if (state.levelTheme === "ice") {
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        for (let ix = b.x + 6; ix < b.x + b.w - 6; ix += 14) {
+            let icicleLen = ((ix * 11) % 6) + 3;
+            ctx.beginPath();
+            ctx.moveTo(ix - 2, b.y + 8);
+            ctx.lineTo(ix, b.y + 8 + icicleLen);
+            ctx.lineTo(ix + 2, b.y + 8);
+            ctx.fill();
+        }
+    } else if (state.levelTheme === "cave") {
+        ctx.fillStyle = "rgba(166,123,255,0.5)";
+        for (let cx = b.x + 8; cx < b.x + b.w - 8; cx += 18) {
+            ctx.fillRect(cx, b.y + 7, 3, 2);
+        }
+    }
+
     // Outline
     ctx.strokeStyle = edge;
     ctx.lineWidth = 1.5;
@@ -493,7 +521,8 @@ function drawGlowScreen(ctx, x, y, radius, color) {
 // Draw methods for all game objects...
 function drawMovingPlatform(ctx, p) {
     drawPlatformShadow(ctx, p.x, p.y, p.w, p.h);
-    ctx.fillStyle = state.levelTheme === "factory" ? "#ff8a1f" : state.levelTheme === "cave" ? "#00d4ff" : state.levelTheme === "ice" ? "#d9ffff" : "#8844cc";
+    let themeColor = state.levelTheme === "factory" ? "#ff8a1f" : state.levelTheme === "cave" ? "#00d4ff" : state.levelTheme === "ice" ? "#d9ffff" : "#8844cc";
+    ctx.fillStyle = themeColor;
     roundRect(ctx, p.x, p.y, p.w, p.h, 6, true);
     // Inner shadow
     ctx.fillStyle = "rgba(0,0,0,0.25)";
@@ -501,6 +530,15 @@ function drawMovingPlatform(ctx, p) {
     // Highlight
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.fillRect(p.x + 8, p.y + 4, p.w - 16, 4);
+
+    // Tech thruster / energy beacon glow underneath moving platforms
+    let glowT = Date.now() / 120;
+    let pulseAlpha = 0.5 + Math.sin(glowT + p.x) * 0.3;
+    let beaconColor = state.levelTheme === "factory" ? `rgba(255,100,20,${pulseAlpha})` : `rgba(0,229,255,${pulseAlpha})`;
+    ctx.fillStyle = beaconColor;
+    ctx.fillRect(p.x + p.w * 0.25 - 4, p.y + p.h - 3, 8, 3);
+    ctx.fillRect(p.x + p.w * 0.75 - 4, p.y + p.h - 3, 8, 3);
+
     // Border
     ctx.strokeStyle = "rgba(0,0,0,0.4)";
     roundRect(ctx, p.x, p.y, p.w, p.h, 6, false);
@@ -2180,30 +2218,38 @@ function drawLevelDecorations(ctx, canvas) {
     lists.levelDecorations.forEach(d => {
         if (d.x < state.camX - 160 || d.x > state.camX + canvas.width + 160) return;
         if (d.type === "tree") {
-            // Wind animation factor
-            let wind = Math.sin(Date.now() / 1000 + d.x * 0.05) * 5;
+            let tNow = Date.now();
+            // Organic multi-frequency wind sway
+            let wind = Math.sin(tNow / 900 + d.x * 0.04) * 5 + Math.sin(tNow / 450 + d.x * 0.08) * 1.5;
             
-            // Trunk with shadow and highlight
-            ctx.fillStyle = "#381a0b";
+            // Trunk with natural curvature, root spread, shadow and bark texture
+            ctx.fillStyle = "#2a1205";
             ctx.beginPath();
-            ctx.moveTo(d.x - 4, state.groundY);
-            ctx.lineTo(d.x + 14, state.groundY);
-            ctx.lineTo(d.x + 8 + wind*0.2, state.groundY - d.h);
-            ctx.lineTo(d.x + 2 + wind*0.2, state.groundY - d.h);
+            ctx.moveTo(d.x - 7, state.groundY);
+            ctx.quadraticCurveTo(d.x - 2, state.groundY - d.h * 0.4, d.x + 1 + wind * 0.2, state.groundY - d.h);
+            ctx.lineTo(d.x + 9 + wind * 0.2, state.groundY - d.h);
+            ctx.quadraticCurveTo(d.x + 8, state.groundY - d.h * 0.4, d.x + 17, state.groundY);
+            ctx.closePath();
             ctx.fill();
             
-            // Trunk highlight
+            // Trunk warm bark highlight
             ctx.fillStyle = "#5c2f16";
             ctx.beginPath();
-            ctx.moveTo(d.x - 1, state.groundY);
-            ctx.lineTo(d.x + 6, state.groundY);
-            ctx.lineTo(d.x + 5 + wind*0.2, state.groundY - d.h);
-            ctx.lineTo(d.x + 2 + wind*0.2, state.groundY - d.h);
+            ctx.moveTo(d.x - 3, state.groundY);
+            ctx.quadraticCurveTo(d.x, state.groundY - d.h * 0.5, d.x + 2 + wind * 0.2, state.groundY - d.h);
+            ctx.lineTo(d.x + 6 + wind * 0.2, state.groundY - d.h);
+            ctx.quadraticCurveTo(d.x + 4, state.groundY - d.h * 0.5, d.x + 7, state.groundY);
+            ctx.closePath();
             ctx.fill();
 
-            // Leaves base position
+            // Subtle vertical bark grooves
+            ctx.fillStyle = "#1e0b02";
+            ctx.fillRect(d.x + 2, state.groundY - d.h * 0.6, 1.5, d.h * 0.35);
+            ctx.fillRect(d.x + 6, state.groundY - d.h * 0.8, 1.2, d.h * 0.25);
+
+            // Foliage base anchor point
             let lx = d.x + 5 + wind;
-            let ly = state.groundY - d.h + Math.sin(Date.now() / 800 + d.x) * 2; // Slight vertical bob
+            let ly = state.groundY - d.h + Math.sin(tNow / 800 + d.x) * 2;
 
             function drawLeaf(x, y, r, color) {
                 ctx.fillStyle = color;
@@ -2212,23 +2258,48 @@ function drawLevelDecorations(ctx, canvas) {
                 ctx.fill();
             }
 
-            // Shadow under leaves
-            drawLeaf(lx, ly + 8, 28, "rgba(0,40,0,0.8)");
+            // 1. Shadow underneath the entire crown
+            drawLeaf(lx, ly + 10, 30, "rgba(0,35,0,0.85)");
 
-            // Main dark leaves
-            drawLeaf(lx - 12, ly + 2, 22, "#1e5c12");
-            drawLeaf(lx + 12, ly + 4, 24, "#1e5c12");
-            drawLeaf(lx, ly - 12, 26, "#1e5c12");
+            // 2. Base deep silhouette foliage
+            drawLeaf(lx - 14, ly + 3, 24, "#14460d");
+            drawLeaf(lx + 14, ly + 5, 25, "#14460d");
+            drawLeaf(lx, ly - 14, 27, "#14460d");
             
-            // Midtone leaves
-            drawLeaf(lx - 14, ly - 2, 18, "#2d8a20");
-            drawLeaf(lx + 10, ly, 20, "#2d8a20");
-            drawLeaf(lx, ly - 16, 22, "#2d8a20");
+            // 3. Midtone rich canopy
+            drawLeaf(lx - 15, ly - 2, 20, "#237d18");
+            drawLeaf(lx + 12, ly + 1, 21, "#237d18");
+            drawLeaf(lx, ly - 17, 23, "#237d18");
 
-            // Highlight leaves (3D volume)
-            drawLeaf(lx - 10, ly - 6, 10, "#5edc45");
-            drawLeaf(lx + 8, ly - 4, 12, "#5edc45");
-            drawLeaf(lx, ly - 20, 14, "#5edc45");
+            // 4. Vibrant sunlight volume
+            drawLeaf(lx - 10, ly - 7, 13, "#4ecb37");
+            drawLeaf(lx + 8, ly - 5, 14, "#4ecb37");
+            drawLeaf(lx, ly - 21, 16, "#4ecb37");
+
+            // 5. Specular top sunlight rims (gives modern HD depth)
+            drawLeaf(lx - 11, ly - 12, 7, "#8bf060");
+            drawLeaf(lx + 7, ly - 10, 8, "#8bf060");
+            drawLeaf(lx - 1, ly - 27, 9, "#a4f77c");
+
+            // 6. Whimsical ambient falling leaves / wind petals around the tree
+            for (let l = 0; l < 3; l++) {
+                let seed = d.x * 13 + l * 77;
+                let leafCycle = (tNow * 0.05 + seed) % 180; // 0 to 180px drift
+                let leafX = lx - 10 + Math.sin(tNow * 0.002 + l) * 26 + (leafCycle * 0.4);
+                let leafY = (ly - 15 + leafCycle) % (d.h + 30) + (ly - 15);
+                let leafRot = tNow * 0.003 + l;
+                let leafAlpha = Math.sin((leafCycle / 180) * Math.PI);
+
+                ctx.save();
+                ctx.translate(leafX, leafY);
+                ctx.rotate(leafRot);
+                ctx.fillStyle = l % 2 === 0 ? "#7ceb52" : "#99f564";
+                ctx.globalAlpha = Math.max(0, leafAlpha * 0.75);
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 3.5, 1.8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
         }
         if (d.type === "crystal") {
             drawGlow(ctx, d.x + 18, d.y + d.s / 2, 38, "rgba(93,252,255,0.25)");

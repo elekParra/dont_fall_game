@@ -424,23 +424,24 @@ function updateFullscreenButtons() {
 }
 
 function _getRequestFS() {
-    var c = typeof canvas !== "undefined" && canvas ? canvas : document.getElementById("game");
     var doc = document.documentElement;
+    var c = typeof canvas !== "undefined" && canvas ? canvas : document.getElementById("game");
 
-    // 1. In modern mobile browsers (Chrome Android, etc.), requesting Fullscreen on the CANVAS element
-    // directly forces the browser into immersive video/game mode which fully strips the URL/navigation bar.
+    // Standard Fullscreen API MUST be requested on document.documentElement so that all game layers,
+    // HUD buttons (Pause, Fullscreen), overlays (Game Over, Pausa, Victory), and UI menus remain
+    // visible and interactive inside the fullscreen view.
+    if (doc) {
+        if (doc.requestFullscreen) return function(opts) { return doc.requestFullscreen(opts); };
+        if (doc.webkitRequestFullscreen) return function() { return doc.webkitRequestFullscreen(); };
+        if (doc.mozRequestFullScreen) return function() { return doc.mozRequestFullScreen(); };
+        if (doc.msRequestFullscreen) return function() { return doc.msRequestFullscreen(); };
+    }
+
     if (c) {
         if (c.requestFullscreen) return function(opts) { return c.requestFullscreen(opts); };
         if (c.webkitRequestFullscreen) return function() { return c.webkitRequestFullscreen(); };
         if (c.mozRequestFullScreen) return function() { return c.mozRequestFullScreen(); };
-        if (c.msRequestFullscreen) return function() { return c.msRequestFullscreen(); };
     }
-
-    // 2. Fallback to document.documentElement if canvas is not available
-    if (doc.requestFullscreen) return function(opts) { return doc.requestFullscreen(opts); };
-    if (doc.webkitRequestFullscreen) return function() { return doc.webkitRequestFullscreen(); };
-    if (doc.mozRequestFullScreen) return function() { return doc.mozRequestFullScreen(); };
-    if (doc.msRequestFullscreen) return function() { return doc.msRequestFullscreen(); };
 
     return null;
 }
@@ -462,7 +463,6 @@ function toggleFullscreen() {
         if (requestFn) {
             var result;
             try {
-                // Must be executed directly in user-gesture event stack
                 result = requestFn({ navigationUI: "hide" });
             } catch (e) {
                 try {
@@ -482,20 +482,17 @@ function toggleFullscreen() {
                     _manualFullscreen(true);
                 });
             } else {
-                // Older WebKit (returns undefined synchronously)
                 _lockOrientation();
                 _syncFullscreenClass();
                 updateFullscreenButtons();
             }
         } else {
-            // No native API supported on this platform (e.g. iPhone Safari)
             _manualFullscreen(true);
         }
     } else {
         // EXIT FULLSCREEN
         if (document.documentElement.classList.contains("is-fullscreen-manual")) {
             _manualFullscreen(false);
-            return;
         }
 
         if (exitFn) {
