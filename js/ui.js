@@ -23,6 +23,37 @@ function setupUI() {
     const startBtn = document.getElementById('startBtn');
     startBtn.addEventListener('click', startGame);
 
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    if (btnFullscreen) {
+        btnFullscreen.addEventListener('click', () => {
+            initAudio();
+            playTone(660, 0.05, "sine");
+            toggleFullscreen();
+        });
+    }
+
+    const btnHudFs = document.getElementById('btnHudFullscreen');
+    if (btnHudFs) {
+        btnHudFs.addEventListener('click', () => {
+            initAudio();
+            playTone(660, 0.05, "sine");
+            toggleFullscreen();
+        });
+    }
+
+    const btnPauseFs = document.getElementById('btnPauseFullscreen');
+    if (btnPauseFs) {
+        btnPauseFs.addEventListener('click', () => {
+            initAudio();
+            playTone(660, 0.05, "sine");
+            toggleFullscreen();
+        });
+    }
+
+    ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"].forEach(evtName => {
+        document.addEventListener(evtName, () => updateFullscreenButtons());
+    });
+
     // Keyboard bindings
     document.addEventListener("keydown", e => {
         if (e.key === "ArrowLeft") state.keys.left = true;
@@ -321,4 +352,89 @@ function drawAllPreviews() {
     drawCharacterPreview("preview-hero", "hero");
     drawCharacterPreview("preview-ninja", "ninja");
     drawCharacterPreview("preview-robot", "robot");
+}
+
+/* =========================================================
+   FULLSCREEN CONTROLLER (Cross-browser + Mobile Orientation)
+========================================================= */
+
+function isFullscreen() {
+    return !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+    );
+}
+
+function updateFullscreenButtons(inFs) {
+    const isFs = typeof inFs === "boolean" ? inFs : isFullscreen();
+    const btnMenu = document.getElementById("btnFullscreen");
+    const btnHud = document.getElementById("btnHudFullscreen");
+    const btnPauseFs = document.getElementById("btnPauseFullscreen");
+
+    if (btnMenu) {
+        const iconSpan = btnMenu.querySelector(".fs-icon");
+        const textSpan = btnMenu.querySelector(".fs-text");
+        if (isFs) {
+            btnMenu.classList.add("is-fullscreen");
+            if (iconSpan) iconSpan.textContent = "🗗";
+            if (textSpan) textSpan.textContent = "SALIR PANTALLA COMPLETA";
+        } else {
+            btnMenu.classList.remove("is-fullscreen");
+            if (iconSpan) iconSpan.textContent = "⛶";
+            if (textSpan) textSpan.textContent = "PANTALLA COMPLETA";
+        }
+    }
+
+    if (btnHud) {
+        btnHud.textContent = isFs ? "🗗" : "⛶";
+        btnHud.setAttribute("title", isFs ? "Salir Pantalla Completa" : "Pantalla Completa");
+        btnHud.setAttribute("aria-label", isFs ? "Salir Pantalla Completa" : "Pantalla Completa");
+    }
+
+    if (btnPauseFs) {
+        btnPauseFs.textContent = isFs ? "🗗 Salir Pantalla Completa" : "⛶ Pantalla Completa";
+    }
+}
+
+async function toggleFullscreen() {
+    try {
+        if (!isFullscreen()) {
+            const root = document.documentElement;
+            if (root.requestFullscreen) {
+                await root.requestFullscreen();
+            } else if (root.webkitRequestFullscreen) {
+                await root.webkitRequestFullscreen();
+            } else if (root.mozRequestFullScreen) {
+                await root.mozRequestFullScreen();
+            } else if (root.msRequestFullscreen) {
+                await root.msRequestFullscreen();
+            }
+
+            // Lock orientation to landscape on mobile if supported
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(() => {
+                    // Browser policy / device may disallow, ignore silently
+                });
+            }
+        } else {
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                await document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                await document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                await document.msExitFullscreen();
+            }
+
+            if (screen.orientation && screen.orientation.unlock) {
+                try { screen.orientation.unlock(); } catch (e) {}
+            }
+        }
+    } catch (err) {
+        console.warn("Fullscreen toggle warning:", err);
+    }
+    updateFullscreenButtons();
 }
