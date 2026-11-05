@@ -23,15 +23,11 @@ function setupUI() {
     const startBtn = document.getElementById('startBtn');
     startBtn.addEventListener('click', startGame);
 
-    // Fullscreen buttons — bind both pointerup and click with a small debounce to guarantee instant response on mobile
+    // Fullscreen buttons — bind pointerdown/click directly for mobile user gesture authorization
     var lastFsTrigger = 0;
     function handleFsTrigger(e) {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
         var now = Date.now();
-        if (now - lastFsTrigger < 400) return;
+        if (now - lastFsTrigger < 350) return;
         lastFsTrigger = now;
         initAudio();
         playTone(660, 0.05, "sine");
@@ -40,19 +36,16 @@ function setupUI() {
 
     var btnFullscreen = document.getElementById('btnFullscreen');
     if (btnFullscreen) {
-        btnFullscreen.addEventListener('pointerup', handleFsTrigger);
         btnFullscreen.addEventListener('click', handleFsTrigger);
     }
 
     var btnHudFs = document.getElementById('btnHudFullscreen');
     if (btnHudFs) {
-        btnHudFs.addEventListener('pointerup', handleFsTrigger);
         btnHudFs.addEventListener('click', handleFsTrigger);
     }
 
     var btnPauseFs = document.getElementById('btnPauseFullscreen');
     if (btnPauseFs) {
-        btnPauseFs.addEventListener('pointerup', handleFsTrigger);
         btnPauseFs.addEventListener('click', handleFsTrigger);
     }
 
@@ -432,99 +425,147 @@ function updateFullscreenButtons() {
 
 function _getRequestFS() {
     var el = document.documentElement;
-    return el.requestFullscreen ||
-           el.webkitRequestFullscreen ||
-           el.mozRequestFullScreen ||
-           el.msRequestFullscreen ||
-           null;
+    var c = typeof canvas !== "undefined" && canvas ? canvas : document.getElementById("game");
+    
+    // Test el first, then canvas, then body
+    if (el.requestFullscreen) return function(opts) { return el.requestFullscreen(opts); };
+    if (el.webkitRequestFullscreen) return function() { return el.webkitRequestFullscreen(); };
+    if (el.mozRequestFullScreen) return function() { return el.mozRequestFullScreen(); };
+    if (el.msRequestFullscreen) return function() { return el.msRequestFullscreen(); };
+
+    if (c) {
+        if (c.requestFullscreen) return function(opts) { return c.requestFullscreen(opts); };
+        if (c.webkitRequestFullscreen) return function() { return c.webkitRequestFullscreen(); };
+        if (c.mozRequestFullScreen) return function() { return c.mozRequestFullScreen(); };
+    }
+
+    if (document.body) {
+        if (document.body.requestFullscreen) return function(opts) { return document.body.requestFullscreen(opts); };
+        if (document.body.webkitRequestFullscreen) return function() { return document.body.webkitRequestFullscreen(); };
+    }
+
+    return null;
 }
 
 function _getExitFS() {
-    return document.exitFullscreen ||
-           document.webkitExitFullscreen ||
-           document.mozCancelFullScreen ||
-           document.msExitFullscreen ||
-           null;
+    if (document.exitFullscreen) return function() { return document.exitFullscreen(); };
+    if (document.webkitExitFullscreen) return function() { return document.webkitExitFullscreen(); };
+    if (document.mozCancelFullScreen) return function() { return document.mozCancelFullScreen(); };
+    if (document.msExitFullscreen) return function() { return document.msExitFullscreen(); };
+    return null;
 }
 
 function toggleFullscreen() {
     var requestFn = _getRequestFS();
     var exitFn = _getExitFS();
 
-    // API available — use native fullscreen
-    if (requestFn) {
-        if (!isFullscreen()) {
-            // ENTER
+    if (!isFullscreen()) {
+        // ENTER FULLSCREEN
+        if (requestFn) {
             var result;
             try {
-                result = requestFn.call(document.documentElement, { navigationUI: "hide" });
+                // Must be executed directly in user-gesture event stack
+                result = requestFn({ navigationUI: "hide" });
             } catch (e) {
-                // Some browsers don't accept the options object
                 try {
-                    result = requestFn.call(document.documentElement);
+                    result = requestFn();
                 } catch (e2) {
-                    console.warn("Fullscreen request threw:", e2);
+                    console.warn("Direct FS request failed, trying fallback:", e2);
                 }
             }
 
-            Promise.resolve(result).then(function() {
-                try {
-                    if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock("landscape").catch(function() {});
-                    }
-                } catch (e) {}
+            if (result && typeof result.then === "function") {
+                result.then(function() {
+                    _lockOrientation();
+                    _syncFullscreenClass();
+                    updateFullscreenButtons();
+                }).catch(function(err) {
+                    console.warn("Fullscreen promise rejected:", err);
+                    _manualFullscreen(true);
+                });
+            } else {
+                // Older WebKit (returns undefined synchronously)
+                _lockOrientation();
                 _syncFullscreenClass();
                 updateFullscreenButtons();
-            }).catch(function(err) {
-                console.warn("Fullscreen enter failed:", err);
-                // Fallback: use manual class
-                _manualFullscreen(true);
-            });
-
+            }
         } else {
-            // EXIT (could be manual or native)
-            if (document.documentElement.classList.contains("is-fullscreen-manual")) {
-                _manualFullscreen(false);
-                return;
-            }
-            
-            var exitResult;
-            try {
-                exitResult = exitFn.call(document);
-            } catch (e) {
-                console.warn("Fullscreen exit threw:", e);
-            }
-
-            Promise.resolve(exitResult).then(function() {
-                try {
-                    if (screen.orientation && screen.orientation.unlock) {
-                        screen.orientation.unlock();
-                    }
-                } catch (e) {}
-                _syncFullscreenClass();
-                updateFullscreenButtons();
-            }).catch(function(err) {
-                console.warn("Fullscreen exit failed:", err);
-                _manualFullscreen(false);
-            });
+            // No native API supported on this platform (e.g. iPhone Safari)
+            _manualFullscreen(true);
         }
     } else {
-        // No native Fullscreen API (file:// or very old browser)
-        // Use manual CSS-class approach + scroll trick
-        _manualFullscreen(!isFullscreen());
+        // EXIT FULLSCREEN
+        if (document.documentElement.classList.contains("is-fullscreen-manual")) {
+            _manualFullscreen(false);
+            return;
+        }
+
+        if (exitFn) {
+            var exitResult;
+            try {
+                exitResult = exitFn();
+            } catch (e) {
+                console.warn("Exit FS threw:", e);
+            }
+
+            if (exitResult && typeof exitResult.then === "function") {
+                exitResult.then(function() {
+                    _unlockOrientation();
+                    _syncFullscreenClass();
+                    updateFullscreenButtons();
+                }).catch(function(err) {
+                    _manualFullscreen(false);
+                });
+            } else {
+                _unlockOrientation();
+                _syncFullscreenClass();
+                updateFullscreenButtons();
+            }
+        } else {
+            _manualFullscreen(false);
+        }
     }
+}
+
+function _lockOrientation() {
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock("landscape").catch(function() {});
+        } else if (screen.lockOrientation) {
+            screen.lockOrientation("landscape");
+        } else if (screen.webkitLockOrientation) {
+            screen.webkitLockOrientation("landscape");
+        } else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation("landscape");
+        }
+    } catch (e) {}
+}
+
+function _unlockOrientation() {
+    try {
+        if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+        } else if (screen.unlockOrientation) {
+            screen.unlockOrientation();
+        } else if (screen.webkitUnlockOrientation) {
+            screen.webkitUnlockOrientation();
+        }
+    } catch (e) {}
 }
 
 function _manualFullscreen(enter) {
     if (enter) {
         document.documentElement.classList.add("is-fullscreen-manual");
         document.documentElement.classList.add("is-fullscreen");
-        // Scroll trick to hide address bar on mobile
-        window.scrollTo(0, 1);
-        setTimeout(function() { window.scrollTo(0, 0); }, 50);
+        _lockOrientation();
+        try {
+            window.scrollTo(0, 1);
+            setTimeout(function() { window.scrollTo(0, 0); }, 50);
+        } catch (e) {}
     } else {
         document.documentElement.classList.remove("is-fullscreen-manual");
         document.documentElement.classList.remove("is-fullscreen");
+        _unlockOrientation();
     }
     updateFullscreenButtons();
 }

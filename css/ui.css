@@ -1059,3 +1059,158 @@ body.game-running .mobile-hud {
     color: #00ffff;
     margin-right: 6px;
 }
+
+/* =========================================================
+   08. PANTALLA ROTAR MÓVIL (ORIENTACIÓN VERTICAL)
+========================================================= */
+
+.rotate-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: radial-gradient(circle at center, rgba(16, 24, 48, 0.98) 0%, rgba(5, 5, 10, 0.99) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Mostrar solo en pantallas táctiles o móviles cuando estén en orientación vertical */
+@media (max-width: 900px) and (orientation: portrait) {
+    .rotate-screen {
+        display: flex;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.rotate-card {
+    max-width: 320px;
+    width: 90%;
+    background: linear-gradient(180deg, #121c38 0%, #080c18 100%);
+    border: 3px solid #00e5ff;
+    border-radius: 16px;
+    padding: 28px 20px;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 0 35px rgba(0, 229, 255, 0.35), inset 0 0 20px rgba(0, 229, 255, 0.1);
+    animation: pulseBorder 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes pulseBorder {
+    0% {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.1);
+        border-color: #00e5ff;
+    }
+    100% {
+        box-shadow: 0 0 40px rgba(0, 229, 255, 0.6), inset 0 0 25px rgba(0, 229, 255, 0.2);
+        border-color: #00ff99;
+    }
+}
+
+.rotate-phone-anim {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.phone-body {
+    width: 36px;
+    height: 58px;
+    border: 3px solid #00e5ff;
+    border-radius: 8px;
+    background: #050a14;
+    position: relative;
+    animation: rotatePhone 2.6s infinite ease-in-out;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+}
+
+.phone-screen {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 8px;
+    background: linear-gradient(135deg, rgba(0, 255, 153, 0.4), rgba(0, 229, 255, 0.2));
+    border-radius: 3px;
+}
+
+.phone-body::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 2px;
+    background: #00e5ff;
+    border-radius: 2px;
+}
+
+@keyframes rotatePhone {
+    0%, 20% {
+        transform: rotate(0deg);
+    }
+    50%, 80% {
+        transform: rotate(90deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.rotate-arrow {
+    position: absolute;
+    right: -4px;
+    top: -2px;
+    font-size: 26px;
+    color: #00ff99;
+    text-shadow: 0 0 10px #00ff99;
+    animation: spinArrow 2.6s infinite linear;
+}
+
+@keyframes spinArrow {
+    0%, 20% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+    50%, 80% { transform: scale(1.2) rotate(-90deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+}
+
+.rotate-title {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 14px;
+    color: #ffffff;
+    margin: 0 0 14px 0;
+    line-height: 1.4;
+    text-shadow: 0 0 10px #00e5ff;
+}
+
+.rotate-desc {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #c5d4eb;
+    margin: 0 0 16px 0;
+}
+
+.rotate-desc strong {
+    color: #00ff99;
+    text-shadow: 0 0 8px rgba(0, 255, 153, 0.6);
+}
+
+.rotate-tip {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 8px;
+    color: #ffdf00;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 8px rgba(255, 223, 0, 0.6);
+}
+
