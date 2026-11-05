@@ -15,16 +15,16 @@
     <meta name="msapplication-TileColor" content="#050814">
 
     <!-- Iconos para Pantalla de Inicio (iOS, Android, Chrome, Safari) -->
-    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-    <link rel="apple-touch-icon" href="icons/icon.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon.svg">
-    <link rel="apple-touch-icon-precomposed" href="icons/icon.svg">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="givap_logo.png?v=2.0">
+    <link rel="apple-touch-icon" href="givap_logo.png?v=2.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="givap_logo.png?v=2.0">
+    <link rel="apple-touch-icon-precomposed" href="givap_logo.png?v=2.0">
+    <link rel="manifest" href="manifest.json?v=2.0">
     
     <!-- CSS Modulares -->
-    <link rel="stylesheet" href="css/style.css?v=1.7">
-    <link rel="stylesheet" href="css/ui.css?v=1.7">
-    <link rel="stylesheet" href="css/animations.css?v=1.7">
+    <link rel="stylesheet" href="css/style.css?v=2.1">
+    <link rel="stylesheet" href="css/ui.css?v=2.1">
+    <link rel="stylesheet" href="css/animations.css?v=2.1">
     
     <!-- Fuente Pixelada -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -35,7 +35,10 @@
     <canvas id="game" width="1800" height="800"></canvas>
 
     <div id="characterMenu">
-        <h1>Elige tu personaje</h1>
+        <div class="menu-header">
+            <img src="givap_logo.png" alt="Givap Frend Logo" class="menu-brand-logo">
+            <h1>Elige tu personaje</h1>
+        </div>
 
         <div class="menu-layout">
             <div class="menu-left">
@@ -211,17 +214,17 @@
     </div>
 
     <!-- Lógica Modular del Juego (Carga tradicional para soportar file://) -->
-    <script src="js/state.js?v=1.7"></script>
-    <script src="js/utilities.js?v=1.7"></script>
-    <script src="js/audio.js?v=1.7"></script>
-    <script src="js/particles.js?v=1.7"></script>
-    <script src="js/levels.js?v=1.7"></script>
-    <script src="js/render.js?v=1.7"></script>
-    <script src="js/player.js?v=1.7"></script>
-    <script src="js/enemies.js?v=1.7"></script>
-    <script src="js/traps.js?v=1.7"></script>
-    <script src="js/ui.js?v=1.7"></script>
-    <script src="js/main.js?v=1.7"></script>
+    <script src="js/state.js?v=2.1"></script>
+    <script src="js/utilities.js?v=2.1"></script>
+    <script src="js/audio.js?v=2.1"></script>
+    <script src="js/particles.js?v=2.1"></script>
+    <script src="js/levels.js?v=2.1"></script>
+    <script src="js/render.js?v=2.1"></script>
+    <script src="js/player.js?v=2.1"></script>
+    <script src="js/enemies.js?v=2.1"></script>
+    <script src="js/traps.js?v=2.1"></script>
+    <script src="js/ui.js?v=2.1"></script>
+    <script src="js/main.js?v=2.1"></script>
 
 </body>
 </html>

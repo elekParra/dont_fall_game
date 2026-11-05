@@ -424,25 +424,23 @@ function updateFullscreenButtons() {
 }
 
 function _getRequestFS() {
-    var el = document.documentElement;
     var c = typeof canvas !== "undefined" && canvas ? canvas : document.getElementById("game");
-    
-    // Test el first, then canvas, then body
-    if (el.requestFullscreen) return function(opts) { return el.requestFullscreen(opts); };
-    if (el.webkitRequestFullscreen) return function() { return el.webkitRequestFullscreen(); };
-    if (el.mozRequestFullScreen) return function() { return el.mozRequestFullScreen(); };
-    if (el.msRequestFullscreen) return function() { return el.msRequestFullscreen(); };
+    var doc = document.documentElement;
 
+    // 1. In modern mobile browsers (Chrome Android, etc.), requesting Fullscreen on the CANVAS element
+    // directly forces the browser into immersive video/game mode which fully strips the URL/navigation bar.
     if (c) {
         if (c.requestFullscreen) return function(opts) { return c.requestFullscreen(opts); };
         if (c.webkitRequestFullscreen) return function() { return c.webkitRequestFullscreen(); };
         if (c.mozRequestFullScreen) return function() { return c.mozRequestFullScreen(); };
+        if (c.msRequestFullscreen) return function() { return c.msRequestFullscreen(); };
     }
 
-    if (document.body) {
-        if (document.body.requestFullscreen) return function(opts) { return document.body.requestFullscreen(opts); };
-        if (document.body.webkitRequestFullscreen) return function() { return document.body.webkitRequestFullscreen(); };
-    }
+    // 2. Fallback to document.documentElement if canvas is not available
+    if (doc.requestFullscreen) return function(opts) { return doc.requestFullscreen(opts); };
+    if (doc.webkitRequestFullscreen) return function() { return doc.webkitRequestFullscreen(); };
+    if (doc.mozRequestFullScreen) return function() { return doc.mozRequestFullScreen(); };
+    if (doc.msRequestFullscreen) return function() { return doc.msRequestFullscreen(); };
 
     return null;
 }

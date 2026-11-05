@@ -134,6 +134,7 @@ html:fullscreen {
     overflow: hidden;
 }
 
+#game:fullscreen,
 html:fullscreen #game {
     width: 100vw !important;
     height: 100vh !important;
@@ -146,7 +147,7 @@ html:fullscreen #game {
     margin: 0 !important;
 }
 
-/* --- WebKit (Safari, older Chrome) --- */
+/* --- WebKit (Chrome, Safari, Android) --- */
 html:-webkit-full-screen {
     background: #000;
     width: 100vw;
@@ -154,6 +155,7 @@ html:-webkit-full-screen {
     overflow: hidden;
 }
 
+#game:-webkit-full-screen,
 html:-webkit-full-screen #game {
     width: 100vw !important;
     height: 100vh !important;
@@ -174,6 +176,7 @@ html:-moz-full-screen {
     overflow: hidden;
 }
 
+#game:-moz-full-screen,
 html:-moz-full-screen #game {
     width: 100vw !important;
     height: 100vh !important;
@@ -194,6 +197,7 @@ html:-ms-fullscreen {
     overflow: hidden;
 }
 
+#game:-ms-fullscreen,
 html:-ms-fullscreen #game {
     width: 100vw !important;
     height: 100vh !important;
