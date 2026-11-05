@@ -18,9 +18,10 @@
     touch-action: pan-y;
 
     padding:
-        calc(18px + env(safe-area-inset-top))
-        14px
-        calc(18px + env(safe-area-inset-bottom));
+        calc(16px + env(safe-area-inset-top))
+        calc(16px + env(safe-area-inset-right))
+        calc(20px + env(safe-area-inset-bottom))
+        calc(16px + env(safe-area-inset-left));
 
     box-sizing: border-box;
 
@@ -171,6 +172,9 @@
     gap: 12px;
     margin-top: 18px;
     width: 100%;
+    position: relative;
+    z-index: 210;
+    pointer-events: auto;
 }
 
 #startBtn {
@@ -217,6 +221,12 @@
     text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
     transition: all 0.15s ease;
     touch-action: manipulation;
+    pointer-events: auto;
+    position: relative;
+    z-index: 210;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .btn-fullscreen:hover {
@@ -347,7 +357,9 @@
 @media (max-width: 950px) and (orientation: landscape) {
     #characterMenu {
         padding-top: calc(10px + env(safe-area-inset-top));
-        padding-bottom: calc(60px + env(safe-area-inset-bottom));
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        padding-left: calc(20px + env(safe-area-inset-left));
+        padding-right: calc(20px + env(safe-area-inset-right));
         align-items: center;
     }
 
@@ -486,10 +498,6 @@
     transform: scale(0.92) translateY(2px);
     box-shadow: 0 0 5px rgba(0, 229, 255, 0.6);
 }
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
 
 .pause-btn {
     pointer-events: auto;
@@ -517,12 +525,15 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(15px + env(safe-area-inset-bottom));
+    bottom: calc(12px + env(safe-area-inset-bottom));
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding: 0 clamp(10px, 3vw, 25px);
+    padding-left: calc(clamp(12px, 3vw, 25px) + env(safe-area-inset-left));
+    padding-right: calc(clamp(12px, 3vw, 25px) + env(safe-area-inset-right));
+    padding-bottom: 0;
+    padding-top: 0;
     box-sizing: border-box;
     pointer-events: none;
     z-index: 50;

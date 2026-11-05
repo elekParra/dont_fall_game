@@ -93,28 +93,27 @@ html, body {
 
 /* =========================================================
    01c. MODO PANTALLA COMPLETA (FULLSCREEN)
+   IMPORTANT: Each pseudo-class MUST be in its own rule block.
+   Combining them (e.g. :fullscreen, :-webkit-full-screen)
+   makes browsers discard the ENTIRE rule if they don't
+   recognize one of the selectors.
 ========================================================= */
-:fullscreen,
-:-webkit-full-screen {
-    background: #000;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+
+/* --- Class-based fallback (set by JS) --- */
+html.is-fullscreen,
+html.is-fullscreen body,
+html.is-fullscreen-manual,
+html.is-fullscreen-manual body {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
 }
 
-:fullscreen body,
-:-webkit-full-screen body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-}
-
-:fullscreen #game,
-:-webkit-full-screen #game,
-#game:fullscreen,
-#game:-webkit-full-screen {
+html.is-fullscreen #game,
+html.is-fullscreen-manual #game {
     width: 100vw !important;
     height: 100vh !important;
     max-width: 100vw !important;
@@ -123,6 +122,87 @@ html, body {
     border-radius: 0 !important;
     box-shadow: none !important;
     object-fit: contain !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* --- Standard Fullscreen API --- */
+html:fullscreen {
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html:fullscreen #game {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+}
+
+/* --- WebKit (Safari, older Chrome) --- */
+html:-webkit-full-screen {
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html:-webkit-full-screen #game {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+}
+
+/* --- Mozilla (Firefox) --- */
+html:-moz-full-screen {
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html:-moz-full-screen #game {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+}
+
+/* --- MS Edge Legacy --- */
+html:-ms-fullscreen {
+    background: #000;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html:-ms-fullscreen #game {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    margin: 0 !important;
 }
 
