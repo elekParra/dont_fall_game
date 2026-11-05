@@ -455,6 +455,124 @@ function _getExitFS() {
 }
 
 function toggleFullscreen() {
+    // Detect iOS Safari (no Fullscreen API support)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIOS && !isStandalone) {
+        // Show instruction overlay to add to Home Screen
+        showInstallOverlay();
+        return;
+    }
+
+    var requestFn = _getRequestFS();
+    var exitFn = _getExitFS();
+
+    if (!isFullscreen()) {
+        // ENTER FULLSCREEN
+        if (requestFn) {
+            var result;
+            try {
+                result = requestFn({ navigationUI: "hide" });
+            } catch (e) {
+                try {
+                    result = requestFn();
+                } catch (e2) {
+                    console.warn("Direct FS request failed, trying fallback:", e2);
+                }
+            }
+
+            if (result && typeof result.then === "function") {
+                result.then(function() {
+                    _lockOrientation();
+                    _syncFullscreenClass();
+                    updateFullscreenButtons();
+                }).catch(function(err) {
+                    console.warn("Fullscreen promise rejected:", err);
+                    _manualFullscreen(true);
+                });
+            } else {
+                _lockOrientation();
+                _syncFullscreenClass();
+                updateFullscreenButtons();
+            }
+        } else {
+            _manualFullscreen(true);
+        }
+    } else {
+        // EXIT FULLSCREEN
+        if (document.documentElement.classList.contains("is-fullscreen-manual")) {
+            _manualFullscreen(false);
+        }
+
+        if (exitFn) {
+            var exitResult;
+            try {
+                exitResult = exitFn();
+            } catch (e) {
+                console.warn("Exit FS threw:", e);
+            }
+
+            if (exitResult && typeof exitResult.then === "function") {
+                exitResult.then(function() {
+                    _unlockOrientation();
+                    _syncFullscreenClass();
+                    updateFullscreenButtons();
+                }).catch(function(err) {
+                    _manualFullscreen(false);
+                });
+            } else {
+                _unlockOrientation();
+                _syncFullscreenClass();
+                updateFullscreenButtons();
+            }
+        } else {
+            _manualFullscreen(false);
+        }
+    }
+}
+
+/**
+ * Displays an overlay with instructions for iOS users to add the game to the Home Screen.
+ * The overlay can be dismissed by tapping anywhere.
+ */
+function showInstallOverlay() {
+    // Create overlay if it doesn't exist
+    let overlay = document.getElementById('installOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'installOverlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = 0;
+        overlay.style.left = 0;
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.background = 'rgba(0,0,0,0.85)';
+        overlay.style.color = '#fff';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = 10000;
+        overlay.style.textAlign = 'center';
+        overlay.style.padding = '1rem';
+        overlay.innerHTML = `
+            <h2 style="margin-bottom:0.5rem;">Añadir a la pantalla de inicio</h2>
+            <p>Para disfrutar del juego en pantalla completa en iOS, añade la página a la <strong>Pantalla de inicio</strong>:</p>
+            <ol style="text-align:left; max-width:300px; margin:auto;">
+                <li>Pulsa el botón <strong>Compartir</strong> (cuadrado con flecha ↑) en la barra inferior del navegador.</li>
+                <li>Selecciona <strong>Añadir a pantalla de inicio</strong>.</li>
+                <li>Confirma y abre el juego desde el icono recién creado.</li>
+            </ol>
+            <p style="margin-top:1rem; font-size:0.9em;">Toca cualquier parte de la pantalla para cerrar.</p>
+        `;
+        overlay.addEventListener('click', () => {
+            overlay.remove();
+        });
+        document.body.appendChild(overlay);
+    }
+}
+
     var requestFn = _getRequestFS();
     var exitFn = _getExitFS();
 
