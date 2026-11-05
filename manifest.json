@@ -1,0 +1,19 @@
+{
+  "name": "GIVAP FREND - Troll Platformer",
+  "short_name": "Givap Frend",
+  "description": "Juego de plataformas troll arcade retro en HTML5",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#050814",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
